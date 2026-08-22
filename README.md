@@ -66,6 +66,66 @@ The **Web-based Bus Ticket Reservation System** is a modern, centralized digital
 
 ---
 
+## 🛠️ Technology Stack & Architecture
+
+- **Backend Framework:** Spring Boot 3.3.3
+- **Language / Runtime:** Java 21 (LTS)
+- **Persistence & ORM:** Spring Data JPA / Hibernate 6.5
+- **Security:** Spring Security 6 & BCrypt
+- **Database:** Microsoft SQL Server (SSMS)
+- **Build Tool:** Apache Maven (with Maven Wrapper included)
+
+---
+
+## 💻 Developer Getting Started Guide
+
+### 1. Prerequisites
+- **JDK 21** installed and configured in `JAVA_HOME`.
+- **Microsoft SQL Server (Express / Developer)** and **SQL Server Management Studio (SSMS)** running locally on port `1433`.
+- **IntelliJ IDEA** (recommended) or VS Code.
+
+### 2. Database Setup (SSMS)
+1. Open SSMS and create a database named `BusReservationDB`:
+   ```sql
+   CREATE DATABASE BusReservationDB;
+   ```
+2. Open and execute [`src/main/resources/schema-sqlserver.sql`](src/main/resources/schema-sqlserver.sql) to initialize the 3NF schema, tables, and constraints.
+
+### 3. Application Configuration
+1. In `src/main/resources/`, copy `application.yml.example` to `application.yml`:
+   - **Windows PowerShell:**
+     ```powershell
+     Copy-Item src/main/resources/application.yml.example src/main/resources/application.yml
+     ```
+   - **Bash / macOS / Linux:**
+     ```bash
+     cp src/main/resources/application.yml.example src/main/resources/application.yml
+     ```
+2. In your local `application.yml`, update your SQL Server credentials (`username` and `password`).
+
+### 4. Build and Run
+- **Compile and verify dependencies:**
+  - Windows:
+    ```powershell
+    .\mvnw.cmd clean compile
+    ```
+  - macOS / Linux:
+    ```bash
+    ./mvnw clean compile
+    ```
+- **Run the Spring Boot application:**
+  - Windows:
+    ```powershell
+    .\mvnw.cmd spring-boot:run
+    ```
+  - macOS / Linux:
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+- **Base API URL:** `http://localhost:8080/api/v1`
+
+---
+
 ## 📅 Project Implementation Roadmap
 
 * **Week 3:** Project Proposal & Scope Finalization
