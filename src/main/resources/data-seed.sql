@@ -154,23 +154,62 @@ BEGIN
 END;
 GO
 
--- 6. SEED SAMPLE BOOKINGS (To verify available seat reduction logic)
-DECLARE @SampleTripId BIGINT = (SELECT TOP 1 trip_id FROM dbo.trips ORDER BY trip_id ASC);
-DECLARE @SampleBusId BIGINT = (SELECT bus_id FROM dbo.trips WHERE trip_id = @SampleTripId);
-DECLARE @SampleUserId BIGINT = (SELECT TOP 1 user_id FROM dbo.users WHERE role = N'PASSENGER');
+-- 6. SEED SAMPLE BOOKINGS (To verify available seat reduction and occupancy display)
+DECLARE @PassengerId BIGINT = (SELECT TOP 1 user_id FROM dbo.users WHERE role = N'PASSENGER');
+IF @PassengerId IS NOT NULL
+BEGIN
+    DECLARE @TId BIGINT, @BId BIGINT, @Fare DECIMAL(10,2), @TotalSeats INT;
+    DECLARE @RowIdx INT = 0;
+    DECLARE @SeatsToBook INT;
 
--- Simulate booking 3 seats on the first trip
-INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
-VALUES (@SampleUserId, @SampleTripId, 3600.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
+    DECLARE trip_cursor CURSOR FOR 
+    SELECT t.trip_id, t.bus_id, t.base_fare, b.total_seats
+    FROM dbo.trips t
+    JOIN dbo.buses b ON t.bus_id = b.bus_id
+    WHERE t.departure_time >= CAST(GETDATE() AS DATE)
+      AND t.departure_time < DATEADD(DAY, 4, CAST(GETDATE() AS DATE))
+    ORDER BY t.trip_id ASC;
 
-DECLARE @BookingId BIGINT = SCOPE_IDENTITY();
+    OPEN trip_cursor;
+    FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare, @TotalSeats;
 
--- Reserve seats 1, 2, 3
-INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
-SELECT @BookingId, @SampleTripId, s.seat_id, 1200.00
-FROM dbo.seats s
-WHERE s.bus_id = @SampleBusId AND s.seat_number IN (N'1', N'2', N'3');
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @RowIdx = @RowIdx + 1;
+        SET @SeatsToBook = CASE (@RowIdx % 7)
+            WHEN 0 THEN 0
+            WHEN 1 THEN 15
+            WHEN 2 THEN 28
+            WHEN 3 THEN 8
+            WHEN 4 THEN 34
+            WHEN 5 THEN 12
+            WHEN 6 THEN 22
+        END;
+
+        IF @SeatsToBook > (@TotalSeats - 5)
+            SET @SeatsToBook = @TotalSeats - 5;
+
+        IF @SeatsToBook > 0
+        BEGIN
+            INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
+            VALUES (@PassengerId, @TId, @Fare * @SeatsToBook, N'CONFIRMED', SYSUTCDATETIME(), 0);
+
+            DECLARE @BkgId BIGINT = SCOPE_IDENTITY();
+
+            INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
+            SELECT TOP (@SeatsToBook) @BkgId, @TId, s.seat_id, @Fare
+            FROM dbo.seats s
+            WHERE s.bus_id = @BId
+            ORDER BY CAST(s.seat_number AS INT) ASC;
+        END;
+
+        FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare, @TotalSeats;
+    END;
+
+    CLOSE trip_cursor;
+    DEALLOCATE trip_cursor;
+END;
 GO
 
-PRINT 'Data seeding completed successfully! BusReservationDB is populated with buses, seats, routes, and trips.';
+PRINT 'Data seeding completed successfully! BusReservationDB is populated with buses, seats, routes, trips, and realistic seat bookings.';
 GO

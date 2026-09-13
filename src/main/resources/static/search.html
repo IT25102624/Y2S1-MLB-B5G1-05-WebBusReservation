@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Route & Schedule System | SLIIT SE2030</title>
+    <title>Bus Reservation System | Search Routes & Schedules</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -70,7 +70,7 @@
             font-size: 0.8rem;
             background: #eff6ff;
             color: var(--primary);
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 6px;
             font-weight: 600;
         }
@@ -322,6 +322,64 @@
             border-bottom-color: var(--primary);
         }
 
+        /* Operator Toolbars */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-input {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            outline: none;
+            background: #fff;
+            min-width: 240px;
+            transition: border-color 0.2s;
+        }
+
+        .toolbar-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .toolbar-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .toolbar-select:focus {
+            border-color: var(--primary);
+        }
+
+        .count-badge {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -477,7 +535,7 @@
             <span class="logo">🚍</span>
             <div>
                 <h1>Bus Reservation System</h1>
-                <span>Module 2: Route & Schedule Search (IT25102624)</span>
+                <span>Search Routes & Schedules</span>
             </div>
         </div>
 
@@ -487,7 +545,7 @@
                 🔍 Passenger View
             </button>
             <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">
-                🛠️ Operator Mode (CRUD)
+                🛠️ Operator Mode
             </button>
         </div>
     </nav>
@@ -565,16 +623,16 @@
         </section>
 
         <!-- =================================================================== -->
-        <!-- OPERATOR MANAGEMENT VIEW (CRUD)                                     -->
+        <!-- OPERATOR MANAGEMENT VIEW                                            -->
         <!-- =================================================================== -->
         <section id="viewOperator" style="display: none;">
             <!-- Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab active" id="tabBtnRoutes" onclick="switchAdminTab('routes')">
-                    🛣️ Routes Management (CRUD)
+                    🛣️ Routes Management
                 </button>
                 <button class="admin-tab" id="tabBtnSchedules" onclick="switchAdminTab('schedules')">
-                    📅 Bus Schedules / Trips (CRUD)
+                    📅 Bus Schedules / Trips
                 </button>
             </div>
 
@@ -591,6 +649,23 @@
                         <button class="btn btn-primary" onclick="openCreateRouteModal()">
                             ➕ Add New Route
                         </button>
+                    </div>
+
+                    <!-- Routes Search & Sort Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <input type="text" id="routeSearchInput" class="toolbar-input" placeholder="🔍 Search by city name or route ID..." oninput="filterAndSortRoutes()">
+                            <select id="routeSortSelect" class="toolbar-select" onchange="filterAndSortRoutes()">
+                                <option value="idAsc">Sort: Route ID (Ascending)</option>
+                                <option value="idDesc">Sort: Route ID (Descending)</option>
+                                <option value="originAsc">Sort: Origin City (A-Z)</option>
+                                <option value="destAsc">Sort: Destination City (A-Z)</option>
+                                <option value="durationAsc">Sort: Duration (Shortest)</option>
+                                <option value="durationDesc">Sort: Duration (Longest)</option>
+                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="resetRouteFilters()">Reset</button>
+                        </div>
+                        <div class="count-badge" id="routeCountBadge">Showing 0 routes</div>
                     </div>
 
                     <div style="overflow-x: auto;">
@@ -625,6 +700,39 @@
                         <button class="btn btn-primary" onclick="openCreateTripModal()">
                             ➕ Schedule New Trip
                         </button>
+                    </div>
+
+                    <!-- Schedules Search, Filter & Sort Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <input type="text" id="tripSearchInput" class="toolbar-input" placeholder="🔍 Search by route, bus #, operator, or trip ID..." oninput="filterAndSortSchedules()" style="min-width: 280px;">
+                            <select id="tripStatusFilter" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="">All Statuses</option>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="IN_TRANSIT">In Transit</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                            <select id="tripBusTypeFilter" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="">All Bus Types</option>
+                                <option value="AC">AC</option>
+                                <option value="LUXURY">Luxury</option>
+                                <option value="SLEEPER">Sleeper</option>
+                                <option value="NON_AC">Non-AC</option>
+                            </select>
+                            <select id="tripSortSelect" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="depAsc">Sort: Departure (Earliest)</option>
+                                <option value="depDesc">Sort: Departure (Latest)</option>
+                                <option value="fareAsc">Sort: Fare (Lowest)</option>
+                                <option value="fareDesc">Sort: Fare (Highest)</option>
+                                <option value="occupancyDesc">Sort: Occupancy (Highest)</option>
+                                <option value="occupancyAsc">Sort: Occupancy (Lowest)</option>
+                                <option value="idDesc">Sort: Trip ID (Newest)</option>
+                                <option value="idAsc">Sort: Trip ID (Oldest)</option>
+                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="resetTripFilters()">Reset</button>
+                        </div>
+                        <div class="count-badge" id="tripCountBadge">Showing 0 trips</div>
                     </div>
 
                     <div style="overflow-x: auto;">
@@ -699,7 +807,7 @@
                 <div class="modal-body">
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label for="modalTripRoute">Select Route *</label>
-                        <select id="modalTripRoute" required>
+                        <select id="modalTripRoute" required onchange="onTripRouteOrDepartureChange()">
                             <option value="">Choose a route...</option>
                         </select>
                     </div>
@@ -711,15 +819,19 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label for="modalTripDep">Departure Date & Time *</label>
-                        <input type="datetime-local" id="modalTripDep" required>
+                        <input type="datetime-local" id="modalTripDep" required onchange="onTripRouteOrDepartureChange()">
                     </div>
                     <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="modalTripArr">Arrival Date & Time *</label>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <label for="modalTripArr">Arrival Date & Time *</label>
+                            <span id="arrCalcHint" style="font-size: 0.78rem; color: var(--primary); font-weight: 500;"></span>
+                        </div>
                         <input type="datetime-local" id="modalTripArr" required>
                     </div>
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label for="modalTripFare">Base Fare (LKR) *</label>
-                        <input type="number" id="modalTripFare" min="1" step="10" required placeholder="e.g. 1250">
+                        <!-- step="any" allows 1250, 1350, or any valid currency value without HTML5 step errors -->
+                        <input type="number" id="modalTripFare" min="0" step="any" required placeholder="e.g. 1250">
                     </div>
                     <div class="form-group">
                         <label for="modalTripStatus">Initial Trip Status</label>
@@ -757,7 +869,8 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label for="modalEditTripFare">Base Fare (LKR) *</label>
-                        <input type="number" id="modalEditTripFare" min="1" step="10" required>
+                        <!-- step="any" allows any amount without HTML5 step errors -->
+                        <input type="number" id="modalEditTripFare" min="0" step="any" required>
                     </div>
                     <div class="form-group">
                         <label for="modalEditTripStatus">Trip Status *</label>
@@ -789,8 +902,9 @@
         // In-memory caches
         let routesCache = [];
         let busesCache = [];
+        let schedulesCache = [];
 
-        // Initialize default dates
+        // Initialize default dates for passenger search
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
@@ -951,7 +1065,7 @@
                         </div>
                         <div class="fare-action">
                             <div class="price">LKR ${t.baseFare.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span>/ seat</span></div>
-                            <button class="btn btn-primary" onclick="alert('Trip #' + ${t.tripId} + ' selected! This connects directly to Module 3: Seat Selection.')">Select Seats</button>
+                            <button class="btn btn-primary" onclick="alert('Trip #' + ${t.tripId} + ' selected! Connects to Module 3: Seat Selection.')">Select Seats</button>
                         </div>
                     </div>
                 `;
@@ -972,17 +1086,52 @@
                 const res = await fetch(`${API_BASE}/routes`);
                 const json = await res.json();
                 routesCache = json.data || [];
-                renderRoutesTable(routesCache);
+                filterAndSortRoutes();
                 populateRouteDropdowns(routesCache);
             } catch (err) {
                 showToast('Failed to load routes from database', 'error');
             }
         }
 
+        function filterAndSortRoutes() {
+            const q = (document.getElementById('routeSearchInput')?.value || '').trim().toLowerCase();
+            const sort = document.getElementById('routeSortSelect')?.value || 'idAsc';
+
+            let filtered = routesCache.filter(r => {
+                if (!q) return true;
+                const matchId = String(r.routeId).includes(q);
+                const matchSrc = (r.sourceCity || '').toLowerCase().includes(q);
+                const matchDest = (r.destinationCity || '').toLowerCase().includes(q);
+                return matchId || matchSrc || matchDest;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'idAsc') return a.routeId - b.routeId;
+                if (sort === 'idDesc') return b.routeId - a.routeId;
+                if (sort === 'originAsc') return (a.sourceCity || '').localeCompare(b.sourceCity || '');
+                if (sort === 'destAsc') return (a.destinationCity || '').localeCompare(b.destinationCity || '');
+                if (sort === 'durationAsc') return a.estimatedDurationHours - b.estimatedDurationHours;
+                if (sort === 'durationDesc') return b.estimatedDurationHours - a.estimatedDurationHours;
+                return 0;
+            });
+
+            renderRoutesTable(filtered);
+            const badge = document.getElementById('routeCountBadge');
+            if (badge) badge.textContent = `Showing ${filtered.length} of ${routesCache.length} routes`;
+        }
+
+        function resetRouteFilters() {
+            const input = document.getElementById('routeSearchInput');
+            const select = document.getElementById('routeSortSelect');
+            if (input) input.value = '';
+            if (select) select.value = 'idAsc';
+            filterAndSortRoutes();
+        }
+
         function renderRoutesTable(routes) {
             const tbody = document.getElementById('routesTableBody');
             if (!routes || routes.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No routes registered yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No matching routes found.</td></tr>';
                 return;
             }
 
@@ -1093,17 +1242,106 @@
                 buses.map(b => `<option value="${b.busId}">${b.busNumber} - ${b.operatorName} (${b.busType}, ${b.totalSeats} seats)</option>`).join('');
         }
 
-        let schedulesCache = [];
+        // Feature: Auto-calculate Arrival Time based on Route Duration and Departure Time
+        function onTripRouteOrDepartureChange() {
+            const routeSelect = document.getElementById('modalTripRoute');
+            const depInput = document.getElementById('modalTripDep');
+            const arrInput = document.getElementById('modalTripArr');
+            const hint = document.getElementById('arrCalcHint');
+
+            const routeId = parseInt(routeSelect.value);
+            const depVal = depInput.value;
+
+            if (!routeId || !depVal) {
+                hint.textContent = '';
+                return;
+            }
+
+            const selectedRoute = routesCache.find(r => r.routeId === routeId);
+            if (!selectedRoute || !selectedRoute.estimatedDurationHours) {
+                hint.textContent = '';
+                return;
+            }
+
+            const durationHours = parseFloat(selectedRoute.estimatedDurationHours);
+            const depDate = new Date(depVal);
+            if (isNaN(depDate.getTime())) {
+                hint.textContent = '';
+                return;
+            }
+
+            // Add estimated duration in milliseconds
+            const arrDate = new Date(depDate.getTime() + (durationHours * 60 * 60 * 1000));
+
+            // Format to YYYY-MM-DDTHH:mm local datetime-local format
+            const pad = num => String(num).padStart(2, '0');
+            const year = arrDate.getFullYear();
+            const month = pad(arrDate.getMonth() + 1);
+            const day = pad(arrDate.getDate());
+            const hours = pad(arrDate.getHours());
+            const minutes = pad(arrDate.getMinutes());
+
+            arrInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            hint.textContent = `⚡ Auto-set (+${durationHours}h duration)`;
+        }
 
         async function loadSchedulesTable() {
             try {
                 const res = await fetch(`${API_BASE}/trips/all`);
                 const json = await res.json();
                 schedulesCache = json.data || [];
-                renderSchedulesTable(schedulesCache);
+                filterAndSortSchedules();
             } catch (err) {
                 showToast('Failed to load scheduled trips', 'error');
             }
+        }
+
+        function filterAndSortSchedules() {
+            const q = (document.getElementById('tripSearchInput')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('tripStatusFilter')?.value || '';
+            const busTypeFilter = document.getElementById('tripBusTypeFilter')?.value || '';
+            const sort = document.getElementById('tripSortSelect')?.value || 'depAsc';
+
+            let filtered = schedulesCache.filter(t => {
+                if (statusFilter && t.tripStatus !== statusFilter) return false;
+                if (busTypeFilter && t.busType !== busTypeFilter) return false;
+                if (q) {
+                    const matchId = String(t.tripId).includes(q);
+                    const matchRoute = `${t.sourceCity} ${t.destinationCity}`.toLowerCase().includes(q);
+                    const matchBus = (t.busNumber || '').toLowerCase().includes(q);
+                    const matchOp = (t.operatorName || '').toLowerCase().includes(q);
+                    if (!matchId && !matchRoute && !matchBus && !matchOp) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'depAsc') return new Date(a.departureTime) - new Date(b.departureTime);
+                if (sort === 'depDesc') return new Date(b.departureTime) - new Date(a.departureTime);
+                if (sort === 'fareAsc') return a.baseFare - b.baseFare;
+                if (sort === 'fareDesc') return b.baseFare - a.baseFare;
+                if (sort === 'occupancyDesc') return (b.bookedSeats || 0) - (a.bookedSeats || 0);
+                if (sort === 'occupancyAsc') return (a.bookedSeats || 0) - (b.bookedSeats || 0);
+                if (sort === 'idDesc') return b.tripId - a.tripId;
+                if (sort === 'idAsc') return a.tripId - b.tripId;
+                return 0;
+            });
+
+            renderSchedulesTable(filtered);
+            const badge = document.getElementById('tripCountBadge');
+            if (badge) badge.textContent = `Showing ${filtered.length} of ${schedulesCache.length} trips`;
+        }
+
+        function resetTripFilters() {
+            const search = document.getElementById('tripSearchInput');
+            const status = document.getElementById('tripStatusFilter');
+            const busType = document.getElementById('tripBusTypeFilter');
+            const sort = document.getElementById('tripSortSelect');
+            if (search) search.value = '';
+            if (status) status.value = '';
+            if (busType) busType.value = '';
+            if (sort) sort.value = 'depAsc';
+            filterAndSortSchedules();
         }
 
         function renderSchedulesTable(trips) {
@@ -1151,18 +1389,19 @@
             loadRoutesTable();
             loadBuses();
 
-            // Prefill with reasonable future dates
+            // Prefill with default future dates
             const now = new Date();
             now.setDate(now.getDate() + 1);
             now.setHours(9, 0, 0, 0);
-            const depIso = now.toISOString().slice(0, 16);
 
-            now.setHours(13, 0, 0, 0);
-            const arrIso = now.toISOString().slice(0, 16);
+            const pad = num => String(num).padStart(2, '0');
+            const depIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T09:00`;
+            const arrIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T12:30`;
 
             document.getElementById('modalTripDep').value = depIso;
             document.getElementById('modalTripArr').value = arrIso;
             document.getElementById('modalTripFare').value = '1250';
+            document.getElementById('arrCalcHint').textContent = '';
             openModal('tripCreateModal');
         }
 
@@ -1174,8 +1413,8 @@
             const payload = {
                 routeId: parseInt(document.getElementById('modalTripRoute').value),
                 busId: parseInt(document.getElementById('modalTripBus').value),
-                departureTime: depVal + ':00',
-                arrivalTime: arrVal + ':00',
+                departureTime: depVal.length === 16 ? depVal + ':00' : depVal,
+                arrivalTime: arrVal.length === 16 ? arrVal + ':00' : arrVal,
                 baseFare: parseFloat(document.getElementById('modalTripFare').value),
                 tripStatus: document.getElementById('modalTripStatus').value
             };
@@ -1213,9 +1452,12 @@
         document.getElementById('tripEditForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const tripId = document.getElementById('modalEditTripId').value;
+            const depVal = document.getElementById('modalEditTripDep').value;
+            const arrVal = document.getElementById('modalEditTripArr').value;
+
             const payload = {
-                departureTime: document.getElementById('modalEditTripDep').value + ':00',
-                arrivalTime: document.getElementById('modalEditTripArr').value + ':00',
+                departureTime: depVal.length === 16 ? depVal + ':00' : depVal,
+                arrivalTime: arrVal.length === 16 ? arrVal + ':00' : arrVal,
                 baseFare: parseFloat(document.getElementById('modalEditTripFare').value),
                 tripStatus: document.getElementById('modalEditTripStatus').value
             };
