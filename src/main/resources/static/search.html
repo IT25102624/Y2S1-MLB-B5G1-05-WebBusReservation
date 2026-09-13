@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Route & Schedule Search | Web Bus Reservation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Bus Reservation System | Search Routes & Schedules</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #2563eb;
             --primary-hover: #1d4ed8;
+            --secondary: #0f172a;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border: #e2e8f0;
             --success: #16a34a;
-            --warning: #f59e0b;
+            --warning: #d97706;
             --danger: #dc2626;
             --radius: 12px;
             --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -32,40 +33,107 @@
             background-color: var(--bg);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 24px;
+            padding-bottom: 60px;
+        }
+
+        /* Top Navbar with Mode Switcher */
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-brand .logo {
+            font-size: 1.6rem;
+        }
+
+        .navbar-brand h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .navbar-brand span {
+            font-size: 0.8rem;
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .mode-toggle-group {
+            display: flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .mode-btn {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
         .container {
-            max-width: 1080px;
-            margin: 0 auto;
+            max-width: 1120px;
+            margin: 28px auto 0;
+            padding: 0 20px;
         }
 
-        header {
-            margin-bottom: 28px;
-            text-align: center;
-        }
-
-        header h1 {
-            font-size: 2rem;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        .search-card {
+        /* Cards & Form Styles */
+        .card {
             background: var(--card-bg);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             padding: 24px;
-            margin-bottom: 28px;
             border: 1px solid var(--border);
+            margin-bottom: 24px;
         }
 
-        .search-grid {
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
@@ -79,7 +147,7 @@
         }
 
         .form-group label {
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #334155;
         }
@@ -89,7 +157,7 @@
             padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             outline: none;
             transition: border-color 0.2s;
             background: #fff;
@@ -108,47 +176,29 @@
         }
 
         .btn {
-            padding: 10px 24px;
+            padding: 9px 20px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
             border: none;
             transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-        }
-
-        .btn-outline:hover {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
+            display: inline-flex;
             align-items: center;
-            margin-bottom: 16px;
+            gap: 6px;
         }
 
-        .results-header h2 {
-            font-size: 1.25rem;
-            color: #1e293b;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #15803d; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; }
 
+        /* Passenger View Components */
         .trip-list {
             display: flex;
             flex-direction: column;
@@ -173,17 +223,8 @@
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         }
 
-        .bus-info h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .bus-info .operator {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
+        .bus-info h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        .bus-info .operator { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
 
         .badge {
             display: inline-block;
@@ -198,6 +239,10 @@
         .badge-luxury { background: #fef3c7; color: #b45309; }
         .badge-sleeper { background: #ede9fe; color: #6d28d9; }
         .badge-nonac { background: #f1f5f9; color: #475569; }
+        .badge-scheduled { background: #dcfce7; color: #15803d; }
+        .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+        .badge-intransit { background: #ffedd5; color: #c2410c; }
+        .badge-completed { background: #f1f5f9; color: #64748b; }
 
         .time-route {
             display: flex;
@@ -205,16 +250,8 @@
             gap: 16px;
         }
 
-        .time-box .time {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .time-box .city {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
+        .time-box .time { font-size: 1.25rem; font-weight: 700; color: #0f172a; }
+        .time-box .city { font-size: 0.85rem; color: var(--text-muted); }
 
         .duration-arrow {
             text-align: center;
@@ -239,20 +276,9 @@
             color: #94a3b8;
         }
 
-        .seats-info {
-            text-align: center;
-        }
-
-        .seats-info .seats-count {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--success);
-        }
-
-        .seats-info .seats-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
+        .seats-info { text-align: center; }
+        .seats-info .seats-count { font-size: 1.25rem; font-weight: 700; color: var(--success); }
+        .seats-info .seats-label { font-size: 0.75rem; color: var(--text-muted); }
 
         .fare-action {
             text-align: right;
@@ -263,18 +289,228 @@
         }
 
         .fare-action .price {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: var(--primary);
         }
 
-        .fare-action .price span {
-            font-size: 0.85rem;
+        .fare-action .price span { font-size: 0.85rem; font-weight: 500; color: var(--text-muted); }
+
+        /* Operator Management Tabs & Tables */
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .admin-tab {
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        /* Operator Toolbars */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-input {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            outline: none;
+            background: #fff;
+            min-width: 240px;
+            transition: border-color 0.2s;
+        }
+
+        .toolbar-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .toolbar-select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.88rem;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .toolbar-select:focus {
+            border-color: var(--primary);
+        }
+
+        .count-badge {
+            font-size: 0.82rem;
+            color: var(--text-muted);
             font-weight: 500;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Modal Dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 540px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            overflow: hidden;
+            animation: modalIn 0.2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.15rem;
+            color: #1e293b;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
             color: var(--text-muted);
         }
 
-        .loading, .empty-state, .error-banner {
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            background: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            animation: slideIn 0.25s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.toast-success { background: #15803d; }
+        .toast.toast-error { background: #b91c1c; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .loading, .empty-state {
             background: white;
             padding: 40px;
             border-radius: var(--radius);
@@ -283,137 +519,506 @@
             color: var(--text-muted);
         }
 
-        .error-banner {
-            color: var(--danger);
-            background: #fef2f2;
-            border-color: #fecaca;
-            margin-bottom: 20px;
-            display: none;
-        }
-
         @media (max-width: 768px) {
-            .trip-card {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            .time-route {
-                justify-content: space-between;
-            }
-            .fare-action {
-                align-items: stretch;
-            }
+            .trip-card { grid-template-columns: 1fr; gap: 12px; }
+            .time-route { justify-content: space-between; }
+            .fare-action { align-items: stretch; }
+            .navbar { flex-direction: column; gap: 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚍 Web Bus Ticket Reservation System</h1>
-            <p>Module 2: Search Bus Schedules & Available Routes (IT25102624)</p>
-        </header>
 
-        <div id="errorBanner" class="error-banner"></div>
-
-        <section class="search-card">
-            <form id="searchForm">
-                <div class="search-grid">
-                    <div class="form-group">
-                        <label for="sourceCity">From (Origin)</label>
-                        <select id="sourceCity" name="sourceCity" required>
-                            <option value="">Loading origin cities...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="destinationCity">To (Destination)</label>
-                        <select id="destinationCity" name="destinationCity" required>
-                            <option value="">Loading destination cities...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="travelDate">Travel Date</label>
-                        <input type="date" id="travelDate" name="travelDate" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="busType">Bus Type (Optional)</label>
-                        <select id="busType" name="busType">
-                            <option value="">All Bus Types</option>
-                            <option value="AC">AC</option>
-                            <option value="LUXURY">Luxury</option>
-                            <option value="SLEEPER">Sleeper</option>
-                            <option value="NON_AC">Non-AC</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="sortBy">Sort By</label>
-                        <select id="sortBy" name="sortBy">
-                            <option value="departureAsc">Departure Time (Earliest First)</option>
-                            <option value="departureDesc">Departure Time (Latest First)</option>
-                            <option value="fareAsc">Price (Lowest First)</option>
-                            <option value="fareDesc">Price (Highest First)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button type="button" class="btn btn-outline" id="btnReset">Clear</button>
-                    <button type="submit" class="btn btn-primary" id="btnSearch">Search Bus Schedules</button>
-                </div>
-            </form>
-        </section>
-
-        <div class="results-header">
-            <h2>Available Schedules</h2>
-            <span id="resultsCount" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="logo">🚍</span>
+            <div>
+                <h1>Bus Reservation System</h1>
+                <span>Search Routes & Schedules</span>
+            </div>
         </div>
 
-        <div id="resultsContainer" class="trip-list">
-            <div class="empty-state">Select origin, destination, and travel date above to view live schedules.</div>
+        <!-- Mode Toggle Switcher -->
+        <div class="mode-toggle-group">
+            <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">
+                🔍 Passenger View
+            </button>
+            <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">
+                🛠️ Operator Mode
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- =================================================================== -->
+        <!-- PASSENGER SEARCH VIEW                                              -->
+        <!-- =================================================================== -->
+        <section id="viewPassenger">
+            <div class="card">
+                <div class="section-header">
+                    <h2 class="section-title">Search Bus Schedules & Routes</h2>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Real-time seat calculation from SSMS</span>
+                </div>
+
+                <form id="searchForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sourceCity">From (Origin City)</label>
+                            <select id="sourceCity" name="sourceCity" required>
+                                <option value="">Loading cities...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="destinationCity">To (Destination City)</label>
+                            <select id="destinationCity" name="destinationCity" required>
+                                <option value="">Loading cities...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="travelDate">Travel Date</label>
+                            <input type="date" id="travelDate" name="travelDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="busType">Bus Type</label>
+                            <select id="busType" name="busType">
+                                <option value="">All Types (AC / Luxury / Sleeper)</option>
+                                <option value="AC">AC</option>
+                                <option value="LUXURY">Luxury</option>
+                                <option value="SLEEPER">Sleeper</option>
+                                <option value="NON_AC">Non-AC</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sortBy">Sort By</label>
+                            <select id="sortBy" name="sortBy">
+                                <option value="departureAsc">Departure Time (Earliest First)</option>
+                                <option value="departureDesc">Departure Time (Latest First)</option>
+                                <option value="fareAsc">Price (Lowest First)</option>
+                                <option value="fareDesc">Price (Highest First)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" id="btnResetSearch">Clear</button>
+                        <button type="submit" class="btn btn-primary">🔍 Find Available Schedules</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="section-header">
+                <h2 class="section-title">Available Departures</h2>
+                <span id="resultsCount" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+            </div>
+
+            <div id="resultsContainer" class="trip-list">
+                <div class="empty-state">Select origin, destination, and travel date above to view live schedules.</div>
+            </div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- OPERATOR MANAGEMENT VIEW                                            -->
+        <!-- =================================================================== -->
+        <section id="viewOperator" style="display: none;">
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" id="tabBtnRoutes" onclick="switchAdminTab('routes')">
+                    🛣️ Routes Management
+                </button>
+                <button class="admin-tab" id="tabBtnSchedules" onclick="switchAdminTab('schedules')">
+                    📅 Bus Schedules / Trips
+                </button>
+            </div>
+
+            <!-- Tab 1: Route Management -->
+            <div id="tabContentRoutes">
+                <div class="card">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">All Travel Routes</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                Manage registered intercity transit corridors
+                            </p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openCreateRouteModal()">
+                            ➕ Add New Route
+                        </button>
+                    </div>
+
+                    <!-- Routes Search & Sort Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <input type="text" id="routeSearchInput" class="toolbar-input" placeholder="🔍 Search by city name or route ID..." oninput="filterAndSortRoutes()">
+                            <select id="routeSortSelect" class="toolbar-select" onchange="filterAndSortRoutes()">
+                                <option value="idAsc">Sort: Route ID (Ascending)</option>
+                                <option value="idDesc">Sort: Route ID (Descending)</option>
+                                <option value="originAsc">Sort: Origin City (A-Z)</option>
+                                <option value="destAsc">Sort: Destination City (A-Z)</option>
+                                <option value="durationAsc">Sort: Duration (Shortest)</option>
+                                <option value="durationDesc">Sort: Duration (Longest)</option>
+                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="resetRouteFilters()">Reset</button>
+                        </div>
+                        <div class="count-badge" id="routeCountBadge">Showing 0 routes</div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Route ID</th>
+                                    <th>Origin City</th>
+                                    <th>Destination City</th>
+                                    <th>Duration</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="routesTableBody">
+                                <tr><td colspan="5" style="text-align:center;">Loading routes from SSMS...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Schedule & Trip Management -->
+            <div id="tabContentSchedules" style="display: none;">
+                <div class="card">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Scheduled Bus Trips</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                Create, update, reschedule, and manage departure statuses
+                            </p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openCreateTripModal()">
+                            ➕ Schedule New Trip
+                        </button>
+                    </div>
+
+                    <!-- Schedules Search, Filter & Sort Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <input type="text" id="tripSearchInput" class="toolbar-input" placeholder="🔍 Search by route, bus #, operator, or trip ID..." oninput="filterAndSortSchedules()" style="min-width: 280px;">
+                            <select id="tripStatusFilter" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="">All Statuses</option>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="IN_TRANSIT">In Transit</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                            <select id="tripBusTypeFilter" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="">All Bus Types</option>
+                                <option value="AC">AC</option>
+                                <option value="LUXURY">Luxury</option>
+                                <option value="SLEEPER">Sleeper</option>
+                                <option value="NON_AC">Non-AC</option>
+                            </select>
+                            <select id="tripSortSelect" class="toolbar-select" onchange="filterAndSortSchedules()">
+                                <option value="depAsc">Sort: Departure (Earliest)</option>
+                                <option value="depDesc">Sort: Departure (Latest)</option>
+                                <option value="fareAsc">Sort: Fare (Lowest)</option>
+                                <option value="fareDesc">Sort: Fare (Highest)</option>
+                                <option value="occupancyDesc">Sort: Occupancy (Highest)</option>
+                                <option value="occupancyAsc">Sort: Occupancy (Lowest)</option>
+                                <option value="idDesc">Sort: Trip ID (Newest)</option>
+                                <option value="idAsc">Sort: Trip ID (Oldest)</option>
+                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="resetTripFilters()">Reset</button>
+                        </div>
+                        <div class="count-badge" id="tripCountBadge">Showing 0 trips</div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Trip ID</th>
+                                    <th>Route</th>
+                                    <th>Bus</th>
+                                    <th>Departure</th>
+                                    <th>Arrival</th>
+                                    <th>Fare</th>
+                                    <th>Status</th>
+                                    <th>Booked / Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedulesTableBody">
+                                <tr><td colspan="9" style="text-align:center;">Loading schedules from SSMS...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- MODALS                                                              -->
+    <!-- =================================================================== -->
+
+    <!-- Route Modal (Create / Edit) -->
+    <div class="modal-overlay" id="routeModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="routeModalTitle">Add New Route</h3>
+                <button class="modal-close" onclick="closeModal('routeModal')">&times;</button>
+            </div>
+            <form id="routeForm">
+                <div class="modal-body">
+                    <input type="hidden" id="modalRouteId">
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalRouteSource">Origin (Source City) *</label>
+                        <input type="text" id="modalRouteSource" required placeholder="e.g. Galle">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalRouteDest">Destination City *</label>
+                        <input type="text" id="modalRouteDest" required placeholder="e.g. Matara">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalRouteDuration">Estimated Duration (Hours) *</label>
+                        <input type="number" id="modalRouteDuration" step="0.1" min="0.1" required placeholder="e.g. 1.5">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('routeModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveRoute">Save Route</button>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Schedule Modal (Create) -->
+    <div class="modal-overlay" id="tripCreateModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Schedule New Bus Trip</h3>
+                <button class="modal-close" onclick="closeModal('tripCreateModal')">&times;</button>
+            </div>
+            <form id="tripCreateForm">
+                <div class="modal-body">
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalTripRoute">Select Route *</label>
+                        <select id="modalTripRoute" required onchange="onTripRouteOrDepartureChange()">
+                            <option value="">Choose a route...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalTripBus">Select Bus Fleet *</label>
+                        <select id="modalTripBus" required>
+                            <option value="">Choose a bus...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalTripDep">Departure Date & Time *</label>
+                        <input type="datetime-local" id="modalTripDep" required onchange="onTripRouteOrDepartureChange()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <label for="modalTripArr">Arrival Date & Time *</label>
+                            <span id="arrCalcHint" style="font-size: 0.78rem; color: var(--primary); font-weight: 500;"></span>
+                        </div>
+                        <input type="datetime-local" id="modalTripArr" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalTripFare">Base Fare (LKR) *</label>
+                        <!-- step="any" allows 1250, 1350, or any valid currency value without HTML5 step errors -->
+                        <input type="number" id="modalTripFare" min="0" step="any" required placeholder="e.g. 1250">
+                    </div>
+                    <div class="form-group">
+                        <label for="modalTripStatus">Initial Trip Status</label>
+                        <select id="modalTripStatus">
+                            <option value="SCHEDULED">SCHEDULED</option>
+                            <option value="IN_TRANSIT">IN_TRANSIT</option>
+                        </select>
+                    </div>
+
+                    <!-- Recurring Schedule Options -->
+                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--primary); font-size: 0.92rem;">
+                            <input type="checkbox" id="modalTripIsRecurring" onchange="toggleRecurringOptions()" style="width: 17px; height: 17px; cursor: pointer;">
+                            <span>🔄 Create Recurring Schedule (Daily / Multi-Day)</span>
+                        </label>
+                    </div>
+
+                    <div id="recurringOptionsSection" style="display: none; margin-top: 12px; padding: 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                            <div class="form-group">
+                                <label for="modalTripRecurrenceType" style="font-size: 0.8rem; color: #1e3a8a;">Recurrence Pattern</label>
+                                <select id="modalTripRecurrenceType" onchange="updateRecurringSummary()">
+                                    <option value="DAILY">Every Day (Daily)</option>
+                                    <option value="WEEKDAYS">Weekdays (Mon - Fri)</option>
+                                    <option value="WEEKENDS">Weekends (Sat - Sun)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="modalTripRepeatDays" style="font-size: 0.8rem; color: #1e3a8a;">Repeat For</label>
+                                <select id="modalTripRepeatDays" onchange="updateRecurringSummary()">
+                                    <option value="7">Next 7 Days (1 Week)</option>
+                                    <option value="14">Next 14 Days (2 Weeks)</option>
+                                    <option value="30">Next 30 Days (1 Month)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="recurringSummaryText" style="font-size: 0.82rem; color: #1e40af; font-weight: 500;">
+                            ⚡ Will schedule 7 trips matching this timetable.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('tripCreateModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Trip</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Schedule Modal (Edit / Reschedule) -->
+    <div class="modal-overlay" id="tripEditModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Reschedule / Update Trip</h3>
+                <button class="modal-close" onclick="closeModal('tripEditModal')">&times;</button>
+            </div>
+            <form id="tripEditForm">
+                <div class="modal-body">
+                    <input type="hidden" id="modalEditTripId">
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalEditTripDep">Departure Date & Time *</label>
+                        <input type="datetime-local" id="modalEditTripDep" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalEditTripArr">Arrival Date & Time *</label>
+                        <input type="datetime-local" id="modalEditTripArr" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalEditTripFare">Base Fare (LKR) *</label>
+                        <!-- step="any" allows any amount without HTML5 step errors -->
+                        <input type="number" id="modalEditTripFare" min="0" step="any" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalEditTripStatus">Trip Status *</label>
+                        <select id="modalEditTripStatus" required>
+                            <option value="SCHEDULED">SCHEDULED</option>
+                            <option value="IN_TRANSIT">IN_TRANSIT</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('tripEditModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Trip</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- =================================================================== -->
+    <!-- JAVASCRIPT LOGIC                                                    -->
+    <!-- =================================================================== -->
     <script>
         const API_BASE = '/api/v1/search';
 
-        // Set default date to tomorrow
+        // In-memory caches
+        let routesCache = [];
+        let busesCache = [];
+        let schedulesCache = [];
+
+        // Initialize default dates for passenger search
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const tomorrowStr = tomorrow.toISOString().split('T')[0];
         document.getElementById('travelDate').value = tomorrowStr;
         document.getElementById('travelDate').min = new Date().toISOString().split('T')[0];
 
-        // Load searchable cities from API
-        async function loadCities() {
+        // --- Mode Switching (Passenger vs Operator) ---
+        function switchMode(mode) {
+            const btnPass = document.getElementById('btnModePassenger');
+            const btnOp = document.getElementById('btnModeOperator');
+            const viewPass = document.getElementById('viewPassenger');
+            const viewOp = document.getElementById('viewOperator');
+
+            if (mode === 'passenger') {
+                btnPass.classList.add('active');
+                btnOp.classList.remove('active');
+                viewPass.style.display = 'block';
+                viewOp.style.display = 'none';
+                loadSearchCities();
+            } else {
+                btnOp.classList.add('active');
+                btnPass.classList.remove('active');
+                viewPass.style.display = 'none';
+                viewOp.style.display = 'block';
+                loadRoutesTable();
+                loadBuses();
+            }
+        }
+
+        // --- Operator Tab Switching (Routes vs Schedules) ---
+        function switchAdminTab(tab) {
+            const tabBtnRoutes = document.getElementById('tabBtnRoutes');
+            const tabBtnSchedules = document.getElementById('tabBtnSchedules');
+            const tabContentRoutes = document.getElementById('tabContentRoutes');
+            const tabContentSchedules = document.getElementById('tabContentSchedules');
+
+            if (tab === 'routes') {
+                tabBtnRoutes.classList.add('active');
+                tabBtnSchedules.classList.remove('active');
+                tabContentRoutes.style.display = 'block';
+                tabContentSchedules.style.display = 'none';
+                loadRoutesTable();
+            } else {
+                tabBtnSchedules.classList.add('active');
+                tabBtnRoutes.classList.remove('active');
+                tabContentSchedules.style.display = 'block';
+                tabContentRoutes.style.display = 'none';
+                loadSchedulesTable();
+            }
+        }
+
+        // --- Passenger Search APIs ---
+        async function loadSearchCities() {
             try {
                 const res = await fetch(`${API_BASE}/cities`);
                 const json = await res.json();
                 if (json.success && json.data) {
-                    const srcSelect = document.getElementById('sourceCity');
-                    const destSelect = document.getElementById('destinationCity');
+                    const src = document.getElementById('sourceCity');
+                    const dest = document.getElementById('destinationCity');
 
-                    srcSelect.innerHTML = '<option value="">Select Origin City</option>' +
+                    const currentSrc = src.value;
+                    const currentDest = dest.value;
+
+                    src.innerHTML = '<option value="">Select Origin City</option>' +
                         json.data.sourceCities.map(c => `<option value="${c}">${c}</option>`).join('');
 
-                    destSelect.innerHTML = '<option value="">Select Destination City</option>' +
+                    dest.innerHTML = '<option value="">Select Destination City</option>' +
                         json.data.destinationCities.map(c => `<option value="${c}">${c}</option>`).join('');
 
-                    // Default selection for immediate testing
-                    srcSelect.value = 'Colombo';
-                    destSelect.value = 'Kandy';
+                    if (currentSrc) src.value = currentSrc;
+                    else if (json.data.sourceCities.includes('Colombo')) src.value = 'Colombo';
+
+                    if (currentDest) dest.value = currentDest;
+                    else if (json.data.destinationCities.includes('Kandy')) dest.value = 'Kandy';
                 }
             } catch (err) {
-                showError('Failed to load city list from backend API.');
+                showToast('Failed to load city list from backend API', 'error');
             }
         }
 
-        // Search Trips
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            hideError();
-
             const source = document.getElementById('sourceCity').value;
             const dest = document.getElementById('destinationCity').value;
             const date = document.getElementById('travelDate').value;
@@ -425,30 +1030,27 @@
                 destinationCity: dest,
                 travelDate: date
             });
-
             if (busType) params.append('busType', busType);
             if (sortBy) params.append('sortBy', sortBy);
 
             const container = document.getElementById('resultsContainer');
-            container.innerHTML = '<div class="loading">Searching available bus schedules in SSMS database...</div>';
+            container.innerHTML = '<div class="loading">Searching active bus schedules in SSMS...</div>';
             document.getElementById('resultsCount').textContent = '';
 
             try {
                 const res = await fetch(`${API_BASE}/trips?${params.toString()}`);
                 const json = await res.json();
 
-                if (!res.ok) {
-                    throw new Error(json.message || 'Error occurred while searching schedules.');
-                }
+                if (!res.ok) throw new Error(json.message || 'Error occurred while searching schedules.');
 
-                renderResults(json.data || []);
+                renderSearchResults(json.data || []);
             } catch (err) {
-                showError(err.message);
+                showToast(err.message, 'error');
                 container.innerHTML = `<div class="empty-state" style="color: var(--danger);">${err.message}</div>`;
             }
         });
 
-        function renderResults(trips) {
+        function renderSearchResults(trips) {
             const container = document.getElementById('resultsContainer');
             document.getElementById('resultsCount').textContent = `${trips.length} bus(es) found`;
 
@@ -460,7 +1062,6 @@
             container.innerHTML = trips.map(t => {
                 const dep = new Date(t.departureTime);
                 const arr = new Date(t.arrivalTime);
-
                 const depTimeStr = dep.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const arrTimeStr = arr.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -475,7 +1076,6 @@
                             <div class="operator">${t.operatorName}</div>
                             <span class="badge ${badgeClass}">${t.busType}</span>
                         </div>
-
                         <div class="time-route">
                             <div class="time-box">
                                 <div class="time">${depTimeStr}</div>
@@ -491,43 +1091,485 @@
                                 <div class="city">${t.destinationCity}</div>
                             </div>
                         </div>
-
                         <div class="seats-info">
                             <div class="seats-count">${t.availableSeats}</div>
                             <div class="seats-label">Seats Available (out of ${t.totalSeats})</div>
                         </div>
-
                         <div class="fare-action">
                             <div class="price">LKR ${t.baseFare.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span>/ seat</span></div>
-                            <button class="btn btn-primary" onclick="alert('Trip #' + ${t.tripId} + ' selected! This connects to Module 3: Seat Selection.')">Select Seats</button>
+                            <button class="btn btn-primary" onclick="alert('Trip #' + ${t.tripId} + ' selected! Connects to Module 3: Seat Selection.')">Select Seats</button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function showError(msg) {
-            const banner = document.getElementById('errorBanner');
-            banner.textContent = msg;
-            banner.style.display = 'block';
-        }
-
-        function hideError() {
-            const banner = document.getElementById('errorBanner');
-            banner.style.display = 'none';
-        }
-
-        document.getElementById('btnReset').addEventListener('click', () => {
+        document.getElementById('btnResetSearch').addEventListener('click', () => {
             document.getElementById('searchForm').reset();
             document.getElementById('travelDate').value = tomorrowStr;
-            loadCities();
+            loadSearchCities();
             document.getElementById('resultsContainer').innerHTML = '<div class="empty-state">Select origin, destination, and travel date above to view live schedules.</div>';
             document.getElementById('resultsCount').textContent = '';
-            hideError();
         });
 
-        // Initialize cities on page load
-        loadCities();
+        // --- OPERATOR: ROUTE CRUD ---
+        async function loadRoutesTable() {
+            try {
+                const res = await fetch(`${API_BASE}/routes`);
+                const json = await res.json();
+                routesCache = json.data || [];
+                filterAndSortRoutes();
+                populateRouteDropdowns(routesCache);
+            } catch (err) {
+                showToast('Failed to load routes from database', 'error');
+            }
+        }
+
+        function filterAndSortRoutes() {
+            const q = (document.getElementById('routeSearchInput')?.value || '').trim().toLowerCase();
+            const sort = document.getElementById('routeSortSelect')?.value || 'idAsc';
+
+            let filtered = routesCache.filter(r => {
+                if (!q) return true;
+                const matchId = String(r.routeId).includes(q);
+                const matchSrc = (r.sourceCity || '').toLowerCase().includes(q);
+                const matchDest = (r.destinationCity || '').toLowerCase().includes(q);
+                return matchId || matchSrc || matchDest;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'idAsc') return a.routeId - b.routeId;
+                if (sort === 'idDesc') return b.routeId - a.routeId;
+                if (sort === 'originAsc') return (a.sourceCity || '').localeCompare(b.sourceCity || '');
+                if (sort === 'destAsc') return (a.destinationCity || '').localeCompare(b.destinationCity || '');
+                if (sort === 'durationAsc') return a.estimatedDurationHours - b.estimatedDurationHours;
+                if (sort === 'durationDesc') return b.estimatedDurationHours - a.estimatedDurationHours;
+                return 0;
+            });
+
+            renderRoutesTable(filtered);
+            const badge = document.getElementById('routeCountBadge');
+            if (badge) badge.textContent = `Showing ${filtered.length} of ${routesCache.length} routes`;
+        }
+
+        function resetRouteFilters() {
+            const input = document.getElementById('routeSearchInput');
+            const select = document.getElementById('routeSortSelect');
+            if (input) input.value = '';
+            if (select) select.value = 'idAsc';
+            filterAndSortRoutes();
+        }
+
+        function renderRoutesTable(routes) {
+            const tbody = document.getElementById('routesTableBody');
+            if (!routes || routes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No matching routes found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = routes.map(r => `
+                <tr>
+                    <td><strong>#${r.routeId}</strong></td>
+                    <td>${r.sourceCity}</td>
+                    <td>${r.destinationCity}</td>
+                    <td>${r.estimatedDurationHours} hrs</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="openEditRouteModal(${r.routeId})">✏️ Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteRoute(${r.routeId}, '${r.sourceCity}', '${r.destinationCity}')">🗑️ Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openCreateRouteModal() {
+            document.getElementById('routeModalTitle').textContent = 'Add New Route';
+            document.getElementById('modalRouteId').value = '';
+            document.getElementById('modalRouteSource').value = '';
+            document.getElementById('modalRouteDest').value = '';
+            document.getElementById('modalRouteDuration').value = '';
+            openModal('routeModal');
+        }
+
+        function openEditRouteModal(routeId) {
+            const r = routesCache.find(x => x.routeId === routeId);
+            if (!r) return;
+            document.getElementById('routeModalTitle').textContent = 'Edit Route #' + routeId;
+            document.getElementById('modalRouteId').value = r.routeId;
+            document.getElementById('modalRouteSource').value = r.sourceCity;
+            document.getElementById('modalRouteDest').value = r.destinationCity;
+            document.getElementById('modalRouteDuration').value = r.estimatedDurationHours;
+            openModal('routeModal');
+        }
+
+        document.getElementById('routeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const routeId = document.getElementById('modalRouteId').value;
+            const payload = {
+                sourceCity: document.getElementById('modalRouteSource').value.trim(),
+                destinationCity: document.getElementById('modalRouteDest').value.trim(),
+                estimatedDurationHours: parseFloat(document.getElementById('modalRouteDuration').value)
+            };
+
+            const isEdit = !!routeId;
+            const url = isEdit ? `${API_BASE}/routes/${routeId}` : `${API_BASE}/routes`;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to save route.');
+
+                showToast(isEdit ? 'Route updated successfully!' : 'Route created successfully!', 'success');
+                closeModal('routeModal');
+                loadRoutesTable();
+                loadSearchCities(); // Keep passenger search cities fresh
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function confirmDeleteRoute(routeId, src, dest) {
+            if (!confirm(`Are you sure you want to delete route '${src} ➔ ${dest}' (#${routeId})?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/routes/${routeId}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to delete route.');
+
+                showToast('Route deleted successfully!', 'success');
+                loadRoutesTable();
+                loadSearchCities();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // --- OPERATOR: SCHEDULE & TRIP CRUD ---
+        async function loadBuses() {
+            try {
+                const res = await fetch(`${API_BASE}/buses`);
+                const json = await res.json();
+                busesCache = json.data || [];
+                populateBusDropdowns(busesCache);
+            } catch (err) {
+                console.error('Failed to load fleet buses', err);
+            }
+        }
+
+        function populateRouteDropdowns(routes) {
+            const select = document.getElementById('modalTripRoute');
+            select.innerHTML = '<option value="">Choose a route...</option>' +
+                routes.map(r => `<option value="${r.routeId}">${r.sourceCity} ➔ ${r.destinationCity} (${r.estimatedDurationHours}h)</option>`).join('');
+        }
+
+        function populateBusDropdowns(buses) {
+            const select = document.getElementById('modalTripBus');
+            select.innerHTML = '<option value="">Choose a bus...</option>' +
+                buses.map(b => `<option value="${b.busId}">${b.busNumber} - ${b.operatorName} (${b.busType}, ${b.totalSeats} seats)</option>`).join('');
+        }
+
+        // Feature: Auto-calculate Arrival Time based on Route Duration and Departure Time
+        function onTripRouteOrDepartureChange() {
+            const routeSelect = document.getElementById('modalTripRoute');
+            const depInput = document.getElementById('modalTripDep');
+            const arrInput = document.getElementById('modalTripArr');
+            const hint = document.getElementById('arrCalcHint');
+
+            const routeId = parseInt(routeSelect.value);
+            const depVal = depInput.value;
+
+            if (!routeId || !depVal) {
+                hint.textContent = '';
+                return;
+            }
+
+            const selectedRoute = routesCache.find(r => r.routeId === routeId);
+            if (!selectedRoute || !selectedRoute.estimatedDurationHours) {
+                hint.textContent = '';
+                return;
+            }
+
+            const durationHours = parseFloat(selectedRoute.estimatedDurationHours);
+            const depDate = new Date(depVal);
+            if (isNaN(depDate.getTime())) {
+                hint.textContent = '';
+                return;
+            }
+
+            // Add estimated duration in milliseconds
+            const arrDate = new Date(depDate.getTime() + (durationHours * 60 * 60 * 1000));
+
+            // Format to YYYY-MM-DDTHH:mm local datetime-local format
+            const pad = num => String(num).padStart(2, '0');
+            const year = arrDate.getFullYear();
+            const month = pad(arrDate.getMonth() + 1);
+            const day = pad(arrDate.getDate());
+            const hours = pad(arrDate.getHours());
+            const minutes = pad(arrDate.getMinutes());
+
+            arrInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            hint.textContent = `⚡ Auto-set (+${durationHours}h duration)`;
+        }
+
+        async function loadSchedulesTable() {
+            try {
+                const res = await fetch(`${API_BASE}/trips/all`);
+                const json = await res.json();
+                schedulesCache = json.data || [];
+                filterAndSortSchedules();
+            } catch (err) {
+                showToast('Failed to load scheduled trips', 'error');
+            }
+        }
+
+        function filterAndSortSchedules() {
+            const q = (document.getElementById('tripSearchInput')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('tripStatusFilter')?.value || '';
+            const busTypeFilter = document.getElementById('tripBusTypeFilter')?.value || '';
+            const sort = document.getElementById('tripSortSelect')?.value || 'depAsc';
+
+            let filtered = schedulesCache.filter(t => {
+                if (statusFilter && t.tripStatus !== statusFilter) return false;
+                if (busTypeFilter && t.busType !== busTypeFilter) return false;
+                if (q) {
+                    const matchId = String(t.tripId).includes(q);
+                    const matchRoute = `${t.sourceCity} ${t.destinationCity}`.toLowerCase().includes(q);
+                    const matchBus = (t.busNumber || '').toLowerCase().includes(q);
+                    const matchOp = (t.operatorName || '').toLowerCase().includes(q);
+                    if (!matchId && !matchRoute && !matchBus && !matchOp) return false;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'depAsc') return new Date(a.departureTime) - new Date(b.departureTime);
+                if (sort === 'depDesc') return new Date(b.departureTime) - new Date(a.departureTime);
+                if (sort === 'fareAsc') return a.baseFare - b.baseFare;
+                if (sort === 'fareDesc') return b.baseFare - a.baseFare;
+                if (sort === 'occupancyDesc') return (b.bookedSeats || 0) - (a.bookedSeats || 0);
+                if (sort === 'occupancyAsc') return (a.bookedSeats || 0) - (b.bookedSeats || 0);
+                if (sort === 'idDesc') return b.tripId - a.tripId;
+                if (sort === 'idAsc') return a.tripId - b.tripId;
+                return 0;
+            });
+
+            renderSchedulesTable(filtered);
+            const badge = document.getElementById('tripCountBadge');
+            if (badge) badge.textContent = `Showing ${filtered.length} of ${schedulesCache.length} trips`;
+        }
+
+        function resetTripFilters() {
+            const search = document.getElementById('tripSearchInput');
+            const status = document.getElementById('tripStatusFilter');
+            const busType = document.getElementById('tripBusTypeFilter');
+            const sort = document.getElementById('tripSortSelect');
+            if (search) search.value = '';
+            if (status) status.value = '';
+            if (busType) busType.value = '';
+            if (sort) sort.value = 'depAsc';
+            filterAndSortSchedules();
+        }
+
+        function renderSchedulesTable(trips) {
+            const tbody = document.getElementById('schedulesTableBody');
+            if (!trips || trips.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No scheduled trips found in SSMS.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = trips.map(t => {
+                const dep = new Date(t.departureTime);
+                const arr = new Date(t.arrivalTime);
+                const depStr = dep.toLocaleDateString() + ' ' + dep.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const arrStr = arr.toLocaleDateString() + ' ' + arr.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                const statusClass = t.tripStatus === 'SCHEDULED' ? 'badge-scheduled'
+                    : t.tripStatus === 'CANCELLED' ? 'badge-cancelled'
+                    : t.tripStatus === 'IN_TRANSIT' ? 'badge-intransit' : 'badge-completed';
+
+                return `
+                    <tr>
+                        <td><strong>#${t.tripId}</strong></td>
+                        <td>${t.sourceCity} ➔ ${t.destinationCity}</td>
+                        <td>
+                            <div><strong>${t.busNumber}</strong></div>
+                            <span class="badge ${t.busType === 'AC' ? 'badge-ac' : 'badge-luxury'}">${t.busType}</span>
+                        </td>
+                        <td>${depStr}</td>
+                        <td>${arrStr}</td>
+                        <td><strong>LKR ${t.baseFare.toFixed(2)}</strong></td>
+                        <td><span class="badge ${statusClass}">${t.tripStatus}</span></td>
+                        <td>${t.bookedSeats} / ${t.totalSeats}</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm" onclick="openEditTripModal(${t.tripId})">✏️ Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrip(${t.tripId})">🗑️ Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleRecurringOptions() {
+            const isChecked = document.getElementById('modalTripIsRecurring').checked;
+            const section = document.getElementById('recurringOptionsSection');
+            section.style.display = isChecked ? 'block' : 'none';
+            if (isChecked) {
+                updateRecurringSummary();
+            }
+        }
+
+        function updateRecurringSummary() {
+            const type = document.getElementById('modalTripRecurrenceType').value;
+            const days = parseInt(document.getElementById('modalTripRepeatDays').value) || 7;
+            const typeLabel = type === 'WEEKDAYS' ? 'on weekdays (Mon-Fri)' : type === 'WEEKENDS' ? 'on weekends (Sat-Sun)' : 'every day';
+            document.getElementById('recurringSummaryText').innerHTML =
+                `⚡ Will schedule departures <strong>${typeLabel}</strong> over the next <strong>${days} days</strong>.`;
+        }
+
+        function openCreateTripModal() {
+            loadRoutesTable();
+            loadBuses();
+
+            // Prefill with default future dates
+            const now = new Date();
+            now.setDate(now.getDate() + 1);
+            now.setHours(9, 0, 0, 0);
+
+            const pad = num => String(num).padStart(2, '0');
+            const depIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T09:00`;
+            const arrIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T12:30`;
+
+            document.getElementById('modalTripDep').value = depIso;
+            document.getElementById('modalTripArr').value = arrIso;
+            document.getElementById('modalTripFare').value = '1250';
+            document.getElementById('arrCalcHint').textContent = '';
+            document.getElementById('modalTripIsRecurring').checked = false;
+            document.getElementById('recurringOptionsSection').style.display = 'none';
+            openModal('tripCreateModal');
+        }
+
+        document.getElementById('tripCreateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const depVal = document.getElementById('modalTripDep').value;
+            const arrVal = document.getElementById('modalTripArr').value;
+            const isRecurring = document.getElementById('modalTripIsRecurring').checked;
+
+            const payload = {
+                routeId: parseInt(document.getElementById('modalTripRoute').value),
+                busId: parseInt(document.getElementById('modalTripBus').value),
+                departureTime: depVal.length === 16 ? depVal + ':00' : depVal,
+                arrivalTime: arrVal.length === 16 ? arrVal + ':00' : arrVal,
+                baseFare: parseFloat(document.getElementById('modalTripFare').value),
+                tripStatus: document.getElementById('modalTripStatus').value,
+                isRecurring: isRecurring,
+                recurrenceType: isRecurring ? document.getElementById('modalTripRecurrenceType').value : null,
+                repeatDays: isRecurring ? parseInt(document.getElementById('modalTripRepeatDays').value) : null
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/trips`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to schedule trip.');
+
+                showToast(isRecurring ? 'Recurring trips scheduled successfully!' : 'Trip scheduled successfully!', 'success');
+                closeModal('tripCreateModal');
+                loadSchedulesTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        function openEditTripModal(tripId) {
+            const t = schedulesCache.find(x => x.tripId === tripId);
+            if (!t) return;
+
+            document.getElementById('modalEditTripId').value = t.tripId;
+            document.getElementById('modalEditTripDep').value = t.departureTime.slice(0, 16);
+            document.getElementById('modalEditTripArr').value = t.arrivalTime.slice(0, 16);
+            document.getElementById('modalEditTripFare').value = t.baseFare;
+            document.getElementById('modalEditTripStatus').value = t.tripStatus;
+
+            openModal('tripEditModal');
+        }
+
+        document.getElementById('tripEditForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const tripId = document.getElementById('modalEditTripId').value;
+            const depVal = document.getElementById('modalEditTripDep').value;
+            const arrVal = document.getElementById('modalEditTripArr').value;
+
+            const payload = {
+                departureTime: depVal.length === 16 ? depVal + ':00' : depVal,
+                arrivalTime: arrVal.length === 16 ? arrVal + ':00' : arrVal,
+                baseFare: parseFloat(document.getElementById('modalEditTripFare').value),
+                tripStatus: document.getElementById('modalEditTripStatus').value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/trips/${tripId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to update trip.');
+
+                showToast('Trip updated successfully!', 'success');
+                closeModal('tripEditModal');
+                loadSchedulesTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function confirmDeleteTrip(tripId) {
+            if (!confirm(`Are you sure you want to cancel or delete Trip #${tripId}?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/trips/${tripId}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to delete trip.');
+
+                showToast(json.message || 'Trip deleted/cancelled successfully!', 'success');
+                loadSchedulesTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // --- Modal Helpers ---
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // --- Toast Helpers ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = (type === 'success' ? '✅ ' : '⚠️ ') + message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Initial loading on page open
+        loadSearchCities();
     </script>
 </body>
 </html>

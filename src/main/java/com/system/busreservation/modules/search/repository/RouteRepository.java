@@ -18,6 +18,10 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     Optional<Route> findFirstBySourceCityIgnoreCaseAndDestinationCityIgnoreCase(String sourceCity, String destinationCity);
 
+    boolean existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCase(String sourceCity, String destinationCity);
+
+    boolean existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCaseAndRouteIdNot(String sourceCity, String destinationCity, Long routeId);
+
     @Query("SELECT DISTINCT r.sourceCity FROM Route r ORDER BY r.sourceCity ASC")
     List<String> findDistinctSourceCities();
 

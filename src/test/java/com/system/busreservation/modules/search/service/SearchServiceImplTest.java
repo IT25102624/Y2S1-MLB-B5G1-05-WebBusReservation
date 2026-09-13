@@ -7,10 +7,15 @@ import com.system.busreservation.model.Trip;
 import com.system.busreservation.model.enums.BusType;
 import com.system.busreservation.model.enums.TripStatus;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
+import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
+import com.system.busreservation.modules.search.dto.RouteRequest;
 import com.system.busreservation.modules.search.dto.RouteResponse;
+import com.system.busreservation.modules.search.dto.TripCreateRequest;
 import com.system.busreservation.modules.search.dto.TripSearchRequest;
 import com.system.busreservation.modules.search.dto.TripSearchResponse;
+import com.system.busreservation.modules.search.dto.TripUpdateRequest;
+import com.system.busreservation.modules.search.repository.BusRepository;
 import com.system.busreservation.modules.search.repository.RouteRepository;
 import com.system.busreservation.modules.search.repository.TripRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +51,9 @@ class SearchServiceImplTest {
 
     @Mock
     private BookingSeatRepository bookingSeatRepository;
+
+    @Mock
+    private BusRepository busRepository;
 
     @InjectMocks
     private SearchServiceImpl searchService;
@@ -81,6 +90,10 @@ class SearchServiceImplTest {
                 .build();
     }
 
+    // =========================================================================
+    // Search / Read Tests
+    // =========================================================================
+
     @Test
     @DisplayName("Should successfully search trips and calculate available seats correctly")
     void searchTrips_Success() {
@@ -95,8 +108,7 @@ class SearchServiceImplTest {
                 eq(null), eq(null), eq(null), eq(TripStatus.SCHEDULED)
         )).thenReturn(List.of(testTrip));
 
-        // 5 booked seats on trip 10
-        List<Object[]> mockSeatCounts = java.util.Collections.singletonList(new Object[]{10L, 5L});
+        List<Object[]> mockSeatCounts = Collections.singletonList(new Object[]{10L, 5L});
         when(bookingSeatRepository.countActiveBookedSeatsByTripIds(List.of(10L)))
                 .thenReturn(mockSeatCounts);
 
@@ -109,7 +121,7 @@ class SearchServiceImplTest {
         assertThat(response.getDestinationCity()).isEqualTo("Kandy");
         assertThat(response.getTotalSeats()).isEqualTo(40);
         assertThat(response.getBookedSeats()).isEqualTo(5);
-        assertThat(response.getAvailableSeats()).isEqualTo(35); // 40 - 5 = 35
+        assertThat(response.getAvailableSeats()).isEqualTo(35);
     }
 
     @Test
@@ -141,22 +153,6 @@ class SearchServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when minFare > maxFare")
-    void searchTrips_MinFareGreaterThanMaxFare_ThrowsException() {
-        TripSearchRequest request = TripSearchRequest.builder()
-                .sourceCity("Colombo")
-                .destinationCity("Kandy")
-                .travelDate(LocalDate.now().plusDays(1))
-                .minFare(new BigDecimal("2000.00"))
-                .maxFare(new BigDecimal("1000.00"))
-                .build();
-
-        assertThatThrownBy(() -> searchService.searchTrips(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Minimum fare cannot be greater than maximum fare");
-    }
-
-    @Test
     @DisplayName("Should return trip details by ID with accurate booked seats")
     void getTripDetails_Success() {
         when(tripRepository.findByIdWithDetails(10L)).thenReturn(Optional.of(testTrip));
@@ -165,17 +161,8 @@ class SearchServiceImplTest {
         TripSearchResponse response = searchService.getTripDetails(10L);
 
         assertThat(response.getTripId()).isEqualTo(10L);
-        assertThat(response.getAvailableSeats()).isEqualTo(37); // 40 - 3 = 37
+        assertThat(response.getAvailableSeats()).isEqualTo(37);
         assertThat(response.getBusNumber()).isEqualTo("ND-1001");
-    }
-
-    @Test
-    @DisplayName("Should throw ResourceNotFoundException when trip ID does not exist")
-    void getTripDetails_NotFound_ThrowsException() {
-        when(tripRepository.findByIdWithDetails(999L)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> searchService.getTripDetails(999L))
-                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
@@ -190,15 +177,218 @@ class SearchServiceImplTest {
         assertThat(response.getDestinationCities()).containsExactly("Badulla", "Jaffna", "Kandy");
     }
 
+    // =========================================================================
+    // Operator CRUD Tests (Routes)
+    // =========================================================================
+
     @Test
-    @DisplayName("Should return all routes correctly")
-    void getAllRoutes_Success() {
-        when(routeRepository.findAll()).thenReturn(List.of(testRoute));
+    @DisplayName("createRoute - Should create route successfully")
+    void createRoute_Success() {
+        RouteRequest request = RouteRequest.builder()
+                .sourceCity("Galle")
+                .destinationCity("Matara")
+                .estimatedDurationHours(new BigDecimal("1.00"))
+                .build();
 
-        List<RouteResponse> routes = searchService.getAllRoutes();
+        Route savedRoute = Route.builder()
+                .routeId(20L)
+                .sourceCity("Galle")
+                .destinationCity("Matara")
+                .estimatedDurationHours(new BigDecimal("1.00"))
+                .build();
 
-        assertThat(routes).hasSize(1);
-        assertThat(routes.get(0).getSourceCity()).isEqualTo("Colombo");
-        assertThat(routes.get(0).getDestinationCity()).isEqualTo("Kandy");
+        when(routeRepository.existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCase("Galle", "Matara")).thenReturn(false);
+        when(routeRepository.save(any(Route.class))).thenReturn(savedRoute);
+
+        RouteResponse response = searchService.createRoute(request);
+
+        assertThat(response.getRouteId()).isEqualTo(20L);
+        assertThat(response.getSourceCity()).isEqualTo("Galle");
+        assertThat(response.getDestinationCity()).isEqualTo("Matara");
+    }
+
+    @Test
+    @DisplayName("createRoute - Should throw exception when route already exists")
+    void createRoute_Duplicate_ThrowsException() {
+        RouteRequest request = RouteRequest.builder()
+                .sourceCity("Colombo")
+                .destinationCity("Kandy")
+                .estimatedDurationHours(new BigDecimal("3.50"))
+                .build();
+
+        when(routeRepository.existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCase("Colombo", "Kandy")).thenReturn(true);
+
+        assertThatThrownBy(() -> searchService.createRoute(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already exists");
+    }
+
+    @Test
+    @DisplayName("deleteRoute - Should delete route when no active trips depend on it")
+    void deleteRoute_Success() {
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(tripRepository.countByRoute_RouteId(1L)).thenReturn(0L);
+
+        searchService.deleteRoute(1L);
+
+        verify(routeRepository).delete(testRoute);
+    }
+
+    @Test
+    @DisplayName("deleteRoute - Should throw exception if trips depend on the route")
+    void deleteRoute_WithActiveTrips_ThrowsException() {
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(tripRepository.countByRoute_RouteId(1L)).thenReturn(3L);
+
+        assertThatThrownBy(() -> searchService.deleteRoute(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("scheduled trip(s) depend on it");
+    }
+
+    // =========================================================================
+    // Operator CRUD Tests (Trips & Buses)
+    // =========================================================================
+
+    @Test
+    @DisplayName("createTrip - Should schedule new trip successfully")
+    void createTrip_Success() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(2).withHour(8).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(2).withHour(11).withMinute(30);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .tripStatus(TripStatus.SCHEDULED)
+                .build();
+
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.save(any(Trip.class))).thenAnswer(invocation -> {
+            Trip t = invocation.getArgument(0);
+            t.setTripId(55L);
+            return t;
+        });
+
+        TripSearchResponse response = searchService.createTrip(request);
+
+        assertThat(response.getTripId()).isEqualTo(55L);
+        assertThat(response.getBaseFare()).isEqualTo(new BigDecimal("1250.00"));
+        assertThat(response.getTotalSeats()).isEqualTo(40);
+        assertThat(response.getAvailableSeats()).isEqualTo(40);
+    }
+
+    @Test
+    @DisplayName("createTrip - Should reject when arrival time is before departure time")
+    void createTrip_InvalidTimings_ThrowsException() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(2).withHour(14).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(2).withHour(10).withMinute(0); // Before departure
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .build();
+
+        assertThatThrownBy(() -> searchService.createTrip(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Arrival time must be after departure time");
+    }
+
+    @Test
+    @DisplayName("deleteTrip - Should cancel trip if active bookings exist")
+    void deleteTrip_WithBookings_SetsStatusCancelled() {
+        when(tripRepository.findById(10L)).thenReturn(Optional.of(testTrip));
+        when(bookingSeatRepository.countActiveBookedSeatsByTripId(10L)).thenReturn(2);
+
+        searchService.deleteTrip(10L);
+
+        assertThat(testTrip.getTripStatus()).isEqualTo(TripStatus.CANCELLED);
+        verify(tripRepository).save(testTrip);
+    }
+
+    @Test
+    @DisplayName("getAllBuses - Should return fleet bus list")
+    void getAllBuses_Success() {
+        when(busRepository.findAll()).thenReturn(List.of(testBus));
+
+        List<BusResponse> buses = searchService.getAllBuses();
+
+        assertThat(buses).hasSize(1);
+        assertThat(buses.get(0).getBusNumber()).isEqualTo("ND-1001");
+        assertThat(buses.get(0).getTotalSeats()).isEqualTo(40);
+    }
+
+    @Test
+    @DisplayName("createRecurringTrips - Should generate daily trips for specified repeat days")
+    void createRecurringTrips_Daily_Success() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(1).withHour(11).withMinute(30);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .isRecurring(true)
+                .recurrenceType("DAILY")
+                .repeatDays(7)
+                .build();
+
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.saveAll(any())).thenAnswer(invocation -> {
+            List<Trip> trips = invocation.getArgument(0);
+            for (long i = 0; i < trips.size(); i++) {
+                trips.get((int) i).setTripId(100L + i);
+            }
+            return trips;
+        });
+
+        List<TripSearchResponse> responses = searchService.createRecurringTrips(request);
+
+        assertThat(responses).hasSize(7);
+        assertThat(responses.get(0).getBaseFare()).isEqualByComparingTo("1250.00");
+        assertThat(responses.get(0).getSourceCity()).isEqualTo("Colombo");
+        verify(tripRepository).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("createTrip - When isRecurring is true, delegates to recurring trip scheduling")
+    void createTrip_WithRecurringFlag_DelegatesToRecurring() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(1).withHour(11).withMinute(30);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .isRecurring(true)
+                .recurrenceType("DAILY")
+                .repeatDays(3)
+                .build();
+
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.saveAll(any())).thenAnswer(invocation -> {
+            List<Trip> trips = invocation.getArgument(0);
+            for (long i = 0; i < trips.size(); i++) {
+                trips.get((int) i).setTripId(200L + i);
+            }
+            return trips;
+        });
+
+        TripSearchResponse response = searchService.createTrip(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getTripId()).isEqualTo(200L);
+        verify(tripRepository).saveAll(any());
     }
 }

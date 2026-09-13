@@ -1,14 +1,20 @@
 package com.system.busreservation.modules.search.service;
 
 import com.system.busreservation.common.exception.ResourceNotFoundException;
+import com.system.busreservation.model.Bus;
 import com.system.busreservation.model.Route;
 import com.system.busreservation.model.Trip;
 import com.system.busreservation.model.enums.TripStatus;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
+import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
+import com.system.busreservation.modules.search.dto.RouteRequest;
 import com.system.busreservation.modules.search.dto.RouteResponse;
+import com.system.busreservation.modules.search.dto.TripCreateRequest;
 import com.system.busreservation.modules.search.dto.TripSearchRequest;
 import com.system.busreservation.modules.search.dto.TripSearchResponse;
+import com.system.busreservation.modules.search.dto.TripUpdateRequest;
+import com.system.busreservation.modules.search.repository.BusRepository;
 import com.system.busreservation.modules.search.repository.RouteRepository;
 import com.system.busreservation.modules.search.repository.TripRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -34,21 +43,23 @@ public class SearchServiceImpl implements SearchService {
     private final RouteRepository routeRepository;
     private final TripRepository tripRepository;
     private final BookingSeatRepository bookingSeatRepository;
+    private final BusRepository busRepository;
+
+    // =========================================================================
+    // Passenger Search & Discovery Operations
+    // =========================================================================
 
     @Override
     public List<TripSearchResponse> searchTrips(TripSearchRequest request) {
         log.info("Searching trips from [{}] to [{}] on [{}]",
                 request.getSourceCity(), request.getDestinationCity(), request.getTravelDate());
 
-        // 1. Business Validation
         validateSearchCriteria(request);
 
-        // 2. Date Window Calculation
         LocalDate travelDate = request.getTravelDate();
         LocalDateTime startTime = travelDate.atStartOfDay();
         LocalDateTime endTime = travelDate.atTime(LocalTime.MAX);
 
-        // If searching for today, ignore departures that already passed
         if (travelDate.isEqual(LocalDate.now())) {
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(startTime)) {
@@ -56,13 +67,11 @@ public class SearchServiceImpl implements SearchService {
             }
         }
 
-        // Apply Time-of-Day filtering if requested
         if (request.getTimeOfDay() != null && !request.getTimeOfDay().isBlank()) {
             startTime = adjustStartTimeForTimeOfDay(travelDate, startTime, request.getTimeOfDay());
             endTime = adjustEndTimeForTimeOfDay(travelDate, endTime, request.getTimeOfDay());
         }
 
-        // 3. Query matching scheduled trips
         List<Trip> matchingTrips = tripRepository.searchTrips(
                 request.getSourceCity().trim(),
                 request.getDestinationCity().trim(),
@@ -79,16 +88,13 @@ public class SearchServiceImpl implements SearchService {
             return Collections.emptyList();
         }
 
-        // 4. Batch fetch booked seats count to prevent N+1 queries
         List<Long> tripIds = matchingTrips.stream().map(Trip::getTripId).toList();
         Map<Long, Integer> bookedSeatsMap = fetchBookedSeatsMap(tripIds);
 
-        // 5. Transform to Response DTOs
         List<TripSearchResponse> responses = matchingTrips.stream()
                 .map(trip -> mapToTripSearchResponse(trip, bookedSeatsMap.getOrDefault(trip.getTripId(), 0)))
                 .collect(Collectors.toList());
 
-        // 6. Apply Sorting
         applySorting(responses, request.getSortBy());
 
         return responses;
@@ -149,7 +155,247 @@ public class SearchServiceImpl implements SearchService {
                 .collect(Collectors.toList());
     }
 
-    // --- Helper & Mapping Methods ---
+    // =========================================================================
+    // Operator / Management CRUD Operations
+    // =========================================================================
+
+    @Override
+    @Transactional
+    public RouteResponse createRoute(RouteRequest request) {
+        log.info("Creating new route from [{}] to [{}]", request.getSourceCity(), request.getDestinationCity());
+        String src = request.getSourceCity().trim();
+        String dest = request.getDestinationCity().trim();
+
+        if (src.equalsIgnoreCase(dest)) {
+            throw new IllegalArgumentException("Source city and destination city cannot be the same.");
+        }
+
+        if (routeRepository.existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCase(src, dest)) {
+            throw new IllegalArgumentException(String.format("Route from '%s' to '%s' already exists.", src, dest));
+        }
+
+        Route route = Route.builder()
+                .sourceCity(src)
+                .destinationCity(dest)
+                .estimatedDurationHours(request.getEstimatedDurationHours())
+                .build();
+
+        Route savedRoute = routeRepository.save(route);
+        log.info("Route successfully created with ID: {}", savedRoute.getRouteId());
+        return mapToRouteResponse(savedRoute);
+    }
+
+    @Override
+    @Transactional
+    public RouteResponse updateRoute(Long routeId, RouteRequest request) {
+        log.info("Updating route ID: {}", routeId);
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", routeId));
+
+        String src = request.getSourceCity().trim();
+        String dest = request.getDestinationCity().trim();
+
+        if (src.equalsIgnoreCase(dest)) {
+            throw new IllegalArgumentException("Source city and destination city cannot be the same.");
+        }
+
+        if (routeRepository.existsBySourceCityIgnoreCaseAndDestinationCityIgnoreCaseAndRouteIdNot(src, dest, routeId)) {
+            throw new IllegalArgumentException(String.format("Another route from '%s' to '%s' already exists.", src, dest));
+        }
+
+        route.setSourceCity(src);
+        route.setDestinationCity(dest);
+        route.setEstimatedDurationHours(request.getEstimatedDurationHours());
+
+        Route updatedRoute = routeRepository.save(route);
+        log.info("Route ID {} successfully updated", routeId);
+        return mapToRouteResponse(updatedRoute);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRoute(Long routeId) {
+        log.info("Deleting route ID: {}", routeId);
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", routeId));
+
+        long dependentTrips = tripRepository.countByRoute_RouteId(routeId);
+        if (dependentTrips > 0) {
+            throw new IllegalStateException(String.format(
+                    "Cannot delete route '%s -> %s' because %d scheduled trip(s) depend on it. Delete or reassign those trips first.",
+                    route.getSourceCity(), route.getDestinationCity(), dependentTrips));
+        }
+
+        routeRepository.delete(route);
+        log.info("Route ID {} successfully deleted", routeId);
+    }
+
+    @Override
+    @Transactional
+    public TripSearchResponse createTrip(TripCreateRequest request) {
+        log.info("Scheduling new trip for route ID: {}, bus ID: {}", request.getRouteId(), request.getBusId());
+
+        if (Boolean.TRUE.equals(request.getIsRecurring())) {
+            List<TripSearchResponse> recurring = createRecurringTrips(request);
+            return recurring.get(0);
+        }
+
+        if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
+            throw new IllegalArgumentException("Arrival time must be after departure time.");
+        }
+
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", request.getRouteId()));
+
+        Bus bus = busRepository.findById(request.getBusId())
+                .orElseThrow(() -> new ResourceNotFoundException("Bus", "busId", request.getBusId()));
+
+        Trip trip = Trip.builder()
+                .route(route)
+                .bus(bus)
+                .departureTime(request.getDepartureTime())
+                .arrivalTime(request.getArrivalTime())
+                .baseFare(request.getBaseFare())
+                .tripStatus(request.getTripStatus() != null ? request.getTripStatus() : TripStatus.SCHEDULED)
+                .build();
+
+        Trip savedTrip = tripRepository.save(trip);
+        log.info("Trip scheduled successfully with ID: {}", savedTrip.getTripId());
+        return mapToTripSearchResponse(savedTrip, 0);
+    }
+
+    @Override
+    @Transactional
+    public List<TripSearchResponse> createRecurringTrips(TripCreateRequest request) {
+        log.info("Scheduling recurring trips for route ID: {}, bus ID: {}, type: {}, days: {}",
+                request.getRouteId(), request.getBusId(), request.getRecurrenceType(), request.getRepeatDays());
+
+        if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
+            throw new IllegalArgumentException("Arrival time must be after departure time.");
+        }
+
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", request.getRouteId()));
+
+        Bus bus = busRepository.findById(request.getBusId())
+                .orElseThrow(() -> new ResourceNotFoundException("Bus", "busId", request.getBusId()));
+
+        TripStatus status = request.getTripStatus() != null ? request.getTripStatus() : TripStatus.SCHEDULED;
+        int repeatDays = (request.getRepeatDays() != null && request.getRepeatDays() > 0)
+                ? Math.min(request.getRepeatDays(), 30)
+                : 7;
+        String recurrenceType = (request.getRecurrenceType() != null && !request.getRecurrenceType().isBlank())
+                ? request.getRecurrenceType().toUpperCase()
+                : "DAILY";
+
+        Duration tripDuration = Duration.between(request.getDepartureTime(), request.getArrivalTime());
+        List<Trip> tripsToSave = new ArrayList<>();
+
+        for (int i = 0; i < repeatDays; i++) {
+            LocalDateTime depTime = request.getDepartureTime().plusDays(i);
+            DayOfWeek dow = depTime.getDayOfWeek();
+
+            boolean shouldInclude = switch (recurrenceType) {
+                case "WEEKDAYS" -> (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY);
+                case "WEEKENDS" -> (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY);
+                default -> true;
+            };
+
+            if (shouldInclude) {
+                LocalDateTime arrTime = depTime.plus(tripDuration);
+                tripsToSave.add(Trip.builder()
+                        .route(route)
+                        .bus(bus)
+                        .departureTime(depTime)
+                        .arrivalTime(arrTime)
+                        .baseFare(request.getBaseFare())
+                        .tripStatus(status)
+                        .build());
+            }
+        }
+
+        if (tripsToSave.isEmpty()) {
+            throw new IllegalArgumentException("No matching dates found for recurrence pattern: " + recurrenceType);
+        }
+
+        List<Trip> savedTrips = tripRepository.saveAll(tripsToSave);
+        log.info("Successfully scheduled {} recurring trips for route ID: {}, bus ID: {}",
+                savedTrips.size(), route.getRouteId(), bus.getBusId());
+
+        return savedTrips.stream()
+                .map(t -> mapToTripSearchResponse(t, 0))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public TripSearchResponse updateTrip(Long tripId, TripUpdateRequest request) {
+        log.info("Updating trip ID: {}", tripId);
+
+        if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
+            throw new IllegalArgumentException("Arrival time must be after departure time.");
+        }
+
+        Trip trip = tripRepository.findByIdWithDetails(tripId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trip", "tripId", tripId));
+
+        trip.setDepartureTime(request.getDepartureTime());
+        trip.setArrivalTime(request.getArrivalTime());
+        trip.setBaseFare(request.getBaseFare());
+        trip.setTripStatus(request.getTripStatus());
+
+        Trip updatedTrip = tripRepository.save(trip);
+        int bookedSeats = bookingSeatRepository.countActiveBookedSeatsByTripId(tripId);
+        log.info("Trip ID {} successfully updated", tripId);
+        return mapToTripSearchResponse(updatedTrip, bookedSeats);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTrip(Long tripId) {
+        log.info("Cancelling/Deleting trip ID: {}", tripId);
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new ResourceNotFoundException("Trip", "tripId", tripId));
+
+        int bookedSeats = bookingSeatRepository.countActiveBookedSeatsByTripId(tripId);
+        if (bookedSeats > 0) {
+            // If active bookings exist, safely set status to CANCELLED rather than deleting foreign keys
+            trip.setTripStatus(TripStatus.CANCELLED);
+            tripRepository.save(trip);
+            log.info("Trip ID {} had {} bookings; changed status to CANCELLED", tripId, bookedSeats);
+        } else {
+            tripRepository.delete(trip);
+            log.info("Trip ID {} successfully deleted", tripId);
+        }
+    }
+
+    @Override
+    public List<TripSearchResponse> getAllTrips() {
+        log.info("Fetching all scheduled trips for management");
+        List<Trip> trips = tripRepository.findAllWithDetails();
+        if (trips.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> tripIds = trips.stream().map(Trip::getTripId).toList();
+        Map<Long, Integer> bookedSeatsMap = fetchBookedSeatsMap(tripIds);
+
+        return trips.stream()
+                .map(t -> mapToTripSearchResponse(t, bookedSeatsMap.getOrDefault(t.getTripId(), 0)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BusResponse> getAllBuses() {
+        log.info("Fetching all fleet buses");
+        return busRepository.findAll().stream()
+                .map(this::mapToBusResponse)
+                .collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // Helper & Mapping Methods
+    // =========================================================================
 
     private void validateSearchCriteria(TripSearchRequest request) {
         if (request.getSourceCity().trim().equalsIgnoreCase(request.getDestinationCity().trim())) {
@@ -223,6 +469,16 @@ public class SearchServiceImpl implements SearchService {
                 .sourceCity(route.getSourceCity())
                 .destinationCity(route.getDestinationCity())
                 .estimatedDurationHours(route.getEstimatedDurationHours())
+                .build();
+    }
+
+    private BusResponse mapToBusResponse(Bus bus) {
+        return BusResponse.builder()
+                .busId(bus.getBusId())
+                .busNumber(bus.getBusNumber())
+                .busType(bus.getBusType())
+                .totalSeats(bus.getTotalSeats())
+                .operatorName(bus.getOperatorName())
                 .build();
     }
 

@@ -68,4 +68,14 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             @Param("now") LocalDateTime now,
             @Param("tripStatus") TripStatus tripStatus
     );
+
+    @Query("""
+        SELECT t FROM Trip t
+        JOIN FETCH t.route r
+        JOIN FETCH t.bus b
+        ORDER BY t.departureTime DESC
+    """)
+    List<Trip> findAllWithDetails();
+
+    long countByRoute_RouteId(Long routeId);
 }
