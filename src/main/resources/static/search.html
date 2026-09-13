@@ -840,6 +840,38 @@
                             <option value="IN_TRANSIT">IN_TRANSIT</option>
                         </select>
                     </div>
+
+                    <!-- Recurring Schedule Options -->
+                    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--primary); font-size: 0.92rem;">
+                            <input type="checkbox" id="modalTripIsRecurring" onchange="toggleRecurringOptions()" style="width: 17px; height: 17px; cursor: pointer;">
+                            <span>🔄 Create Recurring Schedule (Daily / Multi-Day)</span>
+                        </label>
+                    </div>
+
+                    <div id="recurringOptionsSection" style="display: none; margin-top: 12px; padding: 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                            <div class="form-group">
+                                <label for="modalTripRecurrenceType" style="font-size: 0.8rem; color: #1e3a8a;">Recurrence Pattern</label>
+                                <select id="modalTripRecurrenceType" onchange="updateRecurringSummary()">
+                                    <option value="DAILY">Every Day (Daily)</option>
+                                    <option value="WEEKDAYS">Weekdays (Mon - Fri)</option>
+                                    <option value="WEEKENDS">Weekends (Sat - Sun)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="modalTripRepeatDays" style="font-size: 0.8rem; color: #1e3a8a;">Repeat For</label>
+                                <select id="modalTripRepeatDays" onchange="updateRecurringSummary()">
+                                    <option value="7">Next 7 Days (1 Week)</option>
+                                    <option value="14">Next 14 Days (2 Weeks)</option>
+                                    <option value="30">Next 30 Days (1 Month)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="recurringSummaryText" style="font-size: 0.82rem; color: #1e40af; font-weight: 500;">
+                            ⚡ Will schedule 7 trips matching this timetable.
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('tripCreateModal')">Cancel</button>
@@ -1385,6 +1417,23 @@
             }).join('');
         }
 
+        function toggleRecurringOptions() {
+            const isChecked = document.getElementById('modalTripIsRecurring').checked;
+            const section = document.getElementById('recurringOptionsSection');
+            section.style.display = isChecked ? 'block' : 'none';
+            if (isChecked) {
+                updateRecurringSummary();
+            }
+        }
+
+        function updateRecurringSummary() {
+            const type = document.getElementById('modalTripRecurrenceType').value;
+            const days = parseInt(document.getElementById('modalTripRepeatDays').value) || 7;
+            const typeLabel = type === 'WEEKDAYS' ? 'on weekdays (Mon-Fri)' : type === 'WEEKENDS' ? 'on weekends (Sat-Sun)' : 'every day';
+            document.getElementById('recurringSummaryText').innerHTML =
+                `⚡ Will schedule departures <strong>${typeLabel}</strong> over the next <strong>${days} days</strong>.`;
+        }
+
         function openCreateTripModal() {
             loadRoutesTable();
             loadBuses();
@@ -1402,6 +1451,8 @@
             document.getElementById('modalTripArr').value = arrIso;
             document.getElementById('modalTripFare').value = '1250';
             document.getElementById('arrCalcHint').textContent = '';
+            document.getElementById('modalTripIsRecurring').checked = false;
+            document.getElementById('recurringOptionsSection').style.display = 'none';
             openModal('tripCreateModal');
         }
 
@@ -1409,6 +1460,7 @@
             e.preventDefault();
             const depVal = document.getElementById('modalTripDep').value;
             const arrVal = document.getElementById('modalTripArr').value;
+            const isRecurring = document.getElementById('modalTripIsRecurring').checked;
 
             const payload = {
                 routeId: parseInt(document.getElementById('modalTripRoute').value),
@@ -1416,7 +1468,10 @@
                 departureTime: depVal.length === 16 ? depVal + ':00' : depVal,
                 arrivalTime: arrVal.length === 16 ? arrVal + ':00' : arrVal,
                 baseFare: parseFloat(document.getElementById('modalTripFare').value),
-                tripStatus: document.getElementById('modalTripStatus').value
+                tripStatus: document.getElementById('modalTripStatus').value,
+                isRecurring: isRecurring,
+                recurrenceType: isRecurring ? document.getElementById('modalTripRecurrenceType').value : null,
+                repeatDays: isRecurring ? parseInt(document.getElementById('modalTripRepeatDays').value) : null
             };
 
             try {
@@ -1428,7 +1483,7 @@
                 const json = await res.json();
                 if (!res.ok) throw new Error(json.message || 'Failed to schedule trip.');
 
-                showToast('Trip scheduled successfully!', 'success');
+                showToast(isRecurring ? 'Recurring trips scheduled successfully!' : 'Trip scheduled successfully!', 'success');
                 closeModal('tripCreateModal');
                 loadSchedulesTable();
             } catch (err) {

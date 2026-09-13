@@ -191,10 +191,29 @@ public class SearchController {
     public ResponseEntity<ApiResponse<TripSearchResponse>> createTrip(@Valid @RequestBody TripCreateRequest request) {
         log.info("REST request to schedule trip: {}", request);
         TripSearchResponse created = searchService.createTrip(request);
+        String message = Boolean.TRUE.equals(request.getIsRecurring())
+                ? "Recurring trips scheduled successfully"
+                : "Trip scheduled successfully";
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.<TripSearchResponse>builder()
                 .success(true)
-                .message("Trip scheduled successfully")
+                .message(message)
                 .data(created)
+                .build());
+    }
+
+    /**
+     * Schedule a batch of recurring trips across multiple days.
+     * POST /api/v1/search/trips/recurring
+     */
+    @PostMapping("/trips/recurring")
+    public ResponseEntity<ApiResponse<List<TripSearchResponse>>> createRecurringTrips(@Valid @RequestBody TripCreateRequest request) {
+        log.info("REST request to schedule recurring trips: {}", request);
+        request.setIsRecurring(true);
+        List<TripSearchResponse> createdTrips = searchService.createRecurringTrips(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.<List<TripSearchResponse>>builder()
+                .success(true)
+                .message(String.format("Successfully scheduled %d recurring trips", createdTrips.size()))
+                .data(createdTrips)
                 .build());
     }
 

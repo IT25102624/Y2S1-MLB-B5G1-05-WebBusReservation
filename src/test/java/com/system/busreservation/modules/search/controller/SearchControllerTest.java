@@ -236,6 +236,41 @@ class SearchControllerTest {
     }
 
     @Test
+    @DisplayName("POST /search/trips/recurring - Should schedule recurring trips and return 201")
+    void createRecurringTrips_Success() throws Exception {
+        LocalDateTime dep = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(1).withHour(14).withMinute(0);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(2L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1400.00"))
+                .isRecurring(true)
+                .recurrenceType("DAILY")
+                .repeatDays(3)
+                .build();
+
+        TripSearchResponse response = TripSearchResponse.builder()
+                .tripId(88L)
+                .sourceCity("Colombo")
+                .destinationCity("Kandy")
+                .baseFare(new BigDecimal("1400.00"))
+                .availableSeats(40)
+                .build();
+
+        when(searchService.createRecurringTrips(any(TripCreateRequest.class))).thenReturn(List.of(response));
+
+        mockMvc.perform(post("/search/trips/recurring")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].tripId").value(88L));
+    }
+
+    @Test
     @DisplayName("DELETE /search/trips/{tripId} - Should delete trip and return 200")
     void deleteTrip_Success() throws Exception {
         mockMvc.perform(delete("/search/trips/88")

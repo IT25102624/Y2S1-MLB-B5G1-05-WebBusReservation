@@ -322,4 +322,73 @@ class SearchServiceImplTest {
         assertThat(buses.get(0).getBusNumber()).isEqualTo("ND-1001");
         assertThat(buses.get(0).getTotalSeats()).isEqualTo(40);
     }
+
+    @Test
+    @DisplayName("createRecurringTrips - Should generate daily trips for specified repeat days")
+    void createRecurringTrips_Daily_Success() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(1).withHour(11).withMinute(30);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .isRecurring(true)
+                .recurrenceType("DAILY")
+                .repeatDays(7)
+                .build();
+
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.saveAll(any())).thenAnswer(invocation -> {
+            List<Trip> trips = invocation.getArgument(0);
+            for (long i = 0; i < trips.size(); i++) {
+                trips.get((int) i).setTripId(100L + i);
+            }
+            return trips;
+        });
+
+        List<TripSearchResponse> responses = searchService.createRecurringTrips(request);
+
+        assertThat(responses).hasSize(7);
+        assertThat(responses.get(0).getBaseFare()).isEqualByComparingTo("1250.00");
+        assertThat(responses.get(0).getSourceCity()).isEqualTo("Colombo");
+        verify(tripRepository).saveAll(any());
+    }
+
+    @Test
+    @DisplayName("createTrip - When isRecurring is true, delegates to recurring trip scheduling")
+    void createTrip_WithRecurringFlag_DelegatesToRecurring() {
+        LocalDateTime dep = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
+        LocalDateTime arr = LocalDateTime.now().plusDays(1).withHour(11).withMinute(30);
+
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(dep)
+                .arrivalTime(arr)
+                .baseFare(new BigDecimal("1250.00"))
+                .isRecurring(true)
+                .recurrenceType("DAILY")
+                .repeatDays(3)
+                .build();
+
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(testRoute));
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.saveAll(any())).thenAnswer(invocation -> {
+            List<Trip> trips = invocation.getArgument(0);
+            for (long i = 0; i < trips.size(); i++) {
+                trips.get((int) i).setTripId(200L + i);
+            }
+            return trips;
+        });
+
+        TripSearchResponse response = searchService.createTrip(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getTripId()).isEqualTo(200L);
+        verify(tripRepository).saveAll(any());
+    }
 }

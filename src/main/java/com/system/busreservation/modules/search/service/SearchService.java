@@ -66,6 +66,11 @@ public interface SearchService {
     TripSearchResponse createTrip(TripCreateRequest request);
 
     /**
+     * Schedule a batch of recurring trips across multiple days.
+     */
+    List<TripSearchResponse> createRecurringTrips(TripCreateRequest request);
+
+    /**
      * Update/reschedule an existing trip.
      */
     TripSearchResponse updateTrip(Long tripId, TripUpdateRequest request);

@@ -22,9 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -232,6 +235,11 @@ public class SearchServiceImpl implements SearchService {
     public TripSearchResponse createTrip(TripCreateRequest request) {
         log.info("Scheduling new trip for route ID: {}, bus ID: {}", request.getRouteId(), request.getBusId());
 
+        if (Boolean.TRUE.equals(request.getIsRecurring())) {
+            List<TripSearchResponse> recurring = createRecurringTrips(request);
+            return recurring.get(0);
+        }
+
         if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
             throw new IllegalArgumentException("Arrival time must be after departure time.");
         }
@@ -254,6 +262,69 @@ public class SearchServiceImpl implements SearchService {
         Trip savedTrip = tripRepository.save(trip);
         log.info("Trip scheduled successfully with ID: {}", savedTrip.getTripId());
         return mapToTripSearchResponse(savedTrip, 0);
+    }
+
+    @Override
+    @Transactional
+    public List<TripSearchResponse> createRecurringTrips(TripCreateRequest request) {
+        log.info("Scheduling recurring trips for route ID: {}, bus ID: {}, type: {}, days: {}",
+                request.getRouteId(), request.getBusId(), request.getRecurrenceType(), request.getRepeatDays());
+
+        if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
+            throw new IllegalArgumentException("Arrival time must be after departure time.");
+        }
+
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", request.getRouteId()));
+
+        Bus bus = busRepository.findById(request.getBusId())
+                .orElseThrow(() -> new ResourceNotFoundException("Bus", "busId", request.getBusId()));
+
+        TripStatus status = request.getTripStatus() != null ? request.getTripStatus() : TripStatus.SCHEDULED;
+        int repeatDays = (request.getRepeatDays() != null && request.getRepeatDays() > 0)
+                ? Math.min(request.getRepeatDays(), 30)
+                : 7;
+        String recurrenceType = (request.getRecurrenceType() != null && !request.getRecurrenceType().isBlank())
+                ? request.getRecurrenceType().toUpperCase()
+                : "DAILY";
+
+        Duration tripDuration = Duration.between(request.getDepartureTime(), request.getArrivalTime());
+        List<Trip> tripsToSave = new ArrayList<>();
+
+        for (int i = 0; i < repeatDays; i++) {
+            LocalDateTime depTime = request.getDepartureTime().plusDays(i);
+            DayOfWeek dow = depTime.getDayOfWeek();
+
+            boolean shouldInclude = switch (recurrenceType) {
+                case "WEEKDAYS" -> (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY);
+                case "WEEKENDS" -> (dow == DayOfWeek.SATURDAY || dow == DayOfWeek.SUNDAY);
+                default -> true;
+            };
+
+            if (shouldInclude) {
+                LocalDateTime arrTime = depTime.plus(tripDuration);
+                tripsToSave.add(Trip.builder()
+                        .route(route)
+                        .bus(bus)
+                        .departureTime(depTime)
+                        .arrivalTime(arrTime)
+                        .baseFare(request.getBaseFare())
+                        .tripStatus(status)
+                        .build());
+            }
+        }
+
+        if (tripsToSave.isEmpty()) {
+            throw new IllegalArgumentException("No matching dates found for recurrence pattern: " + recurrenceType);
+        }
+
+        List<Trip> savedTrips = tripRepository.saveAll(tripsToSave);
+        log.info("Successfully scheduled {} recurring trips for route ID: {}, bus ID: {}",
+                savedTrips.size(), route.getRouteId(), bus.getBusId());
+
+        return savedTrips.stream()
+                .map(t -> mapToTripSearchResponse(t, 0))
+                .collect(Collectors.toList());
     }
 
     @Override

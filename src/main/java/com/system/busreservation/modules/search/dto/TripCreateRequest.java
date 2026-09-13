@@ -44,4 +44,11 @@ public class TripCreateRequest {
 
     @Builder.Default
     private TripStatus tripStatus = TripStatus.SCHEDULED;
+
+    @Builder.Default
+    private Boolean isRecurring = false;
+
+    private String recurrenceType; // DAILY, WEEKDAYS, WEEKENDS
+
+    private Integer repeatDays; // e.g. 7, 14, 30
 }
