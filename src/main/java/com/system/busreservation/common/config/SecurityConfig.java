@@ -34,6 +34,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/api/v1/search/**").permitAll()
+                .requestMatchers("/api/v1/feedback/**", "/api/feedback/**").permitAll()
+                .requestMatchers("/api/v1/luggage/**", "/api/luggage/**").permitAll()
+                .requestMatchers("/api/v1/notifications/**", "/api/notifications/**").permitAll()
+                .requestMatchers("/*.html", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().permitAll()
             );
 

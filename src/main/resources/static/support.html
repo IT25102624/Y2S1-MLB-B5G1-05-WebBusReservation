@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification, Feedback & Luggage Management</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body class="home-page">
+    <nav class="top-nav">
+        <a class="brand" href="index.html">LankaRide Support Module</a>
+        <div class="nav-links">
+            <a href="search.html">Search Buses</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="login.html" id="loginLink">Login</a>
+            <button id="logoutBtn" class="hidden">Logout</button>
+        </div>
+    </nav>
+
+    <main class="container home-container">
+        <section class="home-hero">
+            <div class="hero-copy">
+                <h1>Track luggage, read alerts, and collect journey feedback in one clean space.</h1>
+                <div class="hero-actions">
+                    <a class="button" href="search.html">Search Buses</a>
+                    <a class="button secondary" href="luggage.html">Generate Luggage Tag</a>
+                    <a class="button secondary" href="feedback.html">Submit Feedback</a>
+                </div>
+                <div class="hero-metrics" aria-label="Module highlights">
+                    <div><strong>01</strong><span>Alert center</span></div>
+                    <div><strong>02</strong><span>Luggage tags</span></div>
+                    <div><strong>03</strong><span>Ratings</span></div>
+                </div>
+            </div>
+
+            <div class="hero-visual" aria-label="Live module preview">
+                <div class="phone-card">
+                    <div class="phone-top">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="status-card pulse">
+                        <small>Notification</small>
+                        <strong>Booking #1042 confirmed</strong>
+                        <p>Colombo to Kandy • 08:30</p>
+                    </div>
+                    <div class="ticket-strip">
+                        <span class="tag">LUGGAGE</span>
+                        <strong class="mono">LUG-20260914-000128</strong>
+                    </div>
+                    <div class="rating-preview">
+                        <span>Passenger rating</span>
+                        <strong>★★★★★</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="module-section">
+            <div class="section-heading">
+                <h2>Only the assigned feature set, ready for demo.</h2>
+            </div>
+            <div class="feature-grid">
+                <article class="feature-card">
+                    <span class="feature-icon">N</span>
+                    <h3>Notifications</h3>
+                    <p>Booking and luggage updates appear from the bell icon in the navbar with unread counts.</p>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-icon">L</span>
+                    <h3>Luggage Management</h3>
+                    <p>Create, edit, delete, and track luggage records using a unique luggage tag linked to an e-ticket.</p>
+                    <a href="luggage.html">Manage luggage</a>
+                </article>
+                <article class="feature-card">
+                    <span class="feature-icon">F</span>
+                    <h3>Feedback</h3>
+                    <p>Passengers can submit ratings and written feedback, then edit or delete their entries.</p>
+                    <a href="feedback.html">Submit feedback</a>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>setupNav('index.html');</script>
+</body>
+</html>

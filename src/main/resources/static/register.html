@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html">LankaRide Support Module</a>
+        <div class="nav-links">
+            <a href="login.html">Login</a>
+        </div>
+    </nav>
+    <main class="container">
+        <section class="panel">
+            <h1>Register Passenger</h1>
+            <p id="message" class="message"></p>
+            <form id="registerForm" class="form-grid">
+                <label>First name <input id="firstName" required></label>
+                <label>Last name <input id="lastName" required></label>
+                <label>Phone <input id="phone" required></label>
+                <label>NIC <input id="nic" required></label>
+                <label>Email <input id="email" type="email" required></label>
+                <label>Password <input id="password" type="password" required></label>
+                <button class="button" type="submit">Create Account</button>
+            </form>
+        </section>
+    </main>
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = event.target;
+            const user = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                nic: document.getElementById('nic').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value,
+                role: 'Passenger'
+            };
+            const response = await fetch('/api/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(user)
+            });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage('Account created. You can log in now.');
+            form.reset();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Tickets</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html">LankaRide Support Module</a>
+        <div class="nav-links">
+            <a href="bookings.html">E-Tickets</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="login.html" id="loginLink">Login</a>
+            <button id="logoutBtn" class="hidden">Logout</button>
+        </div>
+    </nav>
+    <main class="container">
+        <p id="message" class="message"></p>
+        <div class="grid">
+            <section class="panel">
+                <h1>Create E-Ticket</h1>
+                <form id="bookingForm" class="form-grid">
+                    <label>Passenger name <input id="passengerName" required></label>
+                    <label>Email <input id="email" type="email" required></label>
+                    <label>Phone <input id="phone" required></label>
+                    <label>Route <input id="route" placeholder="Colombo to Kandy" required></label>
+                    <label>Journey date <input id="journeyDate" type="date" required></label>
+                    <label>Journey time <input id="journeyTime" type="time" required></label>
+                    <label>Ticket count <input id="ticketCount" type="number" min="1" value="1" required></label>
+                    <button class="button" type="submit">Create Booking</button>
+                </form>
+            </section>
+            <section class="panel">
+                <h2>My E-Tickets</h2>
+                <div id="bookingList" class="form-grid"></div>
+            </section>
+        </div>
+    </main>
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        setupNav('bookings.html');
+
+        if (user) {
+            passengerName.value = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            email.value = user.email || '';
+            phone.value = user.phone || '';
+            loadBookings();
+        }
+
+        bookingForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const response = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    passengerName: passengerName.value.trim(),
+                    email: email.value.trim(),
+                    phone: phone.value.trim(),
+                    route: route.value.trim(),
+                    journeyDate: journeyDate.value,
+                    journeyTime: journeyTime.value,
+                    ticketCount: Number(ticketCount.value),
+                    nic: user.nic
+                })
+            });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage('E-ticket created and notification sent.');
+            bookingForm.reset();
+            passengerName.value = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            email.value = user.email || '';
+            phone.value = user.phone || '';
+            loadBookings();
+        });
+
+        async function loadBookings() {
+            const response = await fetch(`/api/bookings/user/${encodeURIComponent(user.nic)}`);
+            const bookings = await response.json();
+            bookingList.innerHTML = bookings.length ? bookings.map(booking => `
+                <article class="item">
+                    <span class="tag">${booking.status}</span>
+                    <h3>E-ticket #${booking.bookingId}</h3>
+                    <p>${booking.route}</p>
+                    <p>${booking.journeyDate} at ${booking.journeyTime}</p>
+                    <p>${booking.ticketCount} ticket(s)</p>
+                </article>
+            `).join('') : '<p>No e-tickets yet.</p>';
+        }
+    </script>
+</body>
+</html>

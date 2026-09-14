@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html">LankaRide Support Module</a>
+        <div class="nav-links">
+            <a href="register.html">Register</a>
+        </div>
+    </nav>
+    <main class="container">
+        <section class="panel">
+            <h1>Login</h1>
+            <p id="message" class="message"></p>
+            <form id="loginForm" class="form-grid">
+                <label>Email <input id="email" type="email" required></label>
+                <label>Password <input id="password" type="password" required></label>
+                <button class="button" type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value
+                })
+            });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            setCurrentUser(await response.json());
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Management</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html">LankaRide Support Module</a>
+        <div class="nav-links">
+            <a href="search.html">Search Buses</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="login.html" id="loginLink">Login</a>
+            <button id="logoutBtn" class="hidden">Logout</button>
+        </div>
+    </nav>
+    <main class="container">
+        <p id="message" class="message"></p>
+        <div class="grid">
+            <section class="panel">
+                <h1>Submit Feedback</h1>
+                <form id="feedbackForm" class="form-grid">
+                    <label>Name <input id="name" required></label>
+                    <label>Type
+                        <select id="type" required>
+                            <option value="feedback">Feedback</option>
+                            <option value="complain">Complaint</option>
+                        </select>
+                    </label>
+                    <label>Rating
+                        <select id="rating">
+                            <option value="">No rating</option>
+                            <option value="5">5 - Excellent</option>
+                            <option value="4">4 - Good</option>
+                            <option value="3">3 - Average</option>
+                            <option value="2">2 - Poor</option>
+                            <option value="1">1 - Very Poor</option>
+                        </select>
+                    </label>
+                    <label>Written feedback <textarea id="description" required></textarea></label>
+                    <div class="item-actions">
+                        <button id="submitFeedbackBtn" class="button" type="submit">Submit Feedback</button>
+                        <button id="cancelEditBtn" class="button secondary hidden" type="button">Cancel Edit</button>
+                    </div>
+                </form>
+            </section>
+            <section class="panel">
+                <h2>My Feedback</h2>
+                <div id="feedbackList" class="form-grid"></div>
+            </section>
+        </div>
+    </main>
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        let editingFeedbackId = null;
+        setupNav('feedback.html');
+
+        if (user) {
+            document.getElementById('name').value = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            loadFeedback();
+        }
+
+        document.getElementById('feedbackForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const uid = user.id || user.userId || 2;
+            const payload = {
+                userId: uid,
+                name: document.getElementById('name').value.trim(),
+                type: document.getElementById('type').value,
+                rating: document.getElementById('rating').value ? Number(document.getElementById('rating').value) : null,
+                description: document.getElementById('description').value.trim()
+            };
+            const url = editingFeedbackId ? `/api/v1/feedback/${editingFeedbackId}` : '/api/v1/feedback';
+            const response = await fetch(url, {
+                method: editingFeedbackId ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage(editingFeedbackId ? 'Feedback updated successfully.' : 'Feedback submitted successfully.');
+            resetFeedbackForm();
+            loadFeedback();
+        });
+
+        document.getElementById('cancelEditBtn').addEventListener('click', resetFeedbackForm);
+
+        function resetFeedbackForm() {
+            editingFeedbackId = null;
+            document.getElementById('description').value = '';
+            document.getElementById('rating').value = '';
+            document.getElementById('type').value = 'feedback';
+            document.getElementById('name').value = user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            document.getElementById('submitFeedbackBtn').textContent = 'Submit Feedback';
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        async function loadFeedback() {
+            const uid = user.id || user.userId || 2;
+            const response = await fetch(`/api/v1/feedback/user/${uid}`);
+            const feedback = await response.json();
+            feedbackList.innerHTML = feedback.length ? feedback.map(item => `
+                <article class="item" data-feedback='${JSON.stringify(item).replaceAll("'", "&#39;")}'>
+                    <span class="tag">${item.type}</span>
+                    <h3>${item.rating ? `${item.rating}/5` : 'No rating'}</h3>
+                    <p>${item.description}</p>
+                    ${item.reply ? `<p><strong>Reply:</strong> ${item.reply}</p>` : ''}
+                    <small>${item.complainDate || ''} ${item.complainTime || ''}</small>
+                    <div class="item-actions">
+                        <button class="button secondary" type="button" onclick="editFeedback(this)">Edit</button>
+                        <button class="button danger" type="button" onclick="deleteFeedback(${item.feedbackId})">Delete</button>
+                    </div>
+                </article>
+            `).join('') : '<p>No feedback submitted yet.</p>';
+        }
+
+        function editFeedback(button) {
+            const item = JSON.parse(button.closest('.item').dataset.feedback);
+            editingFeedbackId = item.feedbackId;
+            document.getElementById('name').value = item.name || '';
+            document.getElementById('type').value = item.type || 'feedback';
+            document.getElementById('rating').value = item.rating || '';
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('submitFeedbackBtn').textContent = 'Save Feedback';
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteFeedback(id) {
+            if (!confirm('Delete this feedback?')) return;
+            const uid = user.id || user.userId || 2;
+            const response = await fetch(`/api/v1/feedback/${id}?userId=${uid}`, { method: 'DELETE' });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage('Feedback deleted successfully.');
+            loadFeedback();
+        }
+    </script>
+</body>
+</html>

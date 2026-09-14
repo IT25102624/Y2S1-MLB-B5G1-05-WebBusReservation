@@ -9,6 +9,9 @@ GO
 SET NOCOUNT ON;
 
 -- Clear previous test data in reverse foreign key order
+DELETE FROM dbo.notifications;
+DELETE FROM dbo.luggage;
+DELETE FROM dbo.feedbacks;
 DELETE FROM dbo.booking_seats;
 DELETE FROM dbo.bookings;
 DELETE FROM dbo.trips;
@@ -208,6 +211,38 @@ BEGIN
 
     CLOSE trip_cursor;
     DEALLOCATE trip_cursor;
+END;
+GO
+
+-- 7. SEED MODULE 5: FEEDBACK, LUGGAGE & NOTIFICATIONS
+DECLARE @PassengerId BIGINT;
+SELECT TOP 1 @PassengerId = user_id FROM dbo.users WHERE email = N'dohan@busreservation.lk';
+
+IF @PassengerId IS NOT NULL
+BEGIN
+    -- Seed Feedback
+    INSERT INTO dbo.feedbacks (user_id, name, type, description, rating, complain_date, complain_time, reply)
+    VALUES
+        (@PassengerId, N'Dohan Imanjith', N'feedback', N'Very smooth and comfortable ride from Colombo to Kandy. The AC bus was clean and punctual.', 5, CAST(GETDATE() AS DATE), CAST(GETDATE() AS TIME), N'Thank you for your valuable review! We look forward to serving you again.'),
+        (@PassengerId, N'Dohan Imanjith', N'complain', N'Slight delay at Kadawatha interchange due to ticket scanner issue.', 3, CAST(GETDATE() AS DATE), CAST(GETDATE() AS TIME), NULL);
+
+    -- Seed Luggage linked to the first booking
+    DECLARE @SampleBookingId BIGINT;
+    SELECT TOP 1 @SampleBookingId = booking_id FROM dbo.bookings WHERE user_id = @PassengerId;
+
+    IF @SampleBookingId IS NOT NULL
+    BEGIN
+        INSERT INTO dbo.luggage (booking_id, user_id, tag_number, bag_quantity, description, status, created_at)
+        VALUES
+            (@SampleBookingId, @PassengerId, N'LUG-20260914-104821', 2, N'Blue hard-shell suitcase and black laptop backpack', N'CHECKED_IN', SYSUTCDATETIME());
+
+        -- Seed Notifications
+        INSERT INTO dbo.notifications (user_id, booking_id, message, type, created_at, is_read)
+        VALUES
+            (@PassengerId, @SampleBookingId, N'Your booking #' + CAST(@SampleBookingId AS NVARCHAR(20)) + N' has been confirmed!', N'BOOKING_CONFIRMED', SYSUTCDATETIME(), 1),
+            (@PassengerId, @SampleBookingId, N'Luggage tag LUG-20260914-104821 successfully registered for 2 bags.', N'LUGGAGE_TAGGED', SYSUTCDATETIME(), 0),
+            (@PassengerId, NULL, N'Thank you for traveling with us! Please take a moment to submit your journey feedback.', N'FEEDBACK_REMINDER', SYSUTCDATETIME(), 0);
+    END;
 END;
 GO
 
