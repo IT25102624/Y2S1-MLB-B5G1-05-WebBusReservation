@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Business Analytics Dashboard</title>
+
+    <link rel="stylesheet"
+          href="AdminAnalyticsDashboard.css">
+
+</head>
+
+
+<body>
+
+<div class="dash">
+
+
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+
+    <div class="dash-header">
+
+        <div>
+
+            <h1>
+                Business Analytics & Executive Dashboard
+            </h1>
+
+            <p>
+                Revenue, bookings, occupancy and route performance.
+            </p>
+
+        </div>
+
+
+        <button
+                type="button"
+                class="btn primary"
+                onclick="loadDashboard()">
+
+            Refresh
+
+        </button>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         FILTERS
+         ========================================================= -->
+
+    <form
+            class="filter-row"
+            onsubmit="applyFilters(event)">
+
+
+        <div class="filter-field">
+
+            <label for="dateFrom">
+                From
+            </label>
+
+            <input
+                    type="date"
+                    id="dateFrom">
+
+        </div>
+
+
+        <div class="filter-field">
+
+            <label for="dateTo">
+                To
+            </label>
+
+            <input
+                    type="date"
+                    id="dateTo">
+
+        </div>
+
+
+        <div class="filter-field">
+
+            <label for="routeId">
+                Route ID
+            </label>
+
+            <input
+                    type="number"
+                    id="routeId"
+                    placeholder="Any">
+
+        </div>
+
+
+        <div class="filter-field">
+
+            <label for="busId">
+                Bus ID
+            </label>
+
+            <input
+                    type="number"
+                    id="busId"
+                    placeholder="Any">
+
+        </div>
+
+
+        <button
+                type="submit"
+                class="btn primary">
+
+            Apply Filters
+
+        </button>
+
+
+        <button
+                type="button"
+                class="btn"
+                onclick="exportReport('csv')">
+
+            Export CSV
+
+        </button>
+
+
+        <button
+                type="button"
+                class="btn"
+                onclick="exportReport('pdf')">
+
+            Export PDF
+
+        </button>
+
+
+        <button
+                type="button"
+                class="btn"
+                onclick="sendSummary()">
+
+            Send Summary
+
+        </button>
+
+
+    </form>
+
+
+
+    <!-- =========================================================
+         ERROR MESSAGE
+         ========================================================= -->
+
+    <div
+            id="errorMessage"
+            class="error-text">
+    </div>
+
+
+
+    <!-- =========================================================
+         LOADING
+         ========================================================= -->
+
+    <div
+            id="loading"
+            class="empty-note">
+
+        Loading dashboard...
+
+    </div>
+
+
+
+    <!-- =========================================================
+         DASHBOARD CONTENT
+         ========================================================= -->
+
+    <div
+            id="dashboardContent"
+            style="display:none;">
+
+
+
+        <!-- =====================================================
+             KPI CARDS
+             ===================================================== -->
+
+        <div class="metric-grid">
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Total Revenue
+                </div>
+
+                <div
+                        class="value"
+                        id="totalRevenue">
+
+                    LKR 0.00
+
+                </div>
+
+            </div>
+
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Total Bookings
+                </div>
+
+                <div
+                        class="value"
+                        id="totalBookings">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Seats Sold
+                </div>
+
+                <div
+                        class="value"
+                        id="totalSeatsSold">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Occupancy Rate
+                </div>
+
+                <div
+                        class="value"
+                        id="occupancyRate">
+
+                    0%
+
+                </div>
+
+            </div>
+
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Active Buses
+                </div>
+
+                <div
+                        class="value"
+                        id="activeBuses">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+
+            <div class="metric-card">
+
+                <div class="label">
+                    Total Routes
+                </div>
+
+                <div
+                        class="value"
+                        id="totalRoutes">
+
+                    0
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =====================================================
+             REVENUE TREND
+             ===================================================== -->
+
+        <div class="panel">
+
+            <h3>
+                Revenue Trend
+            </h3>
+
+
+            <div
+                    id="revenueChart"
+                    class="chart-container">
+
+                <div class="empty-note">
+
+                    No revenue data available.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             ROUTE PERFORMANCE
+             ===================================================== -->
+
+        <div class="panel">
+
+            <h3>
+                Route Performance
+            </h3>
+
+
+            <div class="table-container">
+
+                <table class="data-table">
+
+
+                    <thead>
+
+                    <tr>
+
+                        <th>
+                            Route
+                        </th>
+
+                        <th>
+                            Trips
+                        </th>
+
+                        <th>
+                            Bookings
+                        </th>
+
+                        <th>
+                            Revenue
+                        </th>
+
+                        <th>
+                            Occupancy
+                        </th>
+
+                        <th>
+                            Actions
+                        </th>
+
+                    </tr>
+
+                    </thead>
+
+
+                    <tbody id="routeTableBody">
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =============================================================
+     API JAVASCRIPT
+     ============================================================= -->
+
+<script src="adminApi.js"></script>
+
+
+
+<script>
+
+
+    /* ============================================================
+       GET FILTER VALUES
+       ============================================================ */
+
+    function getFilters() {
+
+        return {
+
+            dateFrom:
+                document.getElementById("dateFrom").value,
+
+            dateTo:
+                document.getElementById("dateTo").value,
+
+            routeId:
+                document.getElementById("routeId").value,
+
+            busId:
+                document.getElementById("busId").value
+
+        };
+
+    }
+
+
+
+    /* ============================================================
+       FORMAT CURRENCY
+       ============================================================ */
+
+    function formatCurrency(value) {
+
+        const number =
+            Number(value ?? 0);
+
+        return number.toLocaleString(
+            "en-LK",
+            {
+                style: "currency",
+                currency: "LKR"
+            }
+        );
+
+    }
+
+
+
+    /* ============================================================
+       SHOW ERROR
+       ============================================================ */
+
+    function showError(message) {
+
+        document.getElementById(
+            "errorMessage"
+        ).textContent = message;
+
+    }
+
+
+
+    /* ============================================================
+       CLEAR ERROR
+       ============================================================ */
+
+    function clearError() {
+
+        document.getElementById(
+            "errorMessage"
+        ).textContent = "";
+
+    }
+
+
+
+    /* ============================================================
+       LOAD DASHBOARD
+       ============================================================ */
+
+    async function loadDashboard() {
+
+        const loading =
+            document.getElementById("loading");
+
+        const content =
+            document.getElementById("dashboardContent");
+
+
+        loading.style.display = "block";
+
+        content.style.display = "none";
+
+        clearError();
+
+
+        try {
+
+            const filters =
+                getFilters();
+
+
+            const [
+                summary,
+                revenue,
+                routes
+            ] = await Promise.all([
+
+                adminApi.getDashboardSummary(),
+
+                adminApi.getRevenueSummary(filters),
+
+                adminApi.getRoutePerformance(filters)
+
+            ]);
+
+
+            console.log(
+                "Dashboard Summary:",
+                summary
+            );
+
+
+            console.log(
+                "Revenue Summary:",
+                revenue
+            );
+
+
+            console.log(
+                "Route Performance:",
+                routes
+            );
+
+
+            /* ====================================================
+               KPI VALUES
+               ==================================================== */
+
+            document.getElementById(
+                "totalRevenue"
+            ).textContent =
+                formatCurrency(
+                    revenue?.totalRevenue
+                );
+
+
+            document.getElementById(
+                "totalBookings"
+            ).textContent =
+                Number(
+                    revenue?.totalBookings ?? 0
+                );
+
+
+            document.getElementById(
+                "totalSeatsSold"
+            ).textContent =
+                Number(
+                    revenue?.totalSeatsSold ?? 0
+                );
+
+
+            document.getElementById(
+                "occupancyRate"
+            ).textContent =
+                Number(
+                    revenue?.occupancyRatePercent ?? 0
+                ) + "%";
+
+
+            document.getElementById(
+                "activeBuses"
+            ).textContent =
+                Number(
+                    summary?.totalActiveBuses ?? 0
+                );
+
+
+            document.getElementById(
+                "totalRoutes"
+            ).textContent =
+                Number(
+                    summary?.totalRoutes ?? 0
+                );
+
+
+            /* ====================================================
+               REVENUE CHART
+               ==================================================== */
+
+            drawRevenueChart(
+                revenue?.dailyTrend ?? []
+            );
+
+
+            /* ====================================================
+               ROUTE TABLE
+               ==================================================== */
+
+            drawRouteTable(
+                routes ?? []
+            );
+
+
+            loading.style.display = "none";
+
+            content.style.display = "block";
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard loading error:",
+                error
+            );
+
+
+            loading.style.display = "none";
+
+
+            showError(
+                error.message ||
+                "Failed to load dashboard data."
+            );
+
+        }
+
+    }
+
+
+
+    /* ============================================================
+       REVENUE CHART
+       ============================================================ */
+
+    function drawRevenueChart(data) {
+
+        const chart =
+            document.getElementById(
+                "revenueChart"
+            );
+
+
+        if (
+            !Array.isArray(data) ||
+            data.length === 0
+        ) {
+
+            chart.innerHTML =
+                '<div class="empty-note">' +
+                'No revenue data available.' +
+                '</div>';
+
+            return;
+
+        }
+
+
+        let maxRevenue =
+            Math.max(
+                ...data.map(
+                    item =>
+                        Number(
+                            item?.revenue ?? 0
+                        )
+                )
+            );
+
+
+        if (maxRevenue === 0) {
+
+            maxRevenue = 1;
+
+        }
+
+
+        let html =
+            '<div class="simple-chart">';
+
+
+        data.forEach(item => {
+
+            const revenue =
+                Number(
+                    item?.revenue ?? 0
+                );
+
+
+            const percentage =
+                Math.max(
+                    5,
+                    (revenue / maxRevenue) * 100
+                );
+
+
+            html += `
+
+                <div class="chart-item">
+
+                    <div class="chart-date">
+                        ${item?.date ?? "-"}
+                    </div>
+
+                    <div class="chart-bar-wrapper">
+
+                        <div
+                            class="chart-bar"
+                            style="width:${percentage}%">
+                        </div>
+
+                    </div>
+
+                    <div class="chart-value">
+                        ${formatCurrency(revenue)}
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+
+        html += "</div>";
+
+
+        chart.innerHTML = html;
+
+    }
+
+
+
+    /* ============================================================
+       ROUTE PERFORMANCE TABLE
+       ============================================================ */
+
+    function drawRouteTable(routes) {
+
+        const tableBody =
+            document.getElementById(
+                "routeTableBody"
+            );
+
+
+        tableBody.innerHTML = "";
+
+
+        /* ========================================================
+           NO DATA
+           ======================================================== */
+
+        if (
+            !Array.isArray(routes) ||
+            routes.length === 0
+        ) {
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="empty-note">
+
+                        No route data available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+
+        /* ========================================================
+           CREATE EACH ROW
+           ======================================================== */
+
+        routes.forEach(route => {
+
+
+            const row =
+                document.createElement("tr");
+
+
+            /* ====================================================
+               ROUTE ID
+               ==================================================== */
+
+            const routeId =
+                route?.routeId;
+
+
+            /* ====================================================
+               SOURCE CITY
+               ==================================================== */
+
+            const sourceCity =
+                route?.sourceCity ?? "-";
+
+
+            /* ====================================================
+               DESTINATION CITY
+               ==================================================== */
+
+            const destinationCity =
+                route?.destinationCity ?? "-";
+
+
+            /* ====================================================
+               TOTAL TRIPS
+               ==================================================== */
+
+            const totalTrips =
+                Number(
+                    route?.totalTrips ?? 0
+                );
+
+
+            /* ====================================================
+               TOTAL BOOKINGS
+               ==================================================== */
+
+            const totalBookings =
+                Number(
+                    route?.totalBookings ?? 0
+                );
+
+
+            /* ====================================================
+               TOTAL REVENUE
+               ==================================================== */
+
+            const totalRevenue =
+                Number(
+                    route?.totalRevenue ?? 0
+                );
+
+
+            /* ====================================================
+               OCCUPANCY
+               ==================================================== */
+
+            const occupancy =
+                Number(
+                    route?.averageOccupancyPercent ?? 0
+                );
+
+
+
+            /* ====================================================
+               ROUTE CELL
+               ==================================================== */
+
+            const routeCell =
+                document.createElement("td");
+
+            routeCell.textContent =
+                `${sourceCity} → ${destinationCity}`;
+
+
+
+            /* ====================================================
+               TRIPS CELL
+               ==================================================== */
+
+            const tripsCell =
+                document.createElement("td");
+
+            tripsCell.textContent =
+                totalTrips;
+
+
+
+            /* ====================================================
+               BOOKINGS CELL
+               ==================================================== */
+
+            const bookingsCell =
+                document.createElement("td");
+
+            bookingsCell.textContent =
+                totalBookings;
+
+
+
+            /* ====================================================
+               REVENUE CELL
+               ==================================================== */
+
+            const revenueCell =
+                document.createElement("td");
+
+            revenueCell.textContent =
+                formatCurrency(
+                    totalRevenue
+                );
+
+
+
+            /* ====================================================
+               OCCUPANCY CELL
+               ==================================================== */
+
+            const occupancyCell =
+                document.createElement("td");
+
+            occupancyCell.textContent =
+                `${occupancy}%`;
+
+
+
+            /* ====================================================
+               ACTIONS CELL
+               ==================================================== */
+
+            const actionsCell =
+                document.createElement("td");
+
+            actionsCell.className =
+                "action-buttons";
+
+
+
+            /* ====================================================
+               EDIT BUTTON
+               ==================================================== */
+
+            const editButton =
+                document.createElement("button");
+
+            editButton.type = "button";
+
+            editButton.className =
+                "btn edit-btn";
+
+            editButton.textContent =
+                "✏️ Edit";
+
+
+            editButton.addEventListener(
+                "click",
+                function () {
+
+                    editRoute(
+                        routeId,
+                        sourceCity,
+                        destinationCity
+                    );
+
+                }
+            );
+
+
+
+            /* ====================================================
+               DELETE BUTTON
+               ==================================================== */
+
+            const deleteButton =
+                document.createElement("button");
+
+            deleteButton.type = "button";
+
+            deleteButton.className =
+                "btn delete-btn";
+
+            deleteButton.textContent =
+                "🗑 Delete";
+
+
+            deleteButton.addEventListener(
+                "click",
+                function () {
+
+                    deleteRoute(
+                        routeId
+                    );
+
+                }
+            );
+
+
+
+            /* ====================================================
+               ADD BUTTONS
+               ==================================================== */
+
+            actionsCell.appendChild(
+                editButton
+            );
+
+
+            actionsCell.appendChild(
+                deleteButton
+            );
+
+
+
+            /* ====================================================
+               ADD CELLS TO ROW
+               ==================================================== */
+
+            row.appendChild(
+                routeCell
+            );
+
+
+            row.appendChild(
+                tripsCell
+            );
+
+
+            row.appendChild(
+                bookingsCell
+            );
+
+
+            row.appendChild(
+                revenueCell
+            );
+
+
+            row.appendChild(
+                occupancyCell
+            );
+
+
+            row.appendChild(
+                actionsCell
+            );
+
+
+
+            /* ====================================================
+               ADD ROW TO TABLE
+               ==================================================== */
+
+            tableBody.appendChild(
+                row
+            );
+
+        });
+
+    }
+
+
+
+    /* ============================================================
+       EDIT ROUTE
+       ============================================================ */
+
+    async function editRoute(
+        routeId,
+        currentSource,
+        currentDestination
+    ) {
+
+
+        if (!routeId) {
+
+            alert(
+                "Invalid route ID."
+            );
+
+            return;
+
+        }
+
+
+        /* ========================================================
+           NEW SOURCE
+           ======================================================== */
+
+        const newSource =
+            prompt(
+                "Enter source city:",
+                currentSource
+            );
+
+
+        if (newSource === null) {
+
+            return;
+
+        }
+
+
+        /* ========================================================
+           NEW DESTINATION
+           ======================================================== */
+
+        const newDestination =
+            prompt(
+                "Enter destination city:",
+                currentDestination
+            );
+
+
+        if (newDestination === null) {
+
+            return;
+
+        }
+
+
+        /* ========================================================
+           VALIDATION
+           ======================================================== */
+
+        const source =
+            newSource.trim();
+
+
+        const destination =
+            newDestination.trim();
+
+
+        if (
+            source === "" ||
+            destination === ""
+        ) {
+
+            alert(
+                "Source city and destination city are required."
+            );
+
+            return;
+
+        }
+
+
+        /* ========================================================
+           CHECK NO CHANGE
+           ======================================================== */
+
+        if (
+            source.toLowerCase() ===
+                currentSource.trim().toLowerCase()
+            &&
+            destination.toLowerCase() ===
+                currentDestination.trim().toLowerCase()
+        ) {
+
+            alert(
+                "No changes were made."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            clearError();
+
+
+            await adminApi.updateRoute(
+                routeId,
+                {
+                    sourceCity: source,
+                    destinationCity: destination
+                }
+            );
+
+
+            alert(
+                "Route updated successfully."
+            );
+
+
+            /* Reload dashboard */
+
+            await loadDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Update route error:",
+                error
+            );
+
+
+            alert(
+                "Failed to update route.\n\n" +
+                error.message
+            );
+
+        }
+
+    }
+
+
+
+    /* ============================================================
+       DELETE ROUTE
+       ============================================================ */
+
+    async function deleteRoute(routeId) {
+
+
+        if (!routeId) {
+
+            alert(
+                "Invalid route ID."
+            );
+
+            return;
+
+        }
+
+
+        /* ========================================================
+           CONFIRMATION
+           ======================================================== */
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this route?"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+
+        try {
+
+            clearError();
+
+
+            await adminApi.deleteRoute(
+                routeId
+            );
+
+
+            alert(
+                "Route deleted successfully."
+            );
+
+
+            /* Reload dashboard */
+
+            await loadDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Delete route error:",
+                error
+            );
+
+
+            alert(
+                "Failed to delete route.\n\n" +
+                error.message
+            );
+
+        }
+
+    }
+
+
+
+    /* ============================================================
+       APPLY FILTERS
+       ============================================================ */
+
+    function applyFilters(event) {
+
+        event.preventDefault();
+
+        loadDashboard();
+
+    }
+
+
+
+    /* ============================================================
+       EXPORT REPORT
+       ============================================================ */
+
+    async function exportReport(format) {
+
+        try {
+
+            clearError();
+
+
+            const filters =
+                getFilters();
+
+
+            let blob;
+
+
+            if (format === "csv") {
+
+                blob =
+                    await adminApi.exportCsv(
+                        filters
+                    );
+
+            } else {
+
+                blob =
+                    await adminApi.exportPdf(
+                        filters
+                    );
+
+            }
+
+
+            const url =
+                window.URL.createObjectURL(
+                    blob
+                );
+
+
+            const link =
+                document.createElement("a");
+
+
+            link.href = url;
+
+
+            link.download =
+                `revenue-report.${format}`;
+
+
+            document.body.appendChild(
+                link
+            );
+
+
+            link.click();
+
+
+            link.remove();
+
+
+            window.URL.revokeObjectURL(
+                url
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Export error:",
+                error
+            );
+
+
+            showError(
+                error.message ||
+                "Export failed."
+            );
+
+        }
+
+    }
+
+
+
+    /* ============================================================
+       SEND SUMMARY
+       ============================================================ */
+
+    async function sendSummary() {
+
+        try {
+
+            const recipientRole =
+                document.getElementById(
+                    "recipientRole"
+                )?.value || "ADMIN";
+
+
+            await adminApi.dispatchSummary(
+                recipientRole
+            );
+
+
+            alert(
+                "Operational summary sent successfully."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Send Summary error:",
+                error
+            );
+
+
+            alert(
+                "Failed to send operational summary.\n" +
+                error.message
+            );
+
+        }
+
+    }
+
+
+
+    /* ============================================================
+       LOAD WHEN PAGE OPENS
+       ============================================================ */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            loadDashboard();
+
+        }
+    );
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,363 @@
+/* src/modules/admin/AdminAnalyticsDashboard.css */
+
+.dash {
+  --ink: #1c2430;
+  --ink-soft: #5b6472;
+  --line: #dfe3e8;
+  --paper: #ffffff;
+  --canvas: #f6f7f9;
+  --accent: #2f5d50;
+  --accent-soft: #e4ede9;
+  --warn: #a6482f;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--canvas);
+  padding: 28px 32px 48px;
+  min-height: 100vh;
+}
+
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dash-header h1 {
+  font-size: 1.6rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.dash-header p {
+  color: var(--ink-soft);
+  margin: 4px 0 0;
+  font-size: 0.92rem;
+}
+
+.dash-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dash-tab {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.dash-tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-field label {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.filter-field input,
+.filter-field select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 0.88rem;
+  color: var(--ink);
+  min-width: 140px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn.warn {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.metric-card .label {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.metric-card .value {
+  font-size: 1.5rem;
+  font-weight: 650;
+}
+
+.fallback-note {
+  background: #fdf3ea;
+  border: 1px solid #e8c9a8;
+  color: #8a5a2c;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 18px;
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.panel h3 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+}
+
+table.data-table th {
+  text-align: left;
+  color: var(--ink-soft);
+  font-weight: 600;
+  font-size: 0.76rem;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+table.data-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+table.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.row-actions button {
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 0;
+}
+
+.row-actions button.delete {
+  color: var(--warn);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 36, 48, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal {
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 22px;
+  width: 380px;
+  max-width: 90vw;
+}
+
+.modal h3 {
+  margin-top: 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.form-field label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.form-field input,
+.form-field select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.error-text {
+  color: var(--warn);
+  font-size: 0.83rem;
+  margin: 8px 0 0;
+}
+
+.empty-note {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  padding: 12px 0;
+
+  .chart-container {
+      width: 100%;
+      overflow-x: auto;
+  }
+
+  .simple-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 10px 0;
+  }
+
+  .chart-item {
+      display: grid;
+      grid-template-columns: 100px 1fr 130px;
+      gap: 12px;
+      align-items: center;
+  }
+
+  .chart-date {
+      font-size: 0.82rem;
+      color: var(--ink-soft);
+  }
+
+  .chart-bar-wrapper {
+      background: #eef1f3;
+      border-radius: 6px;
+      height: 24px;
+      overflow: hidden;
+  }
+
+  .chart-bar {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 6px;
+      min-width: 4px;
+  }
+
+  .chart-value {
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 600;
+  }
+
+  .table-container {
+      width: 100%;
+      overflow-x: auto;
+  }
+
+  @media (max-width: 768px) {
+
+      .dash {
+          padding: 20px 16px 40px;
+      }
+
+      .chart-item {
+          grid-template-columns: 80px 1fr;
+      }
+
+      .chart-value {
+          grid-column: 2;
+          text-align: left;
+      }
+
+  }
+  /* ============================================================
+     ROUTE PERFORMANCE ACTIONS
+     ============================================================ */
+
+  .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+  }
+
+
+  .edit-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+  }
+
+
+  .delete-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+      cursor: pointer;
+  }
+
+
+  .edit-btn:hover,
+  .delete-btn:hover {
+      opacity: 0.85;
+  }
+}
