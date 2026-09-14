@@ -1,0 +1,555 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ─── Reset & Base ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy:       #1a2744;
+  --navy-light: #243358;
+  --green:      #1a9b60;
+  --green-dark: #158050;
+  --blue-accent:#2563eb;
+  --body-bg:    #f4f6fa;
+  --card-bg:    #ffffff;
+  --border:     #e2e6ef;
+  --text:       #1c2333;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --red:        #dc2626;
+  --amber:      #d97706;
+
+  --seat-available-bg:    #f1f5f9;
+  --seat-available-border:#cbd5e1;
+  --seat-selected-bg:     #1a9b60;
+  --seat-selected-border: #158050;
+  --seat-locked-bg:       #fef3c7;
+  --seat-locked-border:   #fbbf24;
+  --seat-booked-bg:       #e5e7eb;
+  --seat-booked-border:   #d1d5db;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--body-bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Navbar ───────────────────────────────────────────────────── */
+.navbar {
+  background: var(--navy);
+  padding: 0 40px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.brand-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.nav-link:hover { color: #ffffff; }
+
+/* ─── Layout Container ─────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* ─── Hero Banner ──────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: #fff;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+}
+
+.hero h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.hero p {
+  color: rgba(255,255,255,0.65);
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* ─── Trip Cards ───────────────────────────────────────────────── */
+.trips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.trip-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: default;
+}
+
+.trip-card:hover {
+  box-shadow: 0 4px 20px rgba(26,39,68,0.10);
+  transform: translateY(-2px);
+}
+
+.operator-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: var(--blue-accent);
+  border: 1px solid #bfdbfe;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.route-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.city-box { flex: 1; }
+.city-box.dest { text-align: right; }
+
+.city-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.city-time {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.route-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.trip-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.price-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
+
+.price-tag {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+/* ─── Buttons ──────────────────────────────────────────────────── */
+.btn-book {
+  background: var(--green);
+  color: #ffffff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-book:hover {
+  background: var(--green-dark);
+  transform: translateY(-1px);
+}
+
+.btn-confirm {
+  width: 100%;
+  padding: 14px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  margin-top: 20px;
+}
+
+.btn-confirm:hover:not(:disabled) { background: var(--green-dark); }
+.btn-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Booking Layout ───────────────────────────────────────────── */
+.booking-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .booking-layout { grid-template-columns: 1fr; }
+}
+
+/* ─── Card Panel ───────────────────────────────────────────────── */
+.glass-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.panel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.panel-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+/* ─── Lock Timer ───────────────────────────────────────────────── */
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: var(--amber);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.timer-badge.expired {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: var(--red);
+}
+
+/* ─── Seat Legend ──────────────────────────────────────────────── */
+.seat-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.legend-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-box.available { background: var(--seat-available-bg); border: 1.5px solid var(--seat-available-border); }
+.legend-box.selected  { background: var(--seat-selected-bg);  border: 1.5px solid var(--seat-selected-border); }
+.legend-box.locked    { background: var(--seat-locked-bg);    border: 1.5px solid var(--seat-locked-border); }
+.legend-box.booked    { background: var(--seat-booked-bg);    border: 1.5px solid var(--seat-booked-border); }
+
+/* ─── Bus Container ────────────────────────────────────────────── */
+.bus-container {
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 24px 20px 20px;
+  background: #f9fafb;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.bus-driver-cabin {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.steering-wheel {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+/* ─── Seat Grid ────────────────────────────────────────────────── */
+.seat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aisle-gap { width: 28px; flex-shrink: 0; }
+
+/* ─── Individual Seat ──────────────────────────────────────────── */
+.seat {
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  border: 1.5px solid var(--seat-available-border);
+  background: var(--seat-available-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.seat.sleeper {
+  width: 58px;
+  height: 80px;
+  border-radius: 10px;
+}
+
+.seat-num {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.seat-price-badge {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.seat.available:hover {
+  border-color: var(--blue-accent);
+  background: #eff6ff;
+  transform: scale(1.06);
+}
+
+.seat.selected {
+  background: var(--seat-selected-bg);
+  border-color: var(--seat-selected-border);
+}
+
+.seat.selected .seat-num        { color: #fff; }
+.seat.selected .seat-price-badge { color: rgba(255,255,255,0.75); }
+
+.seat.locked {
+  background: var(--seat-locked-bg);
+  border-color: var(--seat-locked-border);
+  cursor: not-allowed;
+}
+
+.seat.locked.locked-by-me {
+  background: var(--seat-selected-bg);
+  border-color: var(--seat-selected-border);
+  cursor: pointer;
+}
+
+.seat.locked.locked-by-me .seat-num        { color: #fff; }
+.seat.locked.locked-by-me .seat-price-badge { color: rgba(255,255,255,0.75); }
+
+.seat.booked {
+  background: var(--seat-booked-bg);
+  border-color: var(--seat-booked-border);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ─── Checkout / Sidebar ───────────────────────────────────────── */
+.section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  margin-top: 20px;
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-group label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+
+.form-control:focus { border-color: var(--blue-accent); }
+
+.passenger-card {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.passenger-card-header {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.two-col { display: flex; gap: 10px; }
+.two-col .form-group { flex: 1; }
+
+/* ─── Fare Summary ─────────────────────────────────────────────── */
+.fare-summary {
+  background: #f9fafb;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.summary-row.total {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 6px;
+}
+
+/* ─── Toast ────────────────────────────────────────────────────── */
+#toast-container { margin-bottom: 16px; }
+
+.toast-msg {
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.toast-msg.error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+}
+
+.toast-msg.info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+/* ─── Divider ──────────────────────────────────────────────────── */
+.divider {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}

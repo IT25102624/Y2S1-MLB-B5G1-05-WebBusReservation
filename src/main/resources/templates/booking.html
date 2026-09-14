@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Select Seats — ' + ${trip.source} + ' to ' + ${trip.destination}">Select Seats</title>
+    <meta name="description" content="Choose your preferred seats for this bus trip and complete your booking.">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="/" class="brand">
+            <div class="brand-icon">🚌</div>
+            Bus Booking
+        </a>
+        <nav class="nav-links">
+            <a href="/" class="nav-link">&larr; Back to Trips</a>
+        </nav>
+    </header>
+
+    <!-- Hidden trip data for JS -->
+    <div id="trip-data"
+         th:data-trip-id="${trip.id}"
+         th:data-trip-source="${trip.source}"
+         th:data-trip-destination="${trip.destination}"
+         th:data-departure="${#temporals.format(trip.departureTime, 'dd MMM yyyy, HH:mm')}"
+         th:data-arrival="${#temporals.format(trip.arrivalTime, 'dd MMM yyyy, HH:mm')}"
+         th:data-operator="${trip.bus.operatorName}"
+         th:data-bus-type="${trip.bus.busType}"
+         style="display:none;">
+    </div>
+
+    <main class="container">
+
+        <!-- Page Header -->
+        <div style="margin-bottom:24px;">
+            <h1 style="font-size:1.5rem; font-weight:800; color:var(--text);">
+                <span th:text="${trip.source}">Origin</span>
+                &rarr;
+                <span th:text="${trip.destination}">Destination</span>
+            </h1>
+            <div style="color:var(--text-muted); font-size:0.9rem; margin-top:4px;">
+                <span th:text="${trip.bus.operatorName}">Operator</span>
+                &bull;
+                <span th:text="${#temporals.format(trip.departureTime, 'dd MMM yyyy, HH:mm')}">Departure</span>
+                &bull;
+                <span th:text="${trip.bus.busType}">Bus Type</span>
+            </div>
+        </div>
+
+        <div class="booking-layout">
+
+            <!-- LEFT: Seat Map -->
+            <div>
+                <div class="glass-panel">
+                    <div class="panel-title">Seat Selection</div>
+                    <div class="panel-sub">Click an available seat to select it. You can select multiple seats.</div>
+
+                    <!-- Timer -->
+                    <div id="lock-timer-container" style="display:none;">
+                        <div id="lock-timer" class="timer-badge">
+                            <span>⏱</span>
+                            <span>Seats held for <strong id="timer-display">5:00</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="seat-legend">
+                        <div class="legend-item"><div class="legend-box available"></div> Available</div>
+                        <div class="legend-item"><div class="legend-box selected"></div> Selected</div>
+                        <div class="legend-item"><div class="legend-box locked"></div> Held by others</div>
+                        <div class="legend-item"><div class="legend-box booked"></div> Booked</div>
+                    </div>
+
+                    <!-- Bus Seat Grid -->
+                    <div class="bus-container">
+                        <div class="bus-driver-cabin">
+                            <div class="steering-wheel">⊙</div>
+                        </div>
+                        <div id="seat-grid-container" class="seat-grid">
+                            <div style="text-align:center; padding:40px; color:var(--text-muted);">Loading seats...</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- RIGHT: Checkout Panel -->
+            <div>
+                <div class="glass-panel" id="checkout-panel">
+
+                    <div class="panel-title">Booking Summary</div>
+                    <div class="panel-sub">No seats selected yet.</div>
+
+                    <div id="toast-container"></div>
+
+                    <!-- Passenger Details Section (shown after seat selection) -->
+                    <div id="passenger-details-section" style="display:none;">
+
+                        <div class="section-label">Contact Information</div>
+
+                        <div class="form-group">
+                            <label for="contact-name">Full Name</label>
+                            <input type="text" id="contact-name" class="form-control" placeholder="Full name" autocomplete="name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-phone">Mobile Number</label>
+                            <input type="tel" id="contact-phone" class="form-control" placeholder="07X XXX XXXX" autocomplete="tel">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-email">Email Address</label>
+                            <input type="email" id="contact-email" class="form-control" placeholder="your@email.com" autocomplete="email">
+                        </div>
+
+                        <hr class="divider">
+
+                        <div class="section-label">Passengers</div>
+                        <div id="passenger-cards-container"></div>
+
+                        <hr class="divider">
+
+                        <!-- Fare Summary -->
+                        <div class="section-label">Fare Summary</div>
+                        <div class="fare-summary" id="fare-summary-box">
+                            <div class="summary-row">
+                                <span>Base Fare</span>
+                                <span id="fare-base">Rs 0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax &amp; Charges</span>
+                                <span id="fare-tax">Rs 0.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span id="fare-total">Rs 0.00</span>
+                            </div>
+                        </div>
+
+                        <button id="confirm-booking-btn" class="btn-confirm" disabled>Confirm Booking</button>
+
+                    </div>
+
+                    <!-- Empty state message -->
+                    <div id="no-seats-msg" style="padding:24px 0; text-align:center; color:var(--text-muted);">
+                        <div style="font-size:2.2rem; margin-bottom:10px;">💺</div>
+                        <div>Select one or more seats<br>to proceed with booking.</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script th:src="@{/js/seating.js}"></script>
+</body>
+</html>
