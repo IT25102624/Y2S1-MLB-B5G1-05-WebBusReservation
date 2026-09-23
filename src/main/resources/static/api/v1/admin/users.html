@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Reservation System | User Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 60px; }
+
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .navbar-brand { display: flex; align-items: center; gap: 12px; }
+        .navbar-brand .logo { font-size: 1.6rem; }
+        .navbar-brand h1 { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
+        .navbar-brand span { font-size: 0.8rem; background: #ede9fe; color: #6d28d9; padding: 2px 10px; border-radius: 6px; font-weight: 600; }
+        .nav-links { display: flex; gap: 6px; align-items: center; }
+        .nav-link { padding: 8px 16px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
+        .nav-link:hover { background: #f1f5f9; color: var(--text-main); }
+        .nav-link.active { background: #ede9fe; color: #6d28d9; }
+
+        .container { max-width: 1120px; margin: 28px auto 0; padding: 0 20px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+        .stat-icon-total { background: #eff6ff; }
+        .stat-icon-passenger { background: #dcfce7; }
+        .stat-icon-conductor { background: #fef3c7; }
+        .stat-icon-driver { background: #e0f2fe; }
+        .stat-icon-admin { background: #ede9fe; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: #1e293b; line-height: 1; }
+        .stat-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
+
+        .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; border: 1px solid var(--border); margin-bottom: 24px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .section-title { font-size: 1.15rem; font-weight: 700; color: #1e293b; }
+
+        .toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .search-wrap { position: relative; }
+        .search-wrap input {
+            padding: 9px 14px 9px 38px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 260px;
+        }
+        .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; color: var(--text-muted); pointer-events: none; }
+        .filter-select, .form-group input, .form-group select {
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            background: #fff;
+        }
+        .filter-select:focus, .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+
+        .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .form-group input, .form-group select { width: 100%; }
+        .password-wrap { position: relative; }
+        .password-wrap input { padding-right: 44px; }
+        .password-toggle {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-muted);
+        }
+
+        .btn {
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-primary:disabled { background: #a78bfa; cursor: not-allowed; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+        .btn-icon-sm { padding: 6px 8px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: #fff; }
+        .btn-icon-edit:hover { background: #eff6ff; border-color: var(--primary); color: var(--primary); }
+        .btn-icon-delete:hover { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); background: #f8fafc; }
+        td { padding: 14px; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; vertical-align: middle; }
+        tr:hover td { background: #f8fafc; }
+
+        .user-cell { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
+
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+        .badge-admin { background: #ede9fe; color: #6d28d9; }
+        .badge-conductor { background: #fef3c7; color: #92400e; }
+        .badge-driver { background: #e0f2fe; color: #0369a1; }
+        .badge-passenger { background: #dcfce7; color: #15803d; }
+
+        .action-btns { display: flex; gap: 6px; }
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+        .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.45); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: #fff; border-radius: 14px; width: 100%; max-width: 460px; padding: 22px; box-shadow: var(--shadow); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-title { font-weight: 700; }
+        .modal-close { border: none; background: none; cursor: pointer; font-size: 1.1rem; color: var(--text-muted); }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+        .session-chip { font-size: 0.78rem; font-weight: 600; color: #334155; background: #f1f5f9; padding: 6px 10px; border-radius: 8px; }
+
+        #toastContainer { position: fixed; top: 72px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; max-width: 340px; animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .toast-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .toast-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .toast-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .search-wrap input { width: 100%; }
+            .navbar { flex-direction: column; padding: 12px 20px; }
+        }
+        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <span class="logo">🛡️</span>
+            <div>
+                <h1>User Management</h1>
+                <span>Admin Portal</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="/admin.html" class="nav-link">🏠 Main Portal</a>
+            <a href="/search.html" class="nav-link">🔍 Search Trips</a>
+            <span id="sessionChip" class="session-chip" style="display:none;"></span>
+            <button id="navLogoutBtn" class="btn btn-outline btn-sm" style="display:none;" onclick="handleLogout()">Sign out</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-total">👥</div>
+                <div>
+                    <div class="stat-value" id="statTotal">—</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-passenger">🧍</div>
+                <div>
+                    <div class="stat-value" id="statPassengers">—</div>
+                    <div class="stat-label">Passengers</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-conductor">🚌</div>
+                <div>
+                    <div class="stat-value" id="statConductors">—</div>
+                    <div class="stat-label">Conductors</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-driver">🚘</div>
+                <div>
+                    <div class="stat-value" id="statDrivers">—</div>
+                    <div class="stat-label">Drivers</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-admin">🛡️</div>
+                <div>
+                    <div class="stat-value" id="statAdmins">—</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <h2 class="section-title">👥 User Management</h2>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-outline" onclick="loadData()">🔄 Refresh</button>
+                    <button class="btn btn-primary" onclick="openAddModal()">➕ Add User</button>
+                </div>
+            </div>
+            <div class="toolbar" style="margin-bottom:20px;">
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search by name, email or phone..." oninput="filterUsers()" />
+                </div>
+                <select class="filter-select" id="roleFilter" onchange="filterUsers()">
+                    <option value="">All Roles</option>
+                    <option value="PASSENGER">🧍 Passenger</option>
+                    <option value="CONDUCTOR">🚌 Conductor</option>
+                    <option value="DRIVER">🚘 Driver</option>
+                    <option value="ADMIN">🛡️ Admin</option>
+                </select>
+                <span id="userCount" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;"></span>
+            </div>
+            <div class="table-wrap">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Phone</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="6"><div class="empty-state"><div class="icon">⏳</div><p>Loading users...</p></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">➕ Create New User</span>
+                <button class="modal-close" onclick="closeAddModal()">✕</button>
+            </div>
+            <form id="addUserForm" onsubmit="handleAddUser(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="addName" required minlength="2" maxlength="100" placeholder="Kasun Perera">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="addEmail" required maxlength="150" placeholder="user@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="addPhone" required pattern="^\+?[0-9]{9,15}$" placeholder="+94771234567">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="addRole">
+                        <option value="PASSENGER">🧍 Passenger</option>
+                        <option value="CONDUCTOR">🚌 Conductor</option>
+                        <option value="DRIVER">🚘 Driver</option>
+                        <option value="ADMIN">🛡️ Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="addPassword" required minlength="6" maxlength="50" placeholder="Min. 6 characters">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="addUserBtn">➕ Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">✏️ Edit User</span>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+            <form id="editUserForm" onsubmit="handleEditUser(event)">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editName" required minlength="2" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="editPhone" required pattern="^\+?[0-9]{9,15}$">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="editRole">
+                        <option value="PASSENGER">🧍 Passenger</option>
+                        <option value="CONDUCTOR">🚌 Conductor</option>
+                        <option value="DRIVER">🚘 Driver</option>
+                        <option value="ADMIN">🛡️ Admin</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="editUserBtn">💾 Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <span class="modal-title">🗑️ Confirm Deletion</span>
+                <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+            </div>
+            <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:8px;">Are you sure you want to delete this user?</p>
+            <p style="font-weight:700; font-size:0.95rem;" id="deleteUserLabel">—</p>
+            <p style="font-size:0.82rem; color:var(--danger); margin-top:10px;">⚠️ This action cannot be undone.</p>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">🗑️ Delete User</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/v1/admin';
+        let allUsers = [];
+        let deleteTargetId = null;
+
+        function getToken() { return localStorage.getItem('bus_jwt_token'); }
+        function setToken(token) { localStorage.setItem('bus_jwt_token', token); }
+        function getUser() { const u = localStorage.getItem('bus_user'); return u ? JSON.parse(u) : null; }
+        function setUser(user) { localStorage.setItem('bus_user', JSON.stringify(user)); }
+        function clearSession() {
+            localStorage.removeItem('bus_jwt_token');
+            localStorage.removeItem('bus_user');
+        }
+        function authHeaders() {
+            const token = getToken();
+            return token
+                ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+                : { 'Content-Type': 'application/json' };
+        }
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.className = `toast toast-${type}`;
+            toast.textContent = `${icons[type] || 'ℹ️'} ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4500);
+        }
+        function roleBadge(role) {
+            const map = {
+                ADMIN: '<span class="badge badge-admin">🛡️ Admin</span>',
+                CONDUCTOR: '<span class="badge badge-conductor">🚌 Conductor</span>',
+                DRIVER: '<span class="badge badge-driver">🚘 Driver</span>',
+                PASSENGER: '<span class="badge badge-passenger">🧍 Passenger</span>'
+            };
+            return map[role] || `<span class="badge">${role}</span>`;
+        }
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            return new Date(dateStr).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        function initials(name) {
+            return (name || 'U').split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
+        }
+        function refreshSessionUi() {
+            const user = getUser();
+            const chip = document.getElementById('sessionChip');
+            const logout = document.getElementById('navLogoutBtn');
+            if (user) {
+                chip.style.display = 'inline-block';
+                chip.textContent = `${user.fullName} · ${user.role}`;
+                logout.style.display = 'inline-flex';
+            } else {
+                chip.style.display = 'none';
+                logout.style.display = 'none';
+            }
+        }
+        function handleLogout() {
+            clearSession();
+            refreshSessionUi();
+            showToast('Signed out successfully.', 'info');
+            window.location.href = '/api/v1/admin/login.html';
+        }
+        async function loadData() {
+            await Promise.all([loadStats(), loadUsers()]);
+        }
+        async function loadStats() {
+            try {
+                const res = await fetch(`${API}/stats`, { headers: authHeaders() });
+                if (!res.ok) return;
+                const json = await res.json();
+                if (json.success) {
+                    const d = json.data;
+                    document.getElementById('statTotal').textContent = d.totalUsers ?? '—';
+                    document.getElementById('statPassengers').textContent = d.totalPassengers ?? '—';
+                    document.getElementById('statConductors').textContent = d.totalConductors ?? '—';
+                    document.getElementById('statDrivers').textContent = d.totalDrivers ?? '—';
+                    document.getElementById('statAdmins').textContent = d.totalAdmins ?? '—';
+                }
+            } catch (e) {
+                console.warn('Failed to load stats', e);
+            }
+        }
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API}/users`, { headers: authHeaders() });
+                if (!res.ok) {
+                    renderUsersError('Failed to load users. Check server status.');
+                    return;
+                }
+                const json = await res.json();
+                if (json.success) {
+                    allUsers = json.data || [];
+                    renderUsers(allUsers);
+                }
+            } catch (e) {
+                renderUsersError('Connection error. Is the Spring Boot server running on port 8080?');
+            }
+        }
+        function renderUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            document.getElementById('userCount').textContent = `${users.length} user${users.length !== 1 ? 's' : ''} found`;
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">👤</div><p>No users match your search.</p></div></td></tr>`;
+                return;
+            }
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td style="color:var(--text-muted); font-weight:600;">#${u.userId}</td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">${initials(u.fullName)}</div>
+                            <div>
+                                <div style="font-weight:600;">${u.fullName}</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);">${u.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color:var(--text-muted);">${u.phoneNumber}</td>
+                    <td>${roleBadge(u.role)}</td>
+                    <td style="color:var(--text-muted); white-space:nowrap;">${formatDate(u.createdAt)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')">✏️</button>
+                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+        }
+        function renderUsersError(msg) {
+            document.getElementById('usersTableBody').innerHTML =
+                `<tr><td colspan="6"><div class="empty-state"><div class="icon">❌</div><p>${msg}</p></div></td></tr>`;
+        }
+        function escStr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+        function filterUsers() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const role = document.getElementById('roleFilter').value;
+            let filtered = allUsers;
+            if (role) filtered = filtered.filter(u => u.role === role);
+            if (keyword) filtered = filtered.filter(u =>
+                u.fullName.toLowerCase().includes(keyword) ||
+                u.email.toLowerCase().includes(keyword) ||
+                (u.phoneNumber || '').toLowerCase().includes(keyword));
+            renderUsers(filtered);
+        }
+        function openAddModal() {
+            document.getElementById('addUserForm').reset();
+            document.getElementById('addModal').classList.add('open');
+        }
+        function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+        async function handleAddUser(event) {
+            event.preventDefault();
+            const btn = document.getElementById('addUserBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating...';
+            const payload = {
+                fullName: document.getElementById('addName').value.trim(),
+                email: document.getElementById('addEmail').value.trim(),
+                phoneNumber: document.getElementById('addPhone').value.trim(),
+                role: document.getElementById('addRole').value,
+                password: document.getElementById('addPassword').value
+            };
+            try {
+                const res = await fetch(`${API}/users`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    closeAddModal();
+                    showToast(`User "${json.data.fullName}" created successfully!`, 'success');
+                    await loadData();
+                } else {
+                    const errMsg = json.message || (json.validationErrors ? Object.values(json.validationErrors).join(', ') : 'Failed to create user');
+                    showToast(errMsg, 'error');
+                }
+            } catch (e) {
+                showToast('Connection error.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '➕ Create User';
+            }
+        }
+        function openEditModal(id, name, phone, role) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editName').value = name;
+            document.getElementById('editPhone').value = phone;
+            document.getElementById('editRole').value = role;
+            document.getElementById('editModal').classList.add('open');
+        }
+        function closeEditModal() { document.getElementById('editModal').classList.remove('open'); }
+        async function handleEditUser(event) {
+            event.preventDefault();
+            const btn = document.getElementById('editUserBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Saving...';
+            const userId = document.getElementById('editUserId').value;
+            const payload = {
+                fullName: document.getElementById('editName').value.trim(),
+                phoneNumber: document.getElementById('editPhone').value.trim(),
+                role: document.getElementById('editRole').value
+            };
+            try {
+                const res = await fetch(`${API}/users/${userId}`, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(payload) });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    closeEditModal();
+                    showToast(`User "${json.data.fullName}" updated successfully!`, 'success');
+                    await loadData();
+                } else {
+                    showToast(json.message || 'Failed to update user', 'error');
+                }
+            } catch (e) {
+                showToast('Connection error.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Save Changes';
+            }
+        }
+        function openDeleteModal(id, name, email) {
+            deleteTargetId = id;
+            document.getElementById('deleteUserLabel').textContent = `${name} (${email})`;
+            document.getElementById('deleteModal').classList.add('open');
+        }
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('deleteModal').classList.remove('open');
+        }
+        async function confirmDelete() {
+            if (!deleteTargetId) return;
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Deleting...';
+            const currentUser = getUser();
+            const adminEmail = currentUser ? currentUser.email : '';
+            const url = adminEmail
+                ? `${API}/users/${deleteTargetId}?adminEmail=${encodeURIComponent(adminEmail)}`
+                : `${API}/users/${deleteTargetId}`;
+            try {
+                const res = await fetch(url, { method: 'DELETE', headers: authHeaders() });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    closeDeleteModal();
+                    showToast('User deleted successfully!', 'success');
+                    await loadData();
+                } else {
+                    showToast(json.message || 'Failed to delete user', 'error');
+                }
+            } catch (e) {
+                showToast('Connection error.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🗑️ Delete User';
+                deleteTargetId = null;
+            }
+        }
+        ['addModal','editModal','deleteModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshSessionUi();
+            const user = getUser();
+            if (!user || !getToken() || user.role !== 'ADMIN') {
+                showToast('Access denied. Admin access required.', 'error');
+                setTimeout(() => {
+                    window.location.href = '/api/v1/admin/login.html';
+                }, 2000);
+                return;
+            }
+            loadData();
+        });
+    </script>
+</body>
+</html>

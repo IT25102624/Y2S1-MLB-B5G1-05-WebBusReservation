@@ -1,8 +1,12 @@
 package com.system.busreservation.common.config;
 
+import com.system.busreservation.modules.admin.security.CustomUserDetailsService;
+import com.system.busreservation.modules.admin.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,15 +16,20 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * Spring Security configuration.
- * Stateless permitAll skeleton ready for JWT filter integration.
+ * Stateless JWT authentication filter integrated with RBAC support.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,15 +38,28 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             // Stateless session management
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Authorization rules skeleton: permitAll for initial team development
-            // Module 1 (Auth) will plug in JwtAuthenticationFilter before UsernamePasswordAuthenticationFilter
+            // Setup DaoAuthenticationProvider
+            .authenticationProvider(daoAuthenticationProvider())
+            // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/search/**").permitAll()
+                .requestMatchers("/auth/**", "/api/v1/auth/**").permitAll()
+                .requestMatchers("/search/**", "/api/v1/search/**").permitAll()
+                .requestMatchers("/", "/index.html", "/search.html", "/auth.html", "/admin.html", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/admin/**", "/api/v1/admin/**").permitAll()
                 .anyRequest().permitAll()
-            );
+            )
+            // Register JWT filter before UsernamePasswordAuthenticationFilter
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
 
     @Bean

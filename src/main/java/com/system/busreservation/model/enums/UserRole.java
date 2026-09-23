@@ -6,5 +6,6 @@ package com.system.busreservation.model.enums;
 public enum UserRole {
     PASSENGER,
     CONDUCTOR,
+    DRIVER,
     ADMIN
 }
