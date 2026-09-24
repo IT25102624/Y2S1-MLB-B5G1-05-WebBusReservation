@@ -3,9 +3,13 @@ package com.system.busreservation.modules.search.service;
 import com.system.busreservation.common.exception.ResourceNotFoundException;
 import com.system.busreservation.model.Bus;
 import com.system.busreservation.model.Route;
+import com.system.busreservation.model.Seat;
 import com.system.busreservation.model.Trip;
+import com.system.busreservation.model.enums.BusType;
+import com.system.busreservation.model.enums.DeckType;
 import com.system.busreservation.model.enums.TripStatus;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
+import com.system.busreservation.modules.search.dto.BusRequest;
 import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
 import com.system.busreservation.modules.search.dto.RouteRequest;
@@ -17,10 +21,13 @@ import com.system.busreservation.modules.search.dto.TripUpdateRequest;
 import com.system.busreservation.modules.search.repository.BusRepository;
 import com.system.busreservation.modules.search.repository.RouteRepository;
 import com.system.busreservation.modules.search.repository.TripRepository;
+import com.system.busreservation.modules.search.strategy.TripSortStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
@@ -44,6 +51,7 @@ public class SearchServiceImpl implements SearchService {
     private final TripRepository tripRepository;
     private final BookingSeatRepository bookingSeatRepository;
     private final BusRepository busRepository;
+    private final TripSortStrategyFactory tripSortStrategyFactory;
 
     // =========================================================================
     // Passenger Search & Discovery Operations
@@ -244,6 +252,10 @@ public class SearchServiceImpl implements SearchService {
             throw new IllegalArgumentException("Arrival time must be after departure time.");
         }
 
+        if (request.getDepartureTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
+            throw new IllegalArgumentException("Departure time cannot be in the past.");
+        }
+
         Route route = routeRepository.findById(request.getRouteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Route", "routeId", request.getRouteId()));
 
@@ -272,6 +284,10 @@ public class SearchServiceImpl implements SearchService {
 
         if (!request.getArrivalTime().isAfter(request.getDepartureTime())) {
             throw new IllegalArgumentException("Arrival time must be after departure time.");
+        }
+
+        if (request.getDepartureTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
+            throw new IllegalArgumentException("Departure time cannot be in the past.");
         }
 
         Route route = routeRepository.findById(request.getRouteId())
@@ -483,16 +499,112 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private void applySorting(List<TripSearchResponse> responses, String sortBy) {
-        if (sortBy == null || sortBy.isBlank()) {
+        if (responses == null || responses.isEmpty()) {
             return;
         }
+        tripSortStrategyFactory.getStrategy(sortBy).sort(responses, sortBy);
+    }
 
-        switch (sortBy.toLowerCase()) {
-            case "faredesc" -> responses.sort(Comparator.comparing(TripSearchResponse::getBaseFare).reversed());
-            case "fareasc" -> responses.sort(Comparator.comparing(TripSearchResponse::getBaseFare));
-            case "departuredesc" -> responses.sort(Comparator.comparing(TripSearchResponse::getDepartureTime).reversed());
-            case "departureasc" -> responses.sort(Comparator.comparing(TripSearchResponse::getDepartureTime));
-            default -> responses.sort(Comparator.comparing(TripSearchResponse::getDepartureTime));
+    // =========================================================================
+    // Operator Bus & Fleet Management CRUD
+    // =========================================================================
+
+    @Override
+    @Transactional
+    public BusResponse createBus(BusRequest request) {
+        log.info("Registering new fleet bus with plate: [{}]", request.getBusNumber());
+        String normalizedNumber = request.getBusNumber().trim().toUpperCase();
+
+        if (busRepository.existsByBusNumberIgnoreCase(normalizedNumber)) {
+            throw new IllegalArgumentException("A bus with plate number '" + normalizedNumber + "' already exists in the system.");
         }
+
+        Bus bus = Bus.builder()
+                .busNumber(normalizedNumber)
+                .busType(request.getBusType())
+                .totalSeats(request.getTotalSeats())
+                .operatorName(request.getOperatorName().trim())
+                .build();
+
+        // Pre-generate physical seat entities to maintain seamless compatibility with Module 3 (Seat Selection)
+        List<Seat> seats = new ArrayList<>();
+        for (int i = 1; i <= request.getTotalSeats(); i++) {
+            seats.add(Seat.builder()
+                    .bus(bus)
+                    .seatNumber(String.valueOf(i))
+                    .deckType(DeckType.LOWER)
+                    .isWindowSeat(i % 4 == 1 || i % 4 == 0)
+                    .build());
+        }
+        bus.setSeats(seats);
+
+        Bus savedBus = busRepository.save(bus);
+        log.info("Bus successfully registered with ID: {}", savedBus.getBusId());
+        return mapToBusResponse(savedBus);
+    }
+
+    @Override
+    @Transactional
+    public BusResponse updateBus(Long busId, BusRequest request) {
+        log.info("Updating fleet bus ID {}: {}", busId, request.getBusNumber());
+        Bus bus = busRepository.findById(busId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bus not found with id: " + busId));
+
+        String normalizedNumber = request.getBusNumber().trim().toUpperCase();
+        if (busRepository.existsByBusNumberIgnoreCaseAndBusIdNot(normalizedNumber, busId)) {
+            throw new IllegalArgumentException("Another bus with plate number '" + normalizedNumber + "' already exists.");
+        }
+
+        bus.setBusNumber(normalizedNumber);
+        bus.setBusType(request.getBusType());
+        bus.setOperatorName(request.getOperatorName().trim());
+
+        // Update capacity and sync physical seats if capacity was increased
+        if (!bus.getTotalSeats().equals(request.getTotalSeats())) {
+            bus.setTotalSeats(request.getTotalSeats());
+            List<Seat> currentSeats = bus.getSeats();
+            if (currentSeats == null) {
+                currentSeats = new ArrayList<>();
+                bus.setSeats(currentSeats);
+            }
+            if (request.getTotalSeats() > currentSeats.size()) {
+                for (int i = currentSeats.size() + 1; i <= request.getTotalSeats(); i++) {
+                    currentSeats.add(Seat.builder()
+                            .bus(bus)
+                            .seatNumber(String.valueOf(i))
+                            .deckType(DeckType.LOWER)
+                            .isWindowSeat(i % 4 == 1 || i % 4 == 0)
+                            .build());
+                }
+            }
+        }
+
+        Bus updatedBus = busRepository.save(bus);
+        log.info("Bus ID {} successfully updated", busId);
+        return mapToBusResponse(updatedBus);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBus(Long busId) {
+        log.info("Deleting fleet bus ID: {}", busId);
+        Bus bus = busRepository.findById(busId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bus not found with id: " + busId));
+
+        long tripCount = tripRepository.countByBus_BusId(busId);
+        if (tripCount > 0) {
+            throw new IllegalStateException("Cannot delete bus '" + bus.getBusNumber() + "': "
+                    + tripCount + " scheduled trip(s) depend on it. Please reschedule or delete the associated trips first.");
+        }
+
+        busRepository.delete(bus);
+        log.info("Bus ID {} successfully deleted", busId);
+    }
+
+    @Override
+    public List<String> getAvailableBusTypes() {
+        return Arrays.stream(BusType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 }

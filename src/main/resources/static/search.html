@@ -238,6 +238,9 @@
         .badge-ac { background: #e0f2fe; color: #0369a1; }
         .badge-luxury { background: #fef3c7; color: #b45309; }
         .badge-sleeper { background: #ede9fe; color: #6d28d9; }
+        .badge-semi { background: #fef9c3; color: #854d0e; }
+        .badge-electric { background: #ccfbf1; color: #0f766e; }
+        .badge-express { background: #e0e7ff; color: #4338ca; }
         .badge-nonac { background: #f1f5f9; color: #475569; }
         .badge-scheduled { background: #dcfce7; color: #15803d; }
         .badge-cancelled { background: #fee2e2; color: #b91c1c; }
@@ -519,11 +522,68 @@
             color: var(--text-muted);
         }
 
+        /* Quick Filter Pills (Passenger View) */
+        .filter-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .pill-btn {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pill-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .pill-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         @media (max-width: 768px) {
             .trip-card { grid-template-columns: 1fr; gap: 12px; }
             .time-route { justify-content: space-between; }
             .fare-action { align-items: stretch; }
             .navbar { flex-direction: column; gap: 12px; }
+        }
+
+        /* Dedicated Print Stylesheet for Timetable Export */
+        @media print {
+            .navbar, .mode-toggle-group, .admin-tabs, .toolbar, .actions,
+            .modal-overlay, .toast-container, .table-actions, .filter-pills {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                padding: 10px !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                padding: 15px !important;
+            }
+            .data-table th, .data-table td {
+                padding: 8px 10px !important;
+                font-size: 0.82rem !important;
+            }
+            #tabContentSchedules {
+                display: block !important;
+            }
         }
     </style>
 </head>
@@ -617,6 +677,17 @@
                 <span id="resultsCount" style="color: var(--text-muted); font-size: 0.9rem;"></span>
             </div>
 
+            <!-- Quick Filter Pills (Client-side Instant Filters) -->
+            <div class="filter-pills" id="passengerFilterPills" style="display: none;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-right: 4px;">⚡ Quick Filter:</span>
+                <button type="button" class="pill-btn active" onclick="applyQuickFilter('ALL', this)">All</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('MORNING', this)">🌅 Morning (04:00 - 12:00)</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('AFTERNOON', this)">☀️ Afternoon (12:00 - 17:00)</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('NIGHT', this)">🌙 Evening / Night</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('AC', this)">❄️ AC</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('LUXURY', this)">💎 Luxury</button>
+            </div>
+
             <div id="resultsContainer" class="trip-list">
                 <div class="empty-state">Select origin, destination, and travel date above to view live schedules.</div>
             </div>
@@ -633,6 +704,9 @@
                 </button>
                 <button class="admin-tab" id="tabBtnSchedules" onclick="switchAdminTab('schedules')">
                     📅 Bus Schedules / Trips
+                </button>
+                <button class="admin-tab" id="tabBtnBuses" onclick="switchAdminTab('buses')">
+                    🚌 Fleet & Buses
                 </button>
             </div>
 
@@ -664,6 +738,7 @@
                                 <option value="durationDesc">Sort: Duration (Longest)</option>
                             </select>
                             <button type="button" class="btn btn-outline btn-sm" onclick="resetRouteFilters()">Reset</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportRoutesToCSV()">📥 Export CSV</button>
                         </div>
                         <div class="count-badge" id="routeCountBadge">Showing 0 routes</div>
                     </div>
@@ -731,6 +806,8 @@
                                 <option value="idAsc">Sort: Trip ID (Oldest)</option>
                             </select>
                             <button type="button" class="btn btn-outline btn-sm" onclick="resetTripFilters()">Reset</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportSchedulesToCSV()">📥 Export CSV</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="printSchedulesTimetable()">🖨️ Print</button>
                         </div>
                         <div class="count-badge" id="tripCountBadge">Showing 0 trips</div>
                     </div>
@@ -752,6 +829,72 @@
                             </thead>
                             <tbody id="schedulesTableBody">
                                 <tr><td colspan="9" style="text-align:center;">Loading schedules from SSMS...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Bus & Fleet Management -->
+            <div id="tabContentBuses" style="display: none;">
+                <div class="card">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Fleet Bus Management</h2>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">
+                                Register, inspect capacity, and manage vehicle tiers in the fleet
+                            </p>
+                        </div>
+                        <button class="btn btn-primary" onclick="openCreateBusModal()">
+                            ➕ Add New Bus
+                        </button>
+                    </div>
+
+                    <!-- Buses Search, Filter & Sort Toolbar -->
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <input type="text" id="busSearchInput" class="toolbar-input" placeholder="🔍 Search by plate # or operator..." oninput="filterAndSortBuses()">
+                            <select id="busFilterTypeSelect" class="toolbar-select" onchange="filterAndSortBuses()">
+                                <option value="">All Bus Types</option>
+                                <option value="AC">AC</option>
+                                <option value="NON_AC">Non-AC</option>
+                                <option value="LUXURY">Luxury</option>
+                                <option value="SLEEPER">Sleeper</option>
+                                <option value="SEMI_LUXURY">Semi-Luxury</option>
+                                <option value="SUPER_LUXURY">Super Luxury</option>
+                                <option value="DOUBLE_DECKER">Double Decker</option>
+                                <option value="MINI_BUS">Mini Bus</option>
+                                <option value="ELECTRIC">Electric</option>
+                                <option value="EXPRESS">Express</option>
+                            </select>
+                            <select id="busSortSelect" class="toolbar-select" onchange="filterAndSortBuses()">
+                                <option value="idAsc">Sort: Bus ID (Ascending)</option>
+                                <option value="idDesc">Sort: Bus ID (Descending)</option>
+                                <option value="plateAsc">Sort: Plate # (A-Z)</option>
+                                <option value="capacityDesc">Sort: Capacity (Highest First)</option>
+                                <option value="capacityAsc">Sort: Capacity (Lowest First)</option>
+                                <option value="operatorAsc">Sort: Operator (A-Z)</option>
+                            </select>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="resetBusFilters()">Reset</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportBusesToCSV()">📥 Export CSV</button>
+                        </div>
+                        <div class="count-badge" id="busCountBadge">Showing 0 buses</div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Bus ID</th>
+                                    <th>Plate Number</th>
+                                    <th>Operator / Fleet</th>
+                                    <th>Bus Type</th>
+                                    <th>Capacity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="busesTableBody">
+                                <tr><td colspan="6" style="text-align:center;">Loading fleet buses from SSMS...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -791,6 +934,58 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeModal('routeModal')">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="btnSaveRoute">Save Route</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bus Modal (Create / Edit) -->
+    <div class="modal-overlay" id="busModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="busModalTitle">Add New Fleet Bus</h3>
+                <button class="modal-close" onclick="closeModal('busModal')">&times;</button>
+            </div>
+            <form id="busForm">
+                <div class="modal-body">
+                    <input type="hidden" id="modalBusId">
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalBusNumber">Bus Plate / Registration Number *</label>
+                        <input type="text" id="modalBusNumber" required placeholder="e.g. WP ND-1001" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalBusOperator">Operator / Fleet Company Name *</label>
+                        <input type="text" id="modalBusOperator" required placeholder="e.g. Superline Express, SLTB">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalBusSeats">Total Seating Capacity *</label>
+                        <input type="number" id="modalBusSeats" min="10" max="120" value="40" required placeholder="e.g. 40">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="modalBusType">Bus Tier / Type *</label>
+                        <select id="modalBusType" required onchange="onBusTypeSelectChange()">
+                            <option value="AC">❄️ AC Express</option>
+                            <option value="NON_AC">🌬️ Non-AC Standard</option>
+                            <option value="LUXURY">💎 Luxury Cruiser</option>
+                            <option value="SLEEPER">🛏️ Sleeper Berth</option>
+                            <option value="SEMI_LUXURY">⭐ Semi-Luxury</option>
+                            <option value="SUPER_LUXURY">👑 Super Luxury</option>
+                            <option value="DOUBLE_DECKER">🚌 Double Decker</option>
+                            <option value="MINI_BUS">🚐 Mini Bus / Van</option>
+                            <option value="ELECTRIC">⚡ Electric Green</option>
+                            <option value="EXPRESS">🚀 Highway Express</option>
+                            <option value="__CUSTOM__">➕ Enter Custom Bus Type...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="customBusTypeGroup" style="display: none; margin-bottom: 14px;">
+                        <label for="modalCustomBusType">Custom Bus Type Name *</label>
+                        <input type="text" id="modalCustomBusType" placeholder="e.g. VIP Lounge, Intercity Superfast">
+                        <small style="color: var(--text-muted); font-size: 0.78rem;">Will be normalized and added to system bus types</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('busModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveBus">Save Bus</button>
                 </div>
             </form>
         </div>
@@ -922,6 +1117,54 @@
         </div>
     </div>
 
+    <!-- Seat Selection Preview Modal (Module 3 Handoff) -->
+    <div class="modal-overlay" id="seatPreviewModal">
+        <div class="modal-box" style="max-width: 520px;">
+            <div class="modal-header">
+                <h3>💺 Trip Details & Seat Selection</h3>
+                <button class="modal-close" onclick="closeModal('seatPreviewModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: var(--surface-alt); border-radius: 8px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span id="previewTripBadge" class="badge badge-ac">AC</span>
+                        <span id="previewTripId" style="font-weight: 700; color: var(--primary);">Trip #101</span>
+                    </div>
+                    <h3 id="previewRouteTitle" style="font-size: 1.15rem; margin-bottom: 6px; color: var(--text);">Colombo ➔ Kandy</h3>
+                    <div id="previewBusInfo" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Bus: NA-1234 • Super Line Express</div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem; border-top: 1px solid var(--border); padding-top: 12px;">
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.78rem;">DEPARTURE</div>
+                            <div id="previewDepTime" style="font-weight: 600; color: var(--text);">08:30 AM</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.78rem;">ARRIVAL</div>
+                            <div id="previewArrTime" style="font-weight: 600; color: var(--text);">11:45 AM</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.78rem;">FARE PER SEAT</div>
+                            <div id="previewFare" style="font-weight: 700; color: var(--primary); font-size: 1.05rem;">LKR 1,250.00</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-muted); font-size: 0.78rem;">AVAILABLE SEATS</div>
+                            <div id="previewSeats" style="font-weight: 600; color: var(--success);">32 seats left</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #eff6ff; border-left: 4px solid var(--primary); padding: 12px; border-radius: 4px; font-size: 0.82rem; color: #1e3a8a; line-height: 1.4;">
+                    <strong>🤝 Module Integration Contract:</strong><br>
+                    Proceeding will forward parameters (<code>tripId</code>, <code>busId</code>, <code>baseFare</code>) to <strong>Module 3: Seat Selection</strong> (Teammate IT25101791) to render the interactive seat map and reserve selected seats.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('seatPreviewModal')">Back to Search</button>
+                <button type="button" class="btn btn-primary" onclick="proceedToSeatSelection()">Proceed to Seat Selection ➔</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -935,6 +1178,8 @@
         let routesCache = [];
         let busesCache = [];
         let schedulesCache = [];
+        let currentPassengerResults = [];
+        let activeSelectedTrip = null;
 
         // Initialize default dates for passenger search
         const tomorrow = new Date();
@@ -970,21 +1215,30 @@
         function switchAdminTab(tab) {
             const tabBtnRoutes = document.getElementById('tabBtnRoutes');
             const tabBtnSchedules = document.getElementById('tabBtnSchedules');
+            const tabBtnBuses = document.getElementById('tabBtnBuses');
             const tabContentRoutes = document.getElementById('tabContentRoutes');
             const tabContentSchedules = document.getElementById('tabContentSchedules');
+            const tabContentBuses = document.getElementById('tabContentBuses');
+
+            tabBtnRoutes.classList.remove('active');
+            tabBtnSchedules.classList.remove('active');
+            tabBtnBuses.classList.remove('active');
+            tabContentRoutes.style.display = 'none';
+            tabContentSchedules.style.display = 'none';
+            tabContentBuses.style.display = 'none';
 
             if (tab === 'routes') {
                 tabBtnRoutes.classList.add('active');
-                tabBtnSchedules.classList.remove('active');
                 tabContentRoutes.style.display = 'block';
-                tabContentSchedules.style.display = 'none';
                 loadRoutesTable();
-            } else {
+            } else if (tab === 'schedules') {
                 tabBtnSchedules.classList.add('active');
-                tabBtnRoutes.classList.remove('active');
                 tabContentSchedules.style.display = 'block';
-                tabContentRoutes.style.display = 'none';
                 loadSchedulesTable();
+            } else if (tab === 'buses') {
+                tabBtnBuses.classList.add('active');
+                tabContentBuses.style.display = 'block';
+                loadBusesTable();
             }
         }
 
@@ -1051,11 +1305,24 @@
         });
 
         function renderSearchResults(trips) {
+            currentPassengerResults = trips || [];
+            const pills = document.getElementById('passengerFilterPills');
+            if (pills) {
+                pills.style.display = (trips && trips.length > 0) ? 'flex' : 'none';
+                pills.querySelectorAll('.pill-btn').forEach((p, idx) => {
+                    if (idx === 0) p.classList.add('active');
+                    else p.classList.remove('active');
+                });
+            }
+            renderTripCards(currentPassengerResults);
+        }
+
+        function renderTripCards(trips) {
             const container = document.getElementById('resultsContainer');
-            document.getElementById('resultsCount').textContent = `${trips.length} bus(es) found`;
+            document.getElementById('resultsCount').textContent = `${trips.length} bus(es) shown`;
 
             if (!trips || trips.length === 0) {
-                container.innerHTML = '<div class="empty-state">No scheduled trips found matching your search criteria.</div>';
+                container.innerHTML = '<div class="empty-state">No scheduled trips found matching your filter criteria.</div>';
                 return;
             }
 
@@ -1097,16 +1364,86 @@
                         </div>
                         <div class="fare-action">
                             <div class="price">LKR ${t.baseFare.toLocaleString('en-US', { minimumFractionDigits: 2 })} <span>/ seat</span></div>
-                            <button class="btn btn-primary" onclick="alert('Trip #' + ${t.tripId} + ' selected! Connects to Module 3: Seat Selection.')">Select Seats</button>
+                            <button class="btn btn-primary" onclick="openSeatPreviewModal(${t.tripId})">Select Seats</button>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
+        // Quick filter pills handler
+        function applyQuickFilter(filterType, btn) {
+            const pills = document.getElementById('passengerFilterPills');
+            if (pills) {
+                pills.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            }
+            if (btn) btn.classList.add('active');
+
+            if (filterType === 'ALL') {
+                renderTripCards(currentPassengerResults);
+                return;
+            }
+
+            const filtered = currentPassengerResults.filter(t => {
+                const dep = new Date(t.departureTime);
+                const hour = dep.getHours();
+
+                if (filterType === 'MORNING') return hour >= 4 && hour < 12;
+                if (filterType === 'AFTERNOON') return hour >= 12 && hour < 17;
+                if (filterType === 'NIGHT') return hour >= 17 || hour < 4;
+                if (filterType === 'AC') return t.busType === 'AC';
+                if (filterType === 'LUXURY') return t.busType === 'LUXURY';
+                return true;
+            });
+
+            renderTripCards(filtered);
+        }
+
+        // Seat preview modal handler for Module 3 handoff
+        function openSeatPreviewModal(tripId) {
+            const trip = currentPassengerResults.find(t => t.tripId === tripId) || schedulesCache.find(t => t.tripId === tripId);
+            if (!trip) return;
+
+            activeSelectedTrip = trip;
+
+            const badgeElem = document.getElementById('previewTripBadge');
+            badgeElem.textContent = trip.busType;
+            badgeElem.className = `badge ${trip.busType === 'AC' ? 'badge-ac' : trip.busType === 'LUXURY' ? 'badge-luxury' : trip.busType === 'SLEEPER' ? 'badge-sleeper' : 'badge-nonac'}`;
+
+            document.getElementById('previewTripId').textContent = `Trip #${trip.tripId}`;
+            document.getElementById('previewRouteTitle').textContent = `${trip.sourceCity} ➔ ${trip.destinationCity}`;
+            document.getElementById('previewBusInfo').textContent = `Bus: ${trip.busNumber} • ${trip.operatorName} (${trip.busType})`;
+
+            const dep = new Date(trip.departureTime);
+            const arr = new Date(trip.arrivalTime);
+            document.getElementById('previewDepTime').textContent = dep.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ` (${dep.toLocaleDateString()})`;
+            document.getElementById('previewArrTime').textContent = arr.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ` (${arr.toLocaleDateString()})`;
+            document.getElementById('previewFare').textContent = `LKR ${trip.baseFare.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            document.getElementById('previewSeats').textContent = `${trip.availableSeats} seats left (out of ${trip.totalSeats})`;
+
+            openModal('seatPreviewModal');
+        }
+
+        function proceedToSeatSelection() {
+            if (!activeSelectedTrip) return;
+            showToast(`Proceeding to Seat Selection for Trip #${activeSelectedTrip.tripId}...`, 'success');
+            closeModal('seatPreviewModal');
+
+            // Module 3 integration target URL with passed parameters
+            const targetUrl = `seat-selection.html?tripId=${activeSelectedTrip.tripId}&busId=${activeSelectedTrip.busId}&fare=${activeSelectedTrip.baseFare}&source=${encodeURIComponent(activeSelectedTrip.sourceCity)}&destination=${encodeURIComponent(activeSelectedTrip.destinationCity)}`;
+            
+            setTimeout(() => {
+                // If the teammate's page is available, navigate; otherwise display confirmation
+                window.location.href = targetUrl;
+            }, 800);
+        }
+
         document.getElementById('btnResetSearch').addEventListener('click', () => {
             document.getElementById('searchForm').reset();
             document.getElementById('travelDate').value = tomorrowStr;
+            currentPassengerResults = [];
+            const pills = document.getElementById('passengerFilterPills');
+            if (pills) pills.style.display = 'none';
             loadSearchCities();
             document.getElementById('resultsContainer').innerHTML = '<div class="empty-state">Select origin, destination, and travel date above to view live schedules.</div>';
             document.getElementById('resultsCount').textContent = '';
@@ -1257,9 +1594,235 @@
                 const json = await res.json();
                 busesCache = json.data || [];
                 populateBusDropdowns(busesCache);
+                if (document.getElementById('busesTableBody')) {
+                    filterAndSortBuses();
+                }
             } catch (err) {
                 console.error('Failed to load fleet buses', err);
             }
+        }
+
+        // --- OPERATOR: FLEET & BUS CRUD ---
+        async function loadBusesTable() {
+            try {
+                const res = await fetch(`${API_BASE}/buses`);
+                const json = await res.json();
+                busesCache = json.data || [];
+                filterAndSortBuses();
+                populateBusDropdowns(busesCache);
+            } catch (err) {
+                showToast('Failed to load fleet buses from database', 'error');
+            }
+        }
+
+        function filterAndSortBuses() {
+            const q = (document.getElementById('busSearchInput')?.value || '').trim().toLowerCase();
+            const typeFilter = document.getElementById('busFilterTypeSelect')?.value || '';
+            const sort = document.getElementById('busSortSelect')?.value || 'idAsc';
+
+            let filtered = busesCache.filter(b => {
+                if (typeFilter && b.busType !== typeFilter) return false;
+                if (q) {
+                    const matchId = String(b.busId).includes(q);
+                    const matchNumber = (b.busNumber || '').toLowerCase().includes(q);
+                    const matchOperator = (b.operatorName || '').toLowerCase().includes(q);
+                    const matchType = (b.busType || '').toLowerCase().includes(q);
+                    return matchId || matchNumber || matchOperator || matchType;
+                }
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sort === 'idAsc') return a.busId - b.busId;
+                if (sort === 'idDesc') return b.busId - a.busId;
+                if (sort === 'plateAsc') return (a.busNumber || '').localeCompare(b.busNumber || '');
+                if (sort === 'capacityDesc') return (b.totalSeats || 0) - (a.totalSeats || 0);
+                if (sort === 'capacityAsc') return (a.totalSeats || 0) - (b.totalSeats || 0);
+                if (sort === 'operatorAsc') return (a.operatorName || '').localeCompare(b.operatorName || '');
+                return 0;
+            });
+
+            renderBusesTable(filtered);
+            const badge = document.getElementById('busCountBadge');
+            if (badge) badge.textContent = `Showing ${filtered.length} of ${busesCache.length} buses`;
+        }
+
+        function resetBusFilters() {
+            const search = document.getElementById('busSearchInput');
+            const type = document.getElementById('busFilterTypeSelect');
+            const sort = document.getElementById('busSortSelect');
+            if (search) search.value = '';
+            if (type) type.value = '';
+            if (sort) sort.value = 'idAsc';
+            filterAndSortBuses();
+        }
+
+        function getBusTypeBadgeClass(busType) {
+            switch ((busType || '').toUpperCase()) {
+                case 'AC': return 'badge-ac';
+                case 'LUXURY':
+                case 'SUPER_LUXURY': return 'badge-luxury';
+                case 'SLEEPER': return 'badge-sleeper';
+                case 'SEMI_LUXURY': return 'badge-semi';
+                case 'ELECTRIC': return 'badge-electric';
+                case 'EXPRESS': return 'badge-express';
+                default: return 'badge-nonac';
+            }
+        }
+
+        function renderBusesTable(buses) {
+            const tbody = document.getElementById('busesTableBody');
+            if (!tbody) return;
+            if (!buses || buses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No matching fleet buses found.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = buses.map(b => {
+                const badgeClass = getBusTypeBadgeClass(b.busType);
+                return `
+                    <tr>
+                        <td><strong>#${b.busId}</strong></td>
+                        <td><span style="font-family: monospace; font-size: 0.95rem; font-weight: 700; background: #f8fafc; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--border);">${b.busNumber}</span></td>
+                        <td>${b.operatorName}</td>
+                        <td><span class="badge ${badgeClass}">${b.busType}</span></td>
+                        <td><strong>${b.totalSeats}</strong> seats</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm" onclick="openEditBusModal(${b.busId})">✏️ Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteBus(${b.busId}, '${b.busNumber}')">🗑️ Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openCreateBusModal() {
+            document.getElementById('busModalTitle').textContent = 'Add New Fleet Bus';
+            document.getElementById('modalBusId').value = '';
+            document.getElementById('modalBusNumber').value = '';
+            document.getElementById('modalBusOperator').value = '';
+            document.getElementById('modalBusSeats').value = '40';
+            document.getElementById('modalBusType').value = 'AC';
+            document.getElementById('modalCustomBusType').value = '';
+            document.getElementById('customBusTypeGroup').style.display = 'none';
+            openModal('busModal');
+        }
+
+        function openEditBusModal(busId) {
+            const b = busesCache.find(x => x.busId === busId);
+            if (!b) return;
+
+            document.getElementById('busModalTitle').textContent = 'Edit Fleet Bus #' + busId;
+            document.getElementById('modalBusId').value = b.busId;
+            document.getElementById('modalBusNumber').value = b.busNumber;
+            document.getElementById('modalBusOperator').value = b.operatorName;
+            document.getElementById('modalBusSeats').value = b.totalSeats;
+
+            const typeSelect = document.getElementById('modalBusType');
+            const customGroup = document.getElementById('customBusTypeGroup');
+            const customInput = document.getElementById('modalCustomBusType');
+
+            let found = false;
+            for (let i = 0; i < typeSelect.options.length; i++) {
+                if (typeSelect.options[i].value === b.busType) {
+                    typeSelect.selectedIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                typeSelect.value = '__CUSTOM__';
+                customGroup.style.display = 'block';
+                customInput.value = b.busType;
+            } else {
+                customGroup.style.display = 'none';
+                customInput.value = '';
+            }
+
+            openModal('busModal');
+        }
+
+        function onBusTypeSelectChange() {
+            const val = document.getElementById('modalBusType').value;
+            const customGroup = document.getElementById('customBusTypeGroup');
+            customGroup.style.display = val === '__CUSTOM__' ? 'block' : 'none';
+            if (val === '__CUSTOM__') {
+                document.getElementById('modalCustomBusType').focus();
+            }
+        }
+
+        document.getElementById('busForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const busId = document.getElementById('modalBusId').value;
+            const typeVal = document.getElementById('modalBusType').value;
+            const customVal = document.getElementById('modalCustomBusType').value.trim();
+
+            let finalBusType = typeVal;
+            if (typeVal === '__CUSTOM__') {
+                if (!customVal) {
+                    showToast('Please enter a name for the custom bus type.', 'error');
+                    return;
+                }
+                finalBusType = customVal.toUpperCase().replace(/\s+/g, '_');
+            }
+
+            const payload = {
+                busNumber: document.getElementById('modalBusNumber').value.trim().toUpperCase(),
+                operatorName: document.getElementById('modalBusOperator').value.trim(),
+                totalSeats: parseInt(document.getElementById('modalBusSeats').value),
+                busType: finalBusType
+            };
+
+            const isEdit = !!busId;
+            const url = isEdit ? `${API_BASE}/buses/${busId}` : `${API_BASE}/buses`;
+            const method = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to save bus.');
+
+                showToast(isEdit ? 'Bus updated successfully!' : 'New bus registered successfully!', 'success');
+                closeModal('busModal');
+                loadBusesTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        });
+
+        async function confirmDeleteBus(busId, plate) {
+            if (!confirm(`Are you sure you want to remove Bus '${plate}' (#${busId}) from the fleet?`)) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/buses/${busId}`, { method: 'DELETE' });
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message || 'Failed to delete bus.');
+
+                showToast(json.message || 'Bus deleted successfully!', 'success');
+                loadBusesTable();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function exportBusesToCSV() {
+            if (!busesCache || busesCache.length === 0) {
+                showToast('No buses loaded to export.', 'error');
+                return;
+            }
+            let csv = "Bus ID,Plate Number,Operator / Fleet,Bus Type,Total Capacity (Seats)\n";
+            busesCache.forEach(b => {
+                csv += `"${b.busId}","${b.busNumber}","${b.operatorName}","${b.busType}","${b.totalSeats}"\n`;
+            });
+            downloadCSV(csv, `fleet_buses_${new Date().toISOString().slice(0, 10)}.csv`);
+            showToast(`Exported ${busesCache.length} buses to CSV!`, 'success');
         }
 
         function populateRouteDropdowns(routes) {
@@ -1547,6 +2110,49 @@
             } catch (err) {
                 showToast(err.message, 'error');
             }
+        }
+
+        // --- Export & Reporting Utilities ---
+        function downloadCSV(csvContent, fileName) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportRoutesToCSV() {
+            if (!routesCache || routesCache.length === 0) {
+                showToast('No routes loaded to export.', 'error');
+                return;
+            }
+            let csv = "Route ID,Origin City,Destination City,Estimated Duration (Hours)\n";
+            routesCache.forEach(r => {
+                csv += `"${r.routeId}","${r.sourceCity}","${r.destinationCity}","${r.estimatedDurationHours}"\n`;
+            });
+            downloadCSV(csv, `routes_${new Date().toISOString().slice(0, 10)}.csv`);
+            showToast(`Exported ${routesCache.length} routes to CSV!`, 'success');
+        }
+
+        function exportSchedulesToCSV() {
+            if (!schedulesCache || schedulesCache.length === 0) {
+                showToast('No schedules loaded to export.', 'error');
+                return;
+            }
+            let csv = "Trip ID,Origin,Destination,Bus Number,Operator,Bus Type,Departure,Arrival,Base Fare (LKR),Status,Booked Seats,Total Seats\n";
+            schedulesCache.forEach(t => {
+                csv += `"${t.tripId}","${t.sourceCity}","${t.destinationCity}","${t.busNumber}","${t.operatorName}","${t.busType}","${t.departureTime}","${t.arrivalTime}","${t.baseFare}","${t.tripStatus}","${t.bookedSeats}","${t.totalSeats}"\n`;
+            });
+            downloadCSV(csv, `bus_schedules_${new Date().toISOString().slice(0, 10)}.csv`);
+            showToast(`Exported ${schedulesCache.length} scheduled trips to CSV!`, 'success');
+        }
+
+        function printSchedulesTimetable() {
+            window.print();
         }
 
         // --- Modal Helpers ---

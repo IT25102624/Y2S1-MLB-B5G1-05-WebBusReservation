@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.system.busreservation.common.config.SecurityConfig;
 import com.system.busreservation.model.enums.BusType;
 import com.system.busreservation.model.enums.TripStatus;
+import com.system.busreservation.modules.search.dto.BusRequest;
 import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
 import com.system.busreservation.modules.search.dto.RouteRequest;
@@ -300,5 +301,87 @@ class SearchControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].busNumber").value("ND-1001"));
+    }
+
+    @Test
+    @DisplayName("POST /search/buses - Should register new bus and return 201")
+    void createBus_Success() throws Exception {
+        BusRequest request = BusRequest.builder()
+                .busNumber("WP ND-2002")
+                .busType(BusType.LUXURY)
+                .totalSeats(45)
+                .operatorName("Southern Express")
+                .build();
+
+        BusResponse response = BusResponse.builder()
+                .busId(5L)
+                .busNumber("WP ND-2002")
+                .busType(BusType.LUXURY)
+                .totalSeats(45)
+                .operatorName("Southern Express")
+                .build();
+
+        when(searchService.createBus(any(BusRequest.class))).thenReturn(response);
+
+        mockMvc.perform(post("/search/buses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Bus registered successfully"))
+                .andExpect(jsonPath("$.data.busNumber").value("WP ND-2002"));
+    }
+
+    @Test
+    @DisplayName("PUT /search/buses/{busId} - Should update bus and return 200")
+    void updateBus_Success() throws Exception {
+        BusRequest request = BusRequest.builder()
+                .busNumber("WP ND-2002")
+                .busType(BusType.AC)
+                .totalSeats(40)
+                .operatorName("Southern Luxury Express")
+                .build();
+
+        BusResponse response = BusResponse.builder()
+                .busId(5L)
+                .busNumber("WP ND-2002")
+                .busType(BusType.AC)
+                .totalSeats(40)
+                .operatorName("Southern Luxury Express")
+                .build();
+
+        when(searchService.updateBus(eq(5L), any(BusRequest.class))).thenReturn(response);
+
+        mockMvc.perform(put("/search/buses/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.operatorName").value("Southern Luxury Express"));
+    }
+
+    @Test
+    @DisplayName("DELETE /search/buses/{busId} - Should delete bus and return 200")
+    void deleteBus_Success() throws Exception {
+        mockMvc.perform(delete("/search/buses/5")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Bus deleted successfully"));
+
+        verify(searchService).deleteBus(5L);
+    }
+
+    @Test
+    @DisplayName("GET /search/bus-types - Should return available bus types")
+    void getAvailableBusTypes_Success() throws Exception {
+        when(searchService.getAvailableBusTypes()).thenReturn(List.of("AC", "NON_AC", "LUXURY", "SLEEPER"));
+
+        mockMvc.perform(get("/search/bus-types")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data[0]").value("AC"));
     }
 }
