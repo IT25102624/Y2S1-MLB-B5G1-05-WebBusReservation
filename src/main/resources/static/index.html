@@ -599,14 +599,21 @@
             </div>
         </div>
 
-        <!-- Mode Toggle Switcher -->
-        <div class="mode-toggle-group">
-            <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">
-                🔍 Passenger View
-            </button>
-            <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">
-                🛠️ Operator Mode
-            </button>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <!-- Nav Links -->
+            <div style="display:flex; gap:6px;">
+                <a href="/admin.html" style="padding:8px 14px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🛡️ Sign In &amp; Portal</a>
+            </div>
+
+            <!-- Mode Toggle Switcher -->
+            <div class="mode-toggle-group">
+                <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">
+                    🔍 Passenger View
+                </button>
+                <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">
+                    🛠️ Operator Mode
+                </button>
+            </div>
         </div>
     </nav>
 

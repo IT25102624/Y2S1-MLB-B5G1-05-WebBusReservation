@@ -20,7 +20,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * Entity representing a system user (Passenger, Conductor, or Admin).
+ * Entity representing a system user (Passenger, Conductor, Driver, or Admin).
  */
 @Entity
 @Table(name = "users", uniqueConstraints = {
