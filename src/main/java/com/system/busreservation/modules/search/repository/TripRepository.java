@@ -78,4 +78,6 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
     List<Trip> findAllWithDetails();
 
     long countByRoute_RouteId(Long routeId);
+
+    long countByBus_BusId(Long busId);
 }

@@ -1,5 +1,6 @@
 package com.system.busreservation.modules.search.service;
 
+import com.system.busreservation.modules.search.dto.BusRequest;
 import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
 import com.system.busreservation.modules.search.dto.RouteRequest;
@@ -89,4 +90,24 @@ public interface SearchService {
      * Retrieve all fleet buses available for scheduling.
      */
     List<BusResponse> getAllBuses();
+
+    /**
+     * Register a new bus into the fleet.
+     */
+    BusResponse createBus(BusRequest request);
+
+    /**
+     * Update details of an existing fleet bus.
+     */
+    BusResponse updateBus(Long busId, BusRequest request);
+
+    /**
+     * Remove a fleet bus (guarded by referential integrity check).
+     */
+    void deleteBus(Long busId);
+
+    /**
+     * Retrieve all supported bus types across the transit network.
+     */
+    List<String> getAvailableBusTypes();
 }

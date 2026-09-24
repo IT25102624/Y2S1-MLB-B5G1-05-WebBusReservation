@@ -1,6 +1,7 @@
 package com.system.busreservation.modules.search.controller;
 
 import com.system.busreservation.common.dto.ApiResponse;
+import com.system.busreservation.modules.search.dto.BusRequest;
 import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
 import com.system.busreservation.modules.search.dto.RouteRequest;
@@ -260,6 +261,66 @@ public class SearchController {
                 .success(true)
                 .message(String.format("Retrieved %d fleet buses", buses.size()))
                 .data(buses)
+                .build());
+    }
+
+    /**
+     * Register a new bus into the fleet.
+     * POST /api/v1/search/buses
+     */
+    @PostMapping("/buses")
+    public ResponseEntity<ApiResponse<BusResponse>> createBus(@Valid @RequestBody BusRequest request) {
+        log.info("REST request to register new fleet bus: {}", request);
+        BusResponse response = searchService.createBus(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.<BusResponse>builder()
+                        .success(true)
+                        .message("Bus registered successfully")
+                        .data(response)
+                        .build());
+    }
+
+    /**
+     * Update details of an existing fleet bus.
+     * PUT /api/v1/search/buses/{busId}
+     */
+    @PutMapping("/buses/{busId}")
+    public ResponseEntity<ApiResponse<BusResponse>> updateBus(
+            @PathVariable Long busId,
+            @Valid @RequestBody BusRequest request) {
+        log.info("REST request to update bus ID {}: {}", busId, request);
+        BusResponse response = searchService.updateBus(busId, request);
+        return ResponseEntity.ok(ApiResponse.<BusResponse>builder()
+                .success(true)
+                .message("Bus updated successfully")
+                .data(response)
+                .build());
+    }
+
+    /**
+     * Remove a fleet bus by ID.
+     * DELETE /api/v1/search/buses/{busId}
+     */
+    @DeleteMapping("/buses/{busId}")
+    public ResponseEntity<ApiResponse<Void>> deleteBus(@PathVariable Long busId) {
+        log.info("REST request to delete bus ID: {}", busId);
+        searchService.deleteBus(busId);
+        return ResponseEntity.ok(ApiResponse.<Void>builder()
+                .success(true)
+                .message("Bus deleted successfully")
+                .build());
+    }
+
+    /**
+     * Retrieve all available bus types across the system.
+     * GET /api/v1/search/bus-types
+     */
+    @GetMapping("/bus-types")
+    public ResponseEntity<ApiResponse<List<String>>> getAvailableBusTypes() {
+        return ResponseEntity.ok(ApiResponse.<List<String>>builder()
+                .success(true)
+                .message("Retrieved available bus types")
+                .data(searchService.getAvailableBusTypes())
                 .build());
     }
 }

@@ -7,6 +7,7 @@ import com.system.busreservation.model.Trip;
 import com.system.busreservation.model.enums.BusType;
 import com.system.busreservation.model.enums.TripStatus;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
+import com.system.busreservation.modules.search.dto.BusRequest;
 import com.system.busreservation.modules.search.dto.BusResponse;
 import com.system.busreservation.modules.search.dto.CityPairResponse;
 import com.system.busreservation.modules.search.dto.RouteRequest;
@@ -18,11 +19,14 @@ import com.system.busreservation.modules.search.dto.TripUpdateRequest;
 import com.system.busreservation.modules.search.repository.BusRepository;
 import com.system.busreservation.modules.search.repository.RouteRepository;
 import com.system.busreservation.modules.search.repository.TripRepository;
+import com.system.busreservation.modules.search.strategy.DepartureTimeSortStrategy;
+import com.system.busreservation.modules.search.strategy.FareSortStrategy;
+import com.system.busreservation.modules.search.strategy.SeatAvailabilitySortStrategy;
+import com.system.busreservation.modules.search.strategy.TripSortStrategyFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -55,7 +59,6 @@ class SearchServiceImplTest {
     @Mock
     private BusRepository busRepository;
 
-    @InjectMocks
     private SearchServiceImpl searchService;
 
     private Route testRoute;
@@ -88,6 +91,20 @@ class SearchServiceImplTest {
                 .baseFare(new BigDecimal("1200.00"))
                 .tripStatus(TripStatus.SCHEDULED)
                 .build();
+
+        TripSortStrategyFactory strategyFactory = new TripSortStrategyFactory(List.of(
+                new DepartureTimeSortStrategy(),
+                new FareSortStrategy(),
+                new SeatAvailabilitySortStrategy()
+        ));
+
+        searchService = new SearchServiceImpl(
+                routeRepository,
+                tripRepository,
+                bookingSeatRepository,
+                busRepository,
+                strategyFactory
+        );
     }
 
     // =========================================================================
@@ -175,6 +192,52 @@ class SearchServiceImplTest {
 
         assertThat(response.getSourceCities()).containsExactly("Colombo", "Galle", "Kandy");
         assertThat(response.getDestinationCities()).containsExactly("Badulla", "Jaffna", "Kandy");
+    }
+
+    @Test
+    @DisplayName("Should sort search results by fare ascending using FareSortStrategy")
+    void searchTrips_SortByFare_UsesStrategy() {
+        Trip tripCheap = Trip.builder()
+                .tripId(11L)
+                .bus(testBus)
+                .route(testRoute)
+                .departureTime(LocalDate.now().plusDays(1).atTime(9, 0))
+                .arrivalTime(LocalDate.now().plusDays(1).atTime(12, 30))
+                .baseFare(new BigDecimal("900.00"))
+                .tripStatus(TripStatus.SCHEDULED)
+                .build();
+
+        Trip tripExpensive = Trip.builder()
+                .tripId(12L)
+                .bus(testBus)
+                .route(testRoute)
+                .departureTime(LocalDate.now().plusDays(1).atTime(10, 0))
+                .arrivalTime(LocalDate.now().plusDays(1).atTime(13, 30))
+                .baseFare(new BigDecimal("1500.00"))
+                .tripStatus(TripStatus.SCHEDULED)
+                .build();
+
+        TripSearchRequest request = TripSearchRequest.builder()
+                .sourceCity("Colombo")
+                .destinationCity("Kandy")
+                .travelDate(LocalDate.now().plusDays(1))
+                .sortBy("fareAsc")
+                .build();
+
+        when(tripRepository.searchTrips(
+                eq("Colombo"), eq("Kandy"), any(LocalDateTime.class), any(LocalDateTime.class),
+                eq(null), eq(null), eq(null), eq(TripStatus.SCHEDULED)
+        )).thenReturn(List.of(tripExpensive, tripCheap));
+
+        when(bookingSeatRepository.countActiveBookedSeatsByTripIds(any())).thenReturn(Collections.emptyList());
+
+        List<TripSearchResponse> responses = searchService.searchTrips(request);
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).getTripId()).isEqualTo(11L);
+        assertThat(responses.get(0).getBaseFare()).isEqualByComparingTo("900.00");
+        assertThat(responses.get(1).getTripId()).isEqualTo(12L);
+        assertThat(responses.get(1).getBaseFare()).isEqualByComparingTo("1500.00");
     }
 
     // =========================================================================
@@ -300,6 +363,22 @@ class SearchServiceImplTest {
     }
 
     @Test
+    @DisplayName("createTrip - Should throw IllegalArgumentException when departure time is in the past")
+    void createTrip_PastDepartureTime_ThrowsException() {
+        TripCreateRequest request = TripCreateRequest.builder()
+                .routeId(1L)
+                .busId(1L)
+                .departureTime(LocalDateTime.now().minusHours(2))
+                .arrivalTime(LocalDateTime.now().plusHours(1))
+                .baseFare(new BigDecimal("1250.00"))
+                .build();
+
+        assertThatThrownBy(() -> searchService.createTrip(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Departure time cannot be in the past");
+    }
+
+    @Test
     @DisplayName("deleteTrip - Should cancel trip if active bookings exist")
     void deleteTrip_WithBookings_SetsStatusCancelled() {
         when(tripRepository.findById(10L)).thenReturn(Optional.of(testTrip));
@@ -390,5 +469,104 @@ class SearchServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getTripId()).isEqualTo(200L);
         verify(tripRepository).saveAll(any());
+    }
+
+    // =========================================================================
+    // Operator Bus & Fleet CRUD Tests
+    // =========================================================================
+
+    @Test
+    @DisplayName("createBus - Should register new bus and auto-generate seat layout")
+    void createBus_Success() {
+        BusRequest request = BusRequest.builder()
+                .busNumber("WP ND-2002")
+                .busType(BusType.LUXURY)
+                .totalSeats(40)
+                .operatorName("Southern Express")
+                .build();
+
+        when(busRepository.existsByBusNumberIgnoreCase("WP ND-2002")).thenReturn(false);
+        when(busRepository.save(any(Bus.class))).thenAnswer(inv -> {
+            Bus b = inv.getArgument(0);
+            b.setBusId(50L);
+            return b;
+        });
+
+        BusResponse response = searchService.createBus(request);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getBusId()).isEqualTo(50L);
+        assertThat(response.getBusNumber()).isEqualTo("WP ND-2002");
+        assertThat(response.getBusType()).isEqualTo(BusType.LUXURY);
+        assertThat(response.getTotalSeats()).isEqualTo(40);
+        verify(busRepository).save(any(Bus.class));
+    }
+
+    @Test
+    @DisplayName("createBus - Should throw exception if bus plate number already exists")
+    void createBus_DuplicatePlate_ThrowsException() {
+        BusRequest request = BusRequest.builder()
+                .busNumber("ND-1001")
+                .busType(BusType.AC)
+                .totalSeats(40)
+                .operatorName("Superline Express")
+                .build();
+
+        when(busRepository.existsByBusNumberIgnoreCase("ND-1001")).thenReturn(true);
+
+        assertThatThrownBy(() -> searchService.createBus(request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already exists");
+    }
+
+    @Test
+    @DisplayName("updateBus - Should update bus details successfully")
+    void updateBus_Success() {
+        BusRequest request = BusRequest.builder()
+                .busNumber("ND-1001-UPDATED")
+                .busType(BusType.SLEEPER)
+                .totalSeats(40)
+                .operatorName("Superline Premier")
+                .build();
+
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(busRepository.existsByBusNumberIgnoreCaseAndBusIdNot("ND-1001-UPDATED", 1L)).thenReturn(false);
+        when(busRepository.save(any(Bus.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        BusResponse response = searchService.updateBus(1L, request);
+
+        assertThat(response.getBusNumber()).isEqualTo("ND-1001-UPDATED");
+        assertThat(response.getBusType()).isEqualTo(BusType.SLEEPER);
+        assertThat(response.getOperatorName()).isEqualTo("Superline Premier");
+    }
+
+    @Test
+    @DisplayName("deleteBus - Should delete bus when no active trips depend on it")
+    void deleteBus_Success() {
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.countByBus_BusId(1L)).thenReturn(0L);
+
+        searchService.deleteBus(1L);
+
+        verify(busRepository).delete(testBus);
+    }
+
+    @Test
+    @DisplayName("deleteBus - Should throw IllegalStateException when active trips are assigned to the bus")
+    void deleteBus_WithAssignedTrips_ThrowsException() {
+        when(busRepository.findById(1L)).thenReturn(Optional.of(testBus));
+        when(tripRepository.countByBus_BusId(1L)).thenReturn(4L);
+
+        assertThatThrownBy(() -> searchService.deleteBus(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("scheduled trip(s) depend on it");
+    }
+
+    @Test
+    @DisplayName("getAvailableBusTypes - Should return all defined bus types")
+    void getAvailableBusTypes_Success() {
+        List<String> types = searchService.getAvailableBusTypes();
+
+        assertThat(types).contains("AC", "NON_AC", "LUXURY", "SLEEPER", "SEMI_LUXURY", "SUPER_LUXURY");
     }
 }
