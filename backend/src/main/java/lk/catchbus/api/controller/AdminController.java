@@ -53,6 +53,20 @@ public class AdminController {
         return Map.of("success", true, "status", status);
     }
 
+    @PatchMapping("/users/{id}/position")
+    public Map<String,Object> updatePosition(@PathVariable long id, @RequestBody Map<String,String> body) {
+        String role = body.getOrDefault("role", "").toUpperCase();
+        if (!Set.of("CONDUCTOR", "DRIVER").contains(role))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Position must be CONDUCTOR or DRIVER.");
+
+        int updated = jdbc.update("UPDATE users SET role=? WHERE user_id=? AND role IN ('CONDUCTOR','DRIVER')", role, id);
+        if (updated == 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only driver and conductor accounts can be reassigned.");
+
+        jdbc.update("UPDATE staff_assignments SET role=? WHERE user_id=? AND active=1", role, id);
+        return Map.of("success", true, "role", role);
+    }
+
     @DeleteMapping("/users/{id}")
     public Map<String,Object> deactivate(@PathVariable long id) {
         int updated = jdbc.update("UPDATE staff_profiles SET active=0 WHERE user_id=?", id);
