@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/dashboard")
@@ -184,26 +185,37 @@ public class AdminDashboardController {
 
     @PostMapping("/dispatch-summary")
     public ResponseEntity<ApiResponse<Void>> dispatchSummary(
-            @RequestParam String recipientRole) {
+            @RequestBody Map<String, String> payload) {
 
-        AnalyticsFilterRequest filter = new AnalyticsFilterRequest();
+        String to = payload.get("to");
+        String subject = payload.get("subject");
+        String body = payload.get("body");
 
-        RevenueSummaryResponse summary =
-                analyticsService.getRevenueSummary(filter);
+        if (to == null || to.isBlank()) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.success("Email address is required", null)
+            );
+        }
 
-        String body =
-                "Revenue: " + summary.getTotalRevenue()
-                        + ", Bookings: " + summary.getTotalBookings();
+        if (subject == null || subject.isBlank()) {
+            subject = "CatchBus LK - Daily Operational Summary";
+        }
+
+        if (body == null || body.isBlank()) {
+            return ResponseEntity.badRequest().body(
+                    ApiResponse.success("Email body is required", null)
+            );
+        }
 
         notificationDispatchService.dispatchOperationalSummary(
-                recipientRole,
-                "Monthly Operational Summary",
+                to,
+                subject,
                 body
         );
 
         return ResponseEntity.ok(
                 ApiResponse.success(
-                        "Summary dispatched to " + recipientRole,
+                        "Summary sent successfully to " + to,
                         null
                 )
         );

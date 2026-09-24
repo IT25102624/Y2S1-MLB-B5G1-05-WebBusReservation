@@ -52,7 +52,7 @@
         <button type="button" class="btn" onclick="sendSummary()">Send Summary</button>
     </form>
 
-    <!-- ERROR MESSAGE -->
+    <!-- ERROR / SUCCESS MESSAGE -->
     <div id="errorMessage" class="error-text"></div>
 
     <!-- LOADING -->
@@ -196,11 +196,43 @@
     </div>
 </div>
 
+<!-- ===================== SEND SUMMARY MODAL ===================== -->
+<div id="summaryModal" class="modal-backdrop" style="display: none;">
+    <div class="modal" style="max-width: 520px;">
+        <h3>Send Operational Summary</h3>
+
+        <div class="form-field">
+            <label for="summaryTo">To (Stakeholder Email)</label>
+            <input type="email" id="summaryTo" placeholder="e.g. manager@company.com">
+        </div>
+
+        <div class="form-field">
+            <label for="summarySubject">Subject</label>
+            <input type="text" id="summarySubject" value="CatchBus LK - Daily Operational Summary">
+        </div>
+
+        <div class="form-field">
+            <label for="summaryBody">Message</label>
+            <textarea id="summaryBody" rows="10"
+                      style="width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font-size:0.9rem; background:#fafafa; resize:vertical; font-family:inherit;"></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="btn primary" id="summarySendBtn" onclick="confirmSendSummary()">
+                Send Email
+            </button>
+            <button type="button" class="btn" onclick="closeSummaryModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="adminApi.js"></script>
 
 <script>
     // ===================== STATE =====================
-    let currentEditId = null;          // null = create mode
+    let currentEditId = null;
     let routeToDeleteId = null;
 
     // ===================== HELPERS =====================
@@ -225,12 +257,38 @@
         const el = document.getElementById("errorMessage");
         el.textContent = "❌ " + message;
         el.style.display = "block";
+        el.style.color = "";
+        el.style.background = "";
+        el.style.border = "";
+        el.style.borderLeft = "";
     }
 
     function clearError() {
         const el = document.getElementById("errorMessage");
         el.textContent = "";
         el.style.display = "none";
+        el.style.color = "";
+        el.style.background = "";
+        el.style.border = "";
+        el.style.borderLeft = "";
+    }
+
+    function showSuccessMessage(message) {
+        const el = document.getElementById("errorMessage");
+        el.textContent = "✅ " + message;
+        el.style.display = "block";
+        el.style.color = "#2f7d32";
+        el.style.background = "#f4fbf4";
+        el.style.border = "1px solid #a8d5a8";
+        el.style.borderLeft = "4px solid #2f7d32";
+
+        setTimeout(() => {
+            el.style.display = "none";
+            el.style.color = "";
+            el.style.background = "";
+            el.style.border = "";
+            el.style.borderLeft = "";
+        }, 6000);
     }
 
     function showValidationError(input, errorId, message) {
@@ -333,7 +391,6 @@
                 adminApi.getRoutePerformance(filters)
             ]);
 
-            // KPI Cards
             document.getElementById("totalRevenue").textContent = formatCurrency(revenue?.totalRevenue);
             document.getElementById("totalBookings").textContent = Number(revenue?.totalBookings ?? 0);
             document.getElementById("totalSeatsSold").textContent = Number(revenue?.totalSeatsSold ?? 0);
@@ -341,7 +398,6 @@
             document.getElementById("activeBuses").textContent = Number(summary?.totalActiveBuses ?? 0);
             document.getElementById("totalRoutes").textContent = Number(summary?.totalRoutes ?? 0);
 
-            // Revenue Details
             const totalRev = Number(revenue?.totalRevenue ?? 0);
             const totalBook = Number(revenue?.totalBookings ?? 0);
             const avgTicket = totalBook > 0 ? totalRev / totalBook : 0;
@@ -447,7 +503,7 @@
             const editButton = document.createElement("button");
             editButton.type = "button";
             editButton.className = "btn edit-btn";
-            editButton.textContent = "✏️ Edit";
+            editButton.textContent = " Edit";
             editButton.addEventListener("click", () => {
                 openEditModal(routeId, sourceCity, destinationCity, estimatedDurationHours);
             });
@@ -510,7 +566,6 @@
         const durationStr = document.getElementById("modalDuration").value.trim();
         const estimatedDurationHours = parseFloat(durationStr);
 
-        // Validation
         if (!source || !destination) {
             showError("Source city and destination city are required.");
             return;
@@ -528,14 +583,12 @@
 
         try {
             if (currentEditId === null) {
-                // CREATE
                 await adminApi.createRoute({
                     sourceCity: source,
                     destinationCity: destination,
                     estimatedDurationHours
                 });
             } else {
-                // UPDATE
                 await adminApi.updateRoute(currentEditId, {
                     sourceCity: source,
                     destinationCity: destination,
@@ -576,6 +629,104 @@
         }
     }
 
+    // ===================== SEND SUMMARY MODAL =====================
+    function openSummaryModal() {
+        const totalRevenue = document.getElementById("totalRevenue")?.textContent || "LKR 0.00";
+        const totalBookings = document.getElementById("totalBookings")?.textContent || "0";
+        const seatsSold = document.getElementById("totalSeatsSold")?.textContent || "0";
+        const occupancy = document.getElementById("occupancyRate")?.textContent || "0%";
+        const activeBuses = document.getElementById("activeBuses")?.textContent || "0";
+        const totalRoutes = document.getElementById("totalRoutes")?.textContent || "0";
+
+        const today = new Date().toLocaleDateString("en-LK", {
+            year: "numeric", month: "long", day: "numeric"
+        });
+
+        const defaultBody =
+`Dear Stakeholder,
+
+Please find below the operational summary for CatchBus LK.
+
+Date: ${today}
+
+----------------------------------------
+Total Revenue      : ${totalRevenue}
+Total Bookings     : ${totalBookings}
+Seats Sold         : ${seatsSold}
+Occupancy Rate     : ${occupancy}
+Active Buses       : ${activeBuses}
+Total Routes       : ${totalRoutes}
+----------------------------------------
+
+This is an automated report from the Business Analytics Dashboard.
+
+Best regards,
+CatchBus LK System`;
+
+        document.getElementById("summaryTo").value = "";
+        document.getElementById("summarySubject").value = "CatchBus LK - Daily Operational Summary";
+        document.getElementById("summaryBody").value = defaultBody;
+
+        document.getElementById("summaryModal").style.display = "flex";
+    }
+
+    function closeSummaryModal() {
+        document.getElementById("summaryModal").style.display = "none";
+    }
+
+    async function confirmSendSummary() {
+        const to = document.getElementById("summaryTo").value.trim();
+        const subject = document.getElementById("summarySubject").value.trim();
+        const body = document.getElementById("summaryBody").value.trim();
+
+        if (!to) {
+            showError("Please enter a stakeholder email address.");
+            return;
+        }
+        if (!subject) {
+            showError("Please enter a subject.");
+            return;
+        }
+        if (!body) {
+            showError("Please enter a message.");
+            return;
+        }
+
+        const btn = document.getElementById("summarySendBtn");
+        const originalText = btn ? btn.textContent : "Send Email";
+
+        try {
+            clearError();
+
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = "Sending...";
+            }
+
+            await adminApi.dispatchSummary({
+                to: to,
+                subject: subject,
+                body: body
+            });
+
+            closeSummaryModal();
+            showSuccessMessage("Operational summary successfully sent to " + to);
+
+        } catch (error) {
+            console.error(error);
+            showError(error.message || "Failed to send operational summary.");
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+    }
+
+    function sendSummary() {
+        openSummaryModal();
+    }
+
     // ===================== OTHER FUNCTIONS =====================
     function applyFilters(event) {
         event.preventDefault();
@@ -610,18 +761,6 @@
         } catch (error) {
             console.error(error);
             showError(error.message || "Export failed.");
-        }
-    }
-
-    async function sendSummary() {
-        try {
-            clearError();
-            const recipientRole = document.getElementById("recipientRole")?.value || "ADMIN";
-            await adminApi.dispatchSummary(recipientRole);
-            alert("Operational summary sent successfully.");
-        } catch (error) {
-            console.error(error);
-            showError(error.message || "Failed to send operational summary.");
         }
     }
 
@@ -667,12 +806,15 @@
             }
         });
 
-        // Close modal when clicking outside
+        // Close modals when clicking outside
         document.getElementById("routeModal").addEventListener("click", function (e) {
             if (e.target === this) closeRouteModal();
         });
         document.getElementById("deleteModal").addEventListener("click", function (e) {
             if (e.target === this) closeDeleteModal();
+        });
+        document.getElementById("summaryModal").addEventListener("click", function (e) {
+            if (e.target === this) closeSummaryModal();
         });
 
         loadDashboard(false);

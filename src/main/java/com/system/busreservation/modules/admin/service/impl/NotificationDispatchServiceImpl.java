@@ -1,17 +1,26 @@
 package com.system.busreservation.modules.admin.service.impl;
 
 import com.system.busreservation.modules.admin.service.NotificationDispatchService;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
 public class NotificationDispatchServiceImpl implements NotificationDispatchService {
 
+    private final JavaMailSender mailSender;
+
     @Override
-    public void dispatchOperationalSummary(String recipientRole, String subject, String bodySummary) {
-        // TODO: replace with a real call into modules.notification once Module 5
-        // exposes its client/service bean or REST endpoint.
-        log.info("[Notification Gateway] to={} subject='{}' summary='{}'", recipientRole, subject, bodySummary);
+    public void dispatchOperationalSummary(String toEmail, String subject, String bodySummary) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(bodySummary);
+        message.setFrom("your-email@gmail.com");   // ඔයාගේ Gmail එක
+
+        mailSender.send(message);
     }
 }

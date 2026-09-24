@@ -86,9 +86,12 @@ const adminApi = {
         return request(`/dashboard/export/pdf${toQuery(filters)}`);
     },
 
-    dispatchSummary(recipientRole) {
-        return request(`/dashboard/dispatch-summary${toQuery({ recipientRole })}`, {
-            method: "POST"
+    // Updated: now sends full email payload (to, subject, body)
+    dispatchSummary(payload) {
+        return request(`/dashboard/dispatch-summary`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         });
     },
 
