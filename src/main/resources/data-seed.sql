@@ -21,10 +21,10 @@ GO
 -- 1. SEED USERS (BCrypt hashed passwords for 'Password@123')
 INSERT INTO dbo.users (full_name, email, phone_number, password_hash, role, created_at)
 VALUES 
-    (N'System Administrator', N'admin@busreservation.lk', N'+94771234567', N'$2a$10$wNqvVvK.5sAec/3Kq4N6ueq6jWjUeO12eN1vN.r2g1Uf9PzO3lS8y', N'ADMIN', SYSUTCDATETIME()),
-    (N'Dohan Imanjith', N'dohan@busreservation.lk', N'+94719876543', N'$2a$10$wNqvVvK.5sAec/3Kq4N6ueq6jWjUeO12eN1vN.r2g1Uf9PzO3lS8y', N'PASSENGER', SYSUTCDATETIME()),
-    (N'Kasun Perera', N'conductor.kandy@busreservation.lk', N'+94762345678', N'$2a$10$wNqvVvK.5sAec/3Kq4N6ueq6jWjUeO12eN1vN.r2g1Uf9PzO3lS8y', N'CONDUCTOR', SYSUTCDATETIME()),
-    (N'Nimal Silva', N'driver.kandy@busreservation.lk', N'+94763456789', N'$2a$10$wNqvVvK.5sAec/3Kq4N6ueq6jWjUeO12eN1vN.r2g1Uf9PzO3lS8y', N'DRIVER', SYSUTCDATETIME());
+    (N'System Administrator', N'admin@busreservation.lk', N'+94771234567', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'ADMIN', SYSUTCDATETIME()),
+    (N'Dohan Imanjith', N'dohan@busreservation.lk', N'+94719876543', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Kasun Perera', N'conductor.kandy@busreservation.lk', N'+94762345678', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'CONDUCTOR', SYSUTCDATETIME()),
+    (N'Nimal Silva', N'driver.kandy@busreservation.lk', N'+94763456789', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'DRIVER', SYSUTCDATETIME());
 GO
 
 -- 2. SEED BUSES
