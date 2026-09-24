@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showCreate, setShowCreate] = useState(false)
+  const [positionSaving, setPositionSaving] = useState(null)
 
   const load = async (role) => {
     setLoading(true)
@@ -41,6 +42,18 @@ export default function AdminDashboard() {
     if (!confirm('Deactivate this account?')) return
     await client.delete(`/admin/users/${id}`)
     load(roleFilter)
+  }
+
+  const updatePosition = async (id, role) => {
+    setPositionSaving(id)
+    try {
+      await client.patch(`/admin/users/${id}/position`, { role })
+      await load(roleFilter)
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not change this staff position.')
+    } finally {
+      setPositionSaving(null)
+    }
   }
 
   return (
@@ -108,6 +121,18 @@ export default function AdminDashboard() {
                 <td className="px-5 py-3 text-slate-400">{u.status}</td>
                 <td className="px-5 py-3 font-mono text-xs text-slate-500">{u.employeeId || '—'}</td>
                 <td className="px-5 py-3 text-right space-x-2">
+                  {(u.role === 'CONDUCTOR' || u.role === 'DRIVER') && (
+                    <select
+                      value={u.role}
+                      disabled={positionSaving === u.id}
+                      onChange={(e) => updatePosition(u.id, e.target.value)}
+                      aria-label={`Change position for ${u.fullName}`}
+                      className="mr-2 rounded-md border border-white/10 bg-ops-950 px-2 py-1 text-xs text-slate-200 outline-none focus:border-amber-500/60 disabled:opacity-50"
+                    >
+                      <option value="CONDUCTOR">Conductor</option>
+                      <option value="DRIVER">Driver</option>
+                    </select>
+                  )}
                   {u.status !== 'ACTIVE' && (
                     <button onClick={() => updateStatus(u.id, 'ACTIVE')} className="text-xs font-semibold text-signal-cyan hover:underline">Activate</button>
                   )}
