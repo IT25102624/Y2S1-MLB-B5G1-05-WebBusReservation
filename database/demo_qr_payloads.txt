@@ -1,0 +1,14 @@
+CatchBusLK demo QR payloads
+============================
+
+Conductor QR payload:
+CONDUCTOR-DEMO-QR
+
+Driver QR payload:
+DRIVER-DEMO-QR
+
+You can encode each exact text value into a QR code for camera testing.
+The login page also accepts a URL such as:
+http://localhost:5173/staff/login?role=CONDUCTOR&token=CONDUCTOR-DEMO-QR
+
+Do not use these demo tokens in production.
