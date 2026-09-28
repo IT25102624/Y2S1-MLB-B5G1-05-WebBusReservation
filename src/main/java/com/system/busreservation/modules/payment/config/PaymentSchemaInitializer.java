@@ -19,7 +19,6 @@ public class PaymentSchemaInitializer implements CommandLineRunner {
     public void run(String... args) {
         addTicketColumns();
         createPaymentCardsTable();
-        normalizeCardBrands();
         createBankDetailsTable();
         createRefundsTable();
         addRefundBankLink();
@@ -69,22 +68,6 @@ public class PaymentSchemaInitializer implements CommandLineRunner {
                     );
                     CREATE INDEX IX_payment_cards_user ON dbo.payment_cards(user_id, is_default DESC);
                 END
-                """);
-    }
-
-    private void normalizeCardBrands() {
-        jdbc.execute("""
-                IF OBJECT_ID('dbo.payment_cards', 'U') IS NOT NULL
-                    UPDATE dbo.payment_cards SET card_brand=CASE
-                        WHEN TRY_CONVERT(INT, RIGHT(RTRIM(card_last_four),1)) % 2=0 THEN 'VISA'
-                        ELSE 'MASTERCARD' END
-                """);
-        jdbc.execute("""
-                IF OBJECT_ID('dbo.payments', 'U') IS NOT NULL
-                    UPDATE dbo.payments SET card_brand=CASE
-                        WHEN TRY_CONVERT(INT, RIGHT(RTRIM(card_last_four),1)) % 2=0 THEN 'VISA'
-                        ELSE 'MASTERCARD' END
-                WHERE card_last_four IS NOT NULL
                 """);
     }
 

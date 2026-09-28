@@ -319,9 +319,9 @@ public class PaymentService {
                 SELECT user_id,?,'REFUND_REQUEST','New refund request',?,0,SYSUTCDATETIME()
                 FROM users WHERE role='ADMIN'
                 """, bookingId, "Passenger: " + passenger.getFullName() + "\nBooking: #" + bookingId
-                        + "\nRefund amount: LKR " + refundable + "\nAccount holder: " + holder
-                        + "\nBank: " + bank + "\nBranch: " + branch + "\nAccount number: " + account
-                        + "\nReason: " + request.getOrDefault("reason", "Passenger cancellation"));
+                + "\nRefund amount: LKR " + refundable + "\nAccount holder: " + holder
+                + "\nBank: " + bank + "\nBranch: " + branch + "\nAccount number: " + account
+                + "\nReason: " + request.getOrDefault("reason", "Passenger cancellation"));
         notifyUser(passenger.getUserId(), bookingId, "REFUND_REQUEST_SENT", "Refund request sent",
                 "Your refund request for booking #" + bookingId + " was sent successfully.\nRefund amount: LKR "
                         + refundable + "\nBank: " + bank + " - " + branch + "\nAccount: " + account);
@@ -558,9 +558,8 @@ public class PaymentService {
         if (!number.matches("\\d{16}")) {
             throw new IllegalArgumentException("The card number must contain exactly 16 digits.");
         }
-        if (!number.startsWith("4") && !number.startsWith("5")) {
-            throw new IllegalArgumentException("Only Visa and Mastercard are accepted.");
-        }
+        cardBrand(number);
+        if (!passesLuhnCheck(number)) throw new IllegalArgumentException("Enter a valid Visa or Mastercard number.");
         validateExpiry(expiry);
     }
 
@@ -574,8 +573,28 @@ public class PaymentService {
     }
 
     private String cardBrand(String card) {
-        int finalDigit = Character.digit(card.charAt(card.length() - 1), 10);
-        return finalDigit % 2 == 0 ? "VISA" : "MASTERCARD";
+        if (card.matches("4\\d{15}")) return "VISA";
+        if (card.matches("5[1-5]\\d{14}")) return "MASTERCARD";
+        if (card.matches("2\\d{15}")) {
+            int prefix = Integer.parseInt(card.substring(0, 4));
+            if (prefix >= 2221 && prefix <= 2720) return "MASTERCARD";
+        }
+        throw new IllegalArgumentException("Only standard Visa and Mastercard numbers are accepted.");
+    }
+
+    private boolean passesLuhnCheck(String card) {
+        int sum = 0;
+        boolean doubleDigit = false;
+        for (int i = card.length() - 1; i >= 0; i--) {
+            int digit = card.charAt(i) - '0';
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit > 9) digit -= 9;
+            }
+            sum += digit;
+            doubleDigit = !doubleDigit;
+        }
+        return sum % 10 == 0;
     }
 
     private String cleanEmail(String email) {
