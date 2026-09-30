@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchBusLK — Conductor Boarding Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #10b981; --cyan-dark: #059669; --bg: #090d16;
+      --card-bg: #111827; --border: rgba(16, 185, 129, 0.25);
+      --ink: #f8fafc; --ink-light: #94a3b8; --rose: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 60px; }
+    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; }
+    .nav-wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; }
+    .brand-title span { color: var(--cyan); }
+    .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .logout-btn:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
+
+    .main-wrap { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+    .badge { display: inline-block; background: rgba(94, 234, 212, 0.15); color: var(--cyan); font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 9999px; letter-spacing: 1px; border: 1px solid var(--border); }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #ffffff; margin-top: 8px; }
+    
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+    @media (max-width: 800px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+    .counter-box { background: rgba(0,0,0,0.4); border-radius: 18px; padding: 18px; display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+    .count-val { font-family: 'Space Grotesk', monospace; font-size: 32px; font-weight: 800; color: var(--cyan); }
+
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .form-group input { width: 100%; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(0,0,0,0.5); color: #ffffff; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: var(--cyan); }
+    .action-btn { width: 100%; background: var(--cyan); color: #090d16; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .action-btn:hover { background: #2dd4bf; }
+    
+    .scan-btn { width: 100%; background: rgba(255,255,255,0.06); color: var(--cyan); border: 1px dashed var(--cyan); border-radius: 12px; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    .scan-btn:hover { background: rgba(94, 234, 212, 0.1); }
+
+    .msg-box { margin-top: 16px; padding: 12px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; display: none; }
+    .msg-success { background: rgba(94, 234, 212, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
+    .msg-error { background: rgba(244, 63, 94, 0.15); color: var(--rose); border: 1px solid var(--rose); }
+
+    .video-preview { width: 100%; height: 200px; background: #000; border-radius: 12px; margin-top: 12px; display: none; object-fit: cover; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <div class="brand-title">Catch<span>Bus</span>LK &middot; Conductor Console</div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span style="font-size:13px; color:var(--ink-light);" id="staffLabel">Demo Conductor (CON-001)</span>
+        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token')">Sign out</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <span class="badge">Boarding &amp; Manifest Controller</span>
+    <h1>Passenger Ticket &amp; QR Verification</h1>
+    <p style="color:var(--ink-light); font-size:14px; margin-top:4px;">Scan passenger tickets or enter booking references manually to confirm boarding in real-time.</p>
+
+    <div class="grid-layout">
+      <!-- Boarding Form Card -->
+      <section class="card">
+        <h2 class="card-title">Verify &amp; Board Passenger</h2>
+        <p style="color:var(--ink-light); font-size:13px; margin-bottom:18px;">Type reference (e.g. <code>CB-2026-0001</code>) or trigger camera scan.</p>
+
+        <div class="msg-box msg-success" id="successBox"></div>
+        <div class="msg-box msg-error" id="errorBox"></div>
+
+        <form id="boardForm" onsubmit="handleBoarding(event)">
+          <div class="form-group">
+            <label>Passenger Booking Reference / QR Payload</label>
+            <input type="text" id="refInput" placeholder="e.g. CB390192 or 3" required>
+          </div>
+
+          <div class="form-group">
+            <label>Remarks / Halting Point (Optional)</label>
+            <input type="text" id="remarksInput" placeholder="e.g. Boarded at Expressway Halt">
+          </div>
+
+          <button type="submit" class="action-btn">Verify &amp; Mark Boarded</button>
+        </form>
+
+        <button type="button" class="scan-btn" onclick="toggleCamera()">&#128247; Scan Passenger QR with Camera</button>
+        <video id="cameraPreview" class="video-preview" autoplay playsinline></video>
+      </section>
+
+      <!-- Manifest & Trip Info Card -->
+      <section class="card">
+        <h2 class="card-title">Assigned Trip Manifest</h2>
+        <div class="counter-box">
+          <div>
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-light);">Boarded Passengers</div>
+            <div style="font-size:13px; color:#cbd5e1; margin-top:2px;" id="tripStatusLabel">Trip Status: SCHEDULED</div>
+          </div>
+          <div class="count-val" id="boardedCountDisplay">0 / 52</div>
+        </div>
+
+        <div style="margin-top:24px; font-size:14px; line-height:2; border-top:1px solid rgba(255,255,255,0.08); padding-top:16px;">
+          <div><strong style="color:var(--ink-light);">Assigned Bus:</strong> <span id="busNumberDisplay" style="color:#ffffff; font-weight:700;">CBL-001 (CatchBusLK Luxury)</span></div>
+          <div><strong style="color:var(--ink-light);">Assigned Route:</strong> <span id="routeDisplay" style="color:#ffffff; font-weight:700;">Colombo &#8594; Kandy (3.25h)</span></div>
+          <div><strong style="color:var(--ink-light);">Scheduled Departure:</strong> <span id="depDisplay" style="color:#ffffff; font-weight:700;">Today &middot; 08:30 AM</span></div>
+          <div><strong style="color:var(--ink-light);">Preceding Bus:</strong> <span id="prevBusDisplay" style="color:var(--cyan); font-weight:700;">CBL-000 (Departed 1h ago)</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let boardedCount = 0;
+    const totalSeats = 52;
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem('auth_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+      return headers;
+    }
+
+    async function loadDashboard() {
+      try {
+        const userInfo = localStorage.getItem('user_info');
+        if (userInfo) {
+          const u = JSON.parse(userInfo);
+          const lbl = document.getElementById('conductorLabel');
+          if (lbl) lbl.innerText = `${u.fullName || 'Demo Conductor'} (${u.email || 'CON-001'})`;
+        }
+
+        const res = await fetch('/api/v1/staff/dashboard', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.data?.assignedTrip) {
+          const trip = data.data.assignedTrip;
+          document.getElementById('busNumberDisplay').innerText = `${trip.busNumber} (${trip.operatorName || 'CatchBusLK'})`;
+          document.getElementById('routeDisplay').innerText = `${trip.sourceCity} → ${trip.destinationCity}`;
+          document.getElementById('tripStatusLabel').innerText = `Trip Status: ${trip.tripStatus || 'IN_TRANSIT'}`;
+        }
+        if (data.data?.precedingBus) {
+          const p = data.data.precedingBus;
+          document.getElementById('prevBusDisplay').innerText = `${p.busNumber} (Active on Route)`;
+        }
+      } catch (e) {
+        console.error('Error loading conductor dashboard:', e);
+      }
+    }
+
+    async function handleBoarding(e) {
+      e.preventDefault();
+      const ref = document.getElementById('refInput').value.trim();
+      const remarks = document.getElementById('remarksInput').value.trim();
+      const sBox = document.getElementById('successBox');
+      const eBox = document.getElementById('errorBox');
+      sBox.style.display = 'none';
+      eBox.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/v1/conductor/board', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ bookingReference: ref, remarks })
+        });
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.message || 'Ticket boarding verification failed.');
+        }
+
+        boardedCount = json.data?.boardedCount || (boardedCount + 1);
+        document.getElementById('boardedCountDisplay').innerText = `${boardedCount} / ${totalSeats}`;
+        sBox.innerText = `Passenger ticket [${ref}] confirmed! Marked as BOARDED at ${new Date().toLocaleTimeString()}. Total boarded: ${boardedCount}.`;
+        sBox.style.display = 'block';
+        document.getElementById('refInput').value = '';
+        document.getElementById('remarksInput').value = '';
+      } catch (err) {
+        eBox.innerText = err.message;
+        eBox.style.display = 'block';
+      }
+    }
+
+    function toggleCamera() {
+      const video = document.getElementById('cameraPreview');
+      if (video.style.display === 'block') {
+        video.style.display = 'none';
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+        }
+      } else {
+        video.style.display = 'block';
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => {
+              alert('Camera not available or blocked in this browser. Please enter ticket reference manually.');
+              video.style.display = 'none';
+            });
+        }
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

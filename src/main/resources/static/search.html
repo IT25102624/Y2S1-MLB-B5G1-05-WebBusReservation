@@ -3,30 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Reservation System | Search Routes & Schedules</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>CatchBusLK — Operator &amp; Dispatch Console</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary: #0f172a;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-dark: #047857;
+            --primary-light: #ecfdf5;
+            --primary-border: rgba(16, 185, 129, 0.25);
+            --secondary: #090d16;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --success: #16a34a;
-            --warning: #d97706;
-            --danger: #dc2626;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 16px;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        }
+
+        h1, h2, h3, .section-title, .modal-title, .logo, .time, .time-badge {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
@@ -68,8 +77,8 @@
 
         .navbar-brand span {
             font-size: 0.8rem;
-            background: #eff6ff;
-            color: var(--primary);
+            background: #ecfdf5;
+            color: var(--primary-dark);
             padding: 2px 10px;
             border-radius: 6px;
             font-weight: 600;
@@ -166,7 +175,7 @@
         .form-group select:focus,
         .form-group input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
         }
 
         .actions {
@@ -359,7 +368,7 @@
 
         .toolbar-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
 
         .toolbar-select {
@@ -546,7 +555,7 @@
         .pill-btn:hover {
             border-color: var(--primary);
             color: var(--primary);
-            background: #eff6ff;
+            background: #ecfdf5;
         }
 
         .pill-btn.active {
@@ -592,21 +601,20 @@
     <!-- Top Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-brand">
-            <span class="logo">🚍</span>
-            <div>
-                <h1>Bus Reservation System</h1>
-                <span>Search Routes & Schedules</span>
-            </div>
+            <a href="index.html" class="logo" style="text-decoration:none; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:800; color:#090d16;">Catch<span style="color:var(--primary);">Bus</span>LK</a>
+            <span id="navBrandBadge" style="font-size:0.75rem; background:var(--primary-light); color:var(--primary-dark); padding:3px 10px; border-radius:9999px; font-weight:700; border:1px solid var(--primary-border); letter-spacing:0.5px;">PASSENGER SEARCH</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <!-- Nav Links -->
-            <div style="display:flex; gap:6px;">
-                <a href="/admin.html" style="padding:8px 14px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🛡️ Sign In &amp; Portal</a>
+            <div style="display:flex; gap:6px; align-items:center;">
+                <a href="index.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🏠 Home</a>
+                <a href="schedule.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">📅 Timetable</a>
+                <a href="admin.html?tab=portal" id="navAdminPortalLink" style="display:none; padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🛡️ Admin Portal</a>
             </div>
 
-            <!-- Mode Toggle Switcher -->
-            <div class="mode-toggle-group">
+            <!-- Mode Toggle Switcher (Operator mode strictly for Admins) -->
+            <div class="mode-toggle-group" id="modeToggleGroup" style="display:none;">
                 <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">
                     🔍 Passenger View
                 </button>
@@ -614,6 +622,9 @@
                     🛠️ Operator Mode
                 </button>
             </div>
+
+            <!-- User Auth Action Chip / Sign In -->
+            <div id="navAuthAction"></div>
         </div>
     </nav>
 
@@ -1051,10 +1062,10 @@
                         </label>
                     </div>
 
-                    <div id="recurringOptionsSection" style="display: none; margin-top: 12px; padding: 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe;">
+                    <div id="recurringOptionsSection" style="display: none; margin-top: 12px; padding: 14px; background: #ecfdf5; border-radius: 8px; border: 1px solid #a7f3d0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
                             <div class="form-group">
-                                <label for="modalTripRecurrenceType" style="font-size: 0.8rem; color: #1e3a8a;">Recurrence Pattern</label>
+                                <label for="modalTripRecurrenceType" style="font-size: 0.8rem; color: #065f46;">Recurrence Pattern</label>
                                 <select id="modalTripRecurrenceType" onchange="updateRecurringSummary()">
                                     <option value="DAILY">Every Day (Daily)</option>
                                     <option value="WEEKDAYS">Weekdays (Mon - Fri)</option>
@@ -1062,7 +1073,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="modalTripRepeatDays" style="font-size: 0.8rem; color: #1e3a8a;">Repeat For</label>
+                                <label for="modalTripRepeatDays" style="font-size: 0.8rem; color: #065f46;">Repeat For</label>
                                 <select id="modalTripRepeatDays" onchange="updateRecurringSummary()">
                                     <option value="7">Next 7 Days (1 Week)</option>
                                     <option value="14">Next 14 Days (2 Weeks)</option>
@@ -1070,7 +1081,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div id="recurringSummaryText" style="font-size: 0.82rem; color: #1e40af; font-weight: 500;">
+                        <div id="recurringSummaryText" style="font-size: 0.82rem; color: #047857; font-weight: 600;">
                             ⚡ Will schedule 7 trips matching this timetable.
                         </div>
                     </div>
@@ -1160,9 +1171,9 @@
                     </div>
                 </div>
 
-                <div style="background: #eff6ff; border-left: 4px solid var(--primary); padding: 12px; border-radius: 4px; font-size: 0.82rem; color: #1e3a8a; line-height: 1.4;">
-                    <strong>🤝 Module Integration Contract:</strong><br>
-                    Proceeding will forward parameters (<code>tripId</code>, <code>busId</code>, <code>baseFare</code>) to <strong>Module 3: Seat Selection</strong> (Teammate IT25101791) to render the interactive seat map and reserve selected seats.
+                <div style="background: #ecfdf5; border-left: 4px solid var(--primary); padding: 12px; border-radius: 4px; font-size: 0.82rem; color: #047857; line-height: 1.4;">
+                    <strong>🤝 Direct Seat Selection Integration:</strong><br>
+                    Proceeding will forward parameters (<code>tripId</code>, <code>busId</code>, <code>baseFare</code>) directly to the interactive 2+2 visual seat picker with a 10-minute hold countdown timer.
                 </div>
             </div>
             <div class="modal-footer">
@@ -1195,26 +1206,72 @@
         document.getElementById('travelDate').value = tomorrowStr;
         document.getElementById('travelDate').min = new Date().toISOString().split('T')[0];
 
-        // --- Mode Switching (Passenger vs Operator) ---
+        // --- Role & Auth State Helpers ---
+        function getAuthUser() {
+            const raw = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
+            try { return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+        }
+        function isAdminUser() {
+            const u = getAuthUser();
+            return u && (u.role === 'ADMIN');
+        }
+        function updateNavbarAuth() {
+            const user = getAuthUser();
+            const isAdmin = isAdminUser();
+            const modeToggleGroup = document.getElementById('modeToggleGroup');
+            const adminPortalLink = document.getElementById('navAdminPortalLink');
+            const navAuthAction = document.getElementById('navAuthAction');
+
+            if (modeToggleGroup) modeToggleGroup.style.display = isAdmin ? 'flex' : 'none';
+            if (adminPortalLink) adminPortalLink.style.display = isAdmin ? 'flex' : 'none';
+            if (navAuthAction) {
+                if (user) {
+                    const name = user.fullName || user.name || 'Account';
+                    navAuthAction.innerHTML = `
+                        <a href="admin.html?tab=profile" style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#047857; padding:6px 14px; border-radius:9999px; text-decoration:none; font-size:0.84rem; font-weight:700; border:1px solid rgba(16,185,129,0.3);">
+                            👤 ${name}
+                        </a>
+                    `;
+                } else {
+                    navAuthAction.innerHTML = `
+                        <a href="admin.html?tab=signin" style="padding:6px 14px; border-radius:8px; font-size:0.84rem; font-weight:700; color:var(--primary); text-decoration:none; border:1.5px solid var(--primary); transition:all 0.2s;">
+                            Sign In
+                        </a>
+                    `;
+                }
+            }
+        }
+
+        // --- Mode Switching (Passenger vs Operator) with Admin Gating ---
         function switchMode(mode) {
             const btnPass = document.getElementById('btnModePassenger');
             const btnOp = document.getElementById('btnModeOperator');
             const viewPass = document.getElementById('viewPassenger');
             const viewOp = document.getElementById('viewOperator');
+            const badge = document.getElementById('navBrandBadge');
 
-            if (mode === 'passenger') {
-                btnPass.classList.add('active');
-                btnOp.classList.remove('active');
-                viewPass.style.display = 'block';
-                viewOp.style.display = 'none';
-                loadSearchCities();
-            } else {
-                btnOp.classList.add('active');
-                btnPass.classList.remove('active');
+            if (mode === 'operator') {
+                if (!isAdminUser()) {
+                    showToast('Operator Mode is restricted to Administrators only. Please sign in as an Admin.', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html?tab=signin';
+                    }, 1200);
+                    return;
+                }
+                if (btnOp) btnOp.classList.add('active');
+                if (btnPass) btnPass.classList.remove('active');
                 viewPass.style.display = 'none';
                 viewOp.style.display = 'block';
+                if (badge) badge.textContent = 'OPERATOR & DISPATCH';
                 loadRoutesTable();
                 loadBuses();
+            } else {
+                if (btnPass) btnPass.classList.add('active');
+                if (btnOp) btnOp.classList.remove('active');
+                viewPass.style.display = 'block';
+                viewOp.style.display = 'none';
+                if (badge) badge.textContent = 'PASSENGER SEARCH';
+                loadSearchCities();
             }
         }
 
@@ -1250,6 +1307,7 @@
         }
 
         // --- Passenger Search APIs ---
+        let hasAutoSearched = false;
         async function loadSearchCities() {
             try {
                 const res = await fetch(`${API_BASE}/cities`);
@@ -1267,11 +1325,37 @@
                     dest.innerHTML = '<option value="">Select Destination City</option>' +
                         json.data.destinationCities.map(c => `<option value="${c}">${c}</option>`).join('');
 
-                    if (currentSrc) src.value = currentSrc;
-                    else if (json.data.sourceCities.includes('Colombo')) src.value = 'Colombo';
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const qFrom = urlParams.get('from');
+                    const qTo = urlParams.get('to');
+                    const qDate = urlParams.get('date');
 
-                    if (currentDest) dest.value = currentDest;
-                    else if (json.data.destinationCities.includes('Kandy')) dest.value = 'Kandy';
+                    if (qFrom && json.data.sourceCities.includes(qFrom)) {
+                        src.value = qFrom;
+                    } else if (currentSrc) {
+                        src.value = currentSrc;
+                    } else if (json.data.sourceCities.includes('Colombo')) {
+                        src.value = 'Colombo';
+                    }
+
+                    if (qTo && json.data.destinationCities.includes(qTo)) {
+                        dest.value = qTo;
+                    } else if (currentDest) {
+                        dest.value = currentDest;
+                    } else if (json.data.destinationCities.includes('Kandy')) {
+                        dest.value = 'Kandy';
+                    }
+
+                    if (qDate) {
+                        document.getElementById('travelDate').value = qDate;
+                    }
+
+                    if (qFrom && qTo && !hasAutoSearched) {
+                        hasAutoSearched = true;
+                        setTimeout(() => {
+                            document.getElementById('searchForm').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        }, 100);
+                    }
                 }
             } catch (err) {
                 showToast('Failed to load city list from backend API', 'error');
@@ -2181,8 +2265,19 @@
             }, 3500);
         }
 
-        // Initial loading on page open
-        loadSearchCities();
+        // Initial loading on page open with role-based checks
+        updateNavbarAuth();
+        const urlMode = new URLSearchParams(window.location.search).get('mode');
+        if (urlMode === 'operator') {
+            if (isAdminUser()) {
+                switchMode('operator');
+            } else {
+                showToast('Operator Mode is restricted to Administrators only. Showing Passenger View.', 'error');
+                switchMode('passenger');
+            }
+        } else {
+            switchMode('passenger');
+        }
     </script>
 </body>
 </html>

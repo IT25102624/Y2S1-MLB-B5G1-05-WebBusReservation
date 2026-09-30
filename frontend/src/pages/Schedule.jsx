@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { generateMockSchedule, cities } from '../data/destinations.js'
 
 /**
@@ -10,6 +10,7 @@ import { generateMockSchedule, cities } from '../data/destinations.js'
  */
 export default function Schedule() {
   const [params, setParams] = useSearchParams()
+  const navigate = useNavigate()
   const from = params.get('from') || ''
   const to = params.get('to') || ''
   const [date, setDate] = useState(params.get('date') || '')
@@ -24,7 +25,7 @@ export default function Schedule() {
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-brand-600">Available trips</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-600">View Times</span>
           <h1 className="mt-1 flex items-center gap-3 font-display text-3xl font-extrabold text-ink-950">
             {route.from} <span className="text-ink-300">→</span> {route.to}
           </h1>
@@ -68,26 +69,46 @@ export default function Schedule() {
       {/* Trip list */}
       <div className="mt-8 space-y-3">
         {trips.map((t) => (
-          <div key={t.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-900/8 bg-white p-5 shadow-card transition hover:shadow-card-lg">
-            <div className="flex items-center gap-6">
-              <div>
-                <div className="font-display text-xl font-extrabold text-ink-950">{t.departTime}</div>
-                <div className="text-xs text-ink-700/50">{t.duration}</div>
-              </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-semibold text-ink-900">{t.operator}</div>
-                <div className="text-xs text-ink-700/50">{t.busType}</div>
-              </div>
+          <div key={t.id} className="rounded-2xl border border-ink-900/8 bg-white p-5 shadow-card transition hover:shadow-card-lg">
+            {/* Departure time + operator */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={() =>
+                  navigate(
+                    `/direct-booking?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${encodeURIComponent(date || new Date().toISOString().slice(0, 10))}&time=${encodeURIComponent(t.departTime)}&operator=${encodeURIComponent(t.operator)}`
+                  )
+                }
+                title="Skip seat browsing — send your request straight to our WhatsApp desk"
+                className="rounded-full bg-signal-rose px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-white shadow-sm transition hover:bg-rose-600"
+              >
+                Direct Booking
+              </button>
+              <span className="font-display text-xl font-extrabold text-ink-950">{t.departTime}</span>
+              <span className="text-sm font-semibold text-ink-900">{t.operator}</span>
             </div>
 
-            <div className="flex items-center gap-6">
-              <span className={`text-xs font-semibold ${t.seatsLeft <= 8 ? 'text-signal-rose' : 'text-brand-600'}`}>
-                {t.seatsLeft} seats left
-              </span>
-              <span className="font-display text-lg font-extrabold text-ink-950">{t.price}</span>
-              <button className="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-600">
-                Select seats
-              </button>
+            {/* One row per bus type: Non A/C Normal Bus first, A/C Luxury Bus below it */}
+            <div className="mt-3 divide-y divide-ink-900/8 border-t border-ink-900/8">
+              {t.options.map((o) => (
+                <div key={o.key} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div className="flex items-center gap-4">
+                    <span className="min-w-[9rem] text-sm font-semibold text-ink-800">{o.busType}</span>
+                    <span className="text-xs text-ink-700/50">{o.duration}</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className={`text-xs font-semibold ${o.seatsLeft <= 8 ? 'text-signal-rose' : 'text-brand-600'}`}>
+                      {o.seatsLeft} seats left
+                    </span>
+                    <span className="font-display text-base font-extrabold text-ink-950">{o.price}</span>
+                    <button
+                      onClick={() => navigate(`/seat-selection?trip=${encodeURIComponent(t.id)}-${encodeURIComponent(o.key)}&from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${encodeURIComponent(date || new Date().toISOString().slice(0,10))}&time=${encodeURIComponent(t.departTime)}&duration=${encodeURIComponent(o.duration)}&operator=${encodeURIComponent(t.operator)}&busType=${encodeURIComponent(o.busType)}&price=${encodeURIComponent(o.price)}`)}
+                      className="rounded-xl bg-brand-500 px-5 py-2 text-sm font-bold text-white hover:bg-brand-600"
+                    >
+                      View seats
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}

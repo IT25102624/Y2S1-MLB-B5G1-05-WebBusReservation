@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchBusLK — Booking Confirmed</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #10b981; --brand-dark: #059669; --brand-light: #ecfdf5;
+      --ink: #090d16; --ink-body: #0f172a; --ink-light: #64748b; --bg: #f8fafc;
+      --border: #e2e8f0; --rose: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--ink-body); line-height: 1.6; padding: 40px 20px; }
+    .confirm-card { max-width: 640px; margin: 0 auto; background: #ffffff; border: 1px solid var(--border); border-radius: 28px; padding: 36px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); text-align: center; }
+    .check-icon { width: 68px; height: 68px; background: var(--brand-light); color: var(--brand); border-radius: 50%; display: grid; place-items: center; font-size: 32px; font-weight: 800; margin: 0 auto 16px; }
+    .title { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 800; color: #090d16; }
+    .ref-badge { display: inline-block; background: #f1f5f9; color: #0f172a; font-family: 'Space Grotesk', monospace; font-size: 16px; font-weight: 800; padding: 6px 16px; border-radius: 9999px; margin-top: 10px; border: 1px solid var(--border); }
+    
+    .ticket-details { background: #f8fafc; border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin: 28px 0; text-align: left; }
+    .ticket-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    .ticket-row:last-child { border-bottom: none; }
+    .ticket-label { color: var(--ink-light); font-weight: 600; }
+    .ticket-val { font-weight: 700; color: #0f172a; }
+
+    .qr-box { background: #ffffff; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 20px; margin: 24px 0; display: inline-block; text-align: center; }
+    .qr-text { font-family: monospace; font-size: 14px; font-weight: 800; color: var(--brand-dark); margin-top: 8px; }
+
+    .action-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+    .btn-primary { background: var(--brand); color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--brand-dark); }
+    .btn-danger { background: #fee2e2; color: var(--rose); text-decoration: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; transition: background 0.2s; }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-secondary { background: #f1f5f9; color: #334155; text-decoration: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 14px; border: none; cursor: pointer; }
+    
+    /* Cancelled State */
+    .cancelled-state { display: none; }
+  </style>
+</head>
+<body>
+  <div class="confirm-card" id="activeBookingCard">
+    <div class="check-icon">&#10003;</div>
+    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--brand); letter-spacing: 1.5px;">Reservation Confirmed</span>
+    <h1 class="title">Your seats are successfully reserved!</h1>
+    <div class="ref-badge" id="refBadge">CB-00000000</div>
+    <p style="color: var(--ink-light); font-size: 14px; margin-top: 8px;">Present this booking reference or QR code to the conductor when boarding.</p>
+
+    <!-- Ticket Summary Card -->
+    <div class="ticket-details">
+      <div class="ticket-row"><span class="ticket-label">Route</span><span class="ticket-val" id="tRoute">Colombo &#8594; Kandy</span></div>
+      <div class="ticket-row"><span class="ticket-label">Travel Date &amp; Time</span><span class="ticket-val" id="tDateTime">2026-10-01 &middot; 08:00 AM</span></div>
+      <div class="ticket-row"><span class="ticket-label">Bus Tier &amp; Operator</span><span class="ticket-val" id="tBus">Non A/C Normal &middot; SLTB Express</span></div>
+      <div class="ticket-row"><span class="ticket-label">Selected Seats</span><span class="ticket-val" id="tSeats" style="color: var(--brand); font-weight: 800;">S12, S13</span></div>
+      <div class="ticket-row"><span class="ticket-label">Passenger Name</span><span class="ticket-val" id="tName">Nimal Perera</span></div>
+      <div class="ticket-row"><span class="ticket-label">Total Amount</span><span class="ticket-val" id="tTotal" style="font-size: 16px;">LKR 1,100</span></div>
+      <div class="ticket-row"><span class="ticket-label">Status</span><span class="ticket-val" style="color: var(--brand);">&#9679; CONFIRMED</span></div>
+    </div>
+
+    <!-- QR preview stub -->
+    <div class="qr-box">
+      <svg width="120" height="120" viewBox="0 0 24 24" fill="none" style="margin: 0 auto;">
+        <rect x="2" y="2" width="8" height="8" rx="1.5" stroke="#16a34a" stroke-width="2"/>
+        <rect x="14" y="2" width="8" height="8" rx="1.5" stroke="#16a34a" stroke-width="2"/>
+        <rect x="2" y="14" width="8" height="8" rx="1.5" stroke="#16a34a" stroke-width="2"/>
+        <rect x="5" y="5" width="2" height="2" fill="#16a34a"/>
+        <rect x="17" y="5" width="2" height="2" fill="#16a34a"/>
+        <rect x="5" y="17" width="2" height="2" fill="#16a34a"/>
+        <path d="M14 14h2v2h-2zM18 14h3v3h-3zM14 18h2v3h-2zM18 19h3v2h-3z" fill="#16a34a"/>
+      </svg>
+      <div class="qr-text" id="qrText">CB-00000000</div>
+      <div style="font-size: 11px; color: var(--ink-light); margin-top: 4px;">Scannable by Conductor Boarding App</div>
+    </div>
+
+    <div class="action-group">
+      <button class="btn-primary" onclick="window.print()">Print / Save PDF</button>
+      <a href="index.html" class="btn-secondary">Book Another Trip</a>
+      <button class="btn-danger" onclick="cancelBooking()">Cancel Reservation</button>
+    </div>
+  </div>
+
+  <!-- Cancelled Confirmation View -->
+  <div class="confirm-card cancelled-state" id="cancelledCard">
+    <div class="check-icon" style="background:#fee2e2; color:var(--rose);">&#10005;</div>
+    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--rose); letter-spacing: 1.5px;">Reservation Cancelled</span>
+    <h1 class="title">Your booking has been cancelled</h1>
+    <p style="color: var(--ink-light); font-size: 14px; margin-top: 12px; line-height: 1.7;">
+      The selected seats have been released back to real-time seat availability for other passengers.
+      If an online payment was completed, the automated refund has been queued.
+    </p>
+    <div class="action-group" style="margin-top: 28px;">
+      <a href="index.html" class="btn-primary">Return to Homepage</a>
+      <a href="schedule.html" class="btn-secondary">Browse Other Departures</a>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref') || 'CB-2026-0001';
+
+    let booking = null;
+    try {
+      booking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+    } catch (e) {}
+
+    document.getElementById('refBadge').innerText = ref;
+    document.getElementById('qrText').innerText = ref;
+
+    if (booking) {
+      document.getElementById('tRoute').innerText = `${booking.from || 'Colombo'} → ${booking.to || 'Kandy'}`;
+      document.getElementById('tDateTime').innerText = `${booking.date || 'Today'} · ${booking.time || '08:00 AM'}`;
+      document.getElementById('tBus').innerText = `${booking.busType || 'Non A/C Normal'} · ${booking.operator || 'SLTB Express'}`;
+      document.getElementById('tSeats').innerText = (booking.seats || ['S12']).join(', ');
+      document.getElementById('tName').innerText = booking.passengerName || booking.passenger?.name || 'Nimal Perera';
+      document.getElementById('tTotal').innerText = `LKR ${(booking.total || 1100).toLocaleString()}`;
+    }
+
+    async function cancelBooking() {
+      if (!confirm('Are you sure you want to cancel this reservation? The selected seats will be immediately released.')) return;
+
+      try {
+        await fetch(`/api/v1/bookings/${encodeURIComponent(ref)}`, { method: 'DELETE' });
+      } catch (err) {}
+
+      localStorage.removeItem('catchbuslk-last-booking');
+      document.getElementById('activeBookingCard').style.display = 'none';
+      document.getElementById('cancelledCard').style.display = 'block';
+    }
+  </script>
+</body>
+</html>

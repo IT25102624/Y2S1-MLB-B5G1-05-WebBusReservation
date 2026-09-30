@@ -44,3 +44,17 @@ npm run dev
 Proxies `/api/*` to `http://localhost:8081` (see `vite.config.js`) — run the
 backend first for anything beyond the guest homepage. Build for production
 with `npm run build`.
+
+## Seat Selection & Ticket Booking flow
+
+The frontend includes a complete guest-booking flow:
+
+`Home → Book a Trip → View Times → View seats → Seat Selection → Passenger details → Provisional booking confirmation`
+
+- `/seat-selection` is a dedicated seat-selection page.
+- Seats are laid out as a 2+2 bus (supporting both Non A/C Normal 54-seat and A/C Luxury 49-seat layouts) with driver and rear markers.
+- Selected seats are held in `localStorage` for 10 minutes with a live countdown timer.
+- Unavailable seats cannot be selected, and users can select up to 6 seats per booking.
+- Passenger details and boarding point are collected before confirmation.
+- `/booking-confirmation` displays booking reference, summary, and cancellation flow that releases the held seats.
+- `/direct-booking` provides an expedited WhatsApp direct reservation flow.

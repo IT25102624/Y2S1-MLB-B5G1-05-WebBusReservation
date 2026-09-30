@@ -29,17 +29,13 @@ export function HeroBus({ className = '' }) {
         {/* headlight */}
         <circle cx="494" cy="196" r="7" fill="#ffe89c" />
         {/* wheels */}
-        <g className="hero-wheel">
+        <g className="animate-wheel">
           <circle cx="150" cy="222" r="26" fill="#0f1712" />
           <circle cx="150" cy="222" r="10" fill="#dff8e7" />
-          <animateTransform attributeName="transform" type="rotate"
-            from="0 150 222" to="360 150 222" dur="1.4s" repeatCount="indefinite" />
         </g>
-        <g className="hero-wheel">
+        <g className="animate-wheel">
           <circle cx="420" cy="222" r="26" fill="#0f1712" />
           <circle cx="420" cy="222" r="10" fill="#dff8e7" />
-          <animateTransform attributeName="transform" type="rotate"
-            from="0 420 222" to="360 420 222" dur="1.4s" repeatCount="indefinite" />
         </g>
       </g>
 

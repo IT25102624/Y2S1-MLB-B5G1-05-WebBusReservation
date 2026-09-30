@@ -58,6 +58,41 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success("User authenticated successfully", response));
     }
 
+    @PostMapping({"/staff/login", "/api/v1/auth/staff/login", "/api/auth/staff/login"})
+    public ResponseEntity<ApiResponse<AuthResponse>> staffLogin(@RequestBody java.util.Map<String, String> request) {
+        String qrToken = request.get("qrToken");
+        String email = request.get("email");
+        String password = request.get("password");
+
+        if (qrToken != null && !qrToken.isBlank()) {
+            log.info("REST request to authenticate staff via QR token: {}", qrToken);
+            AuthResponse response = authService.loginWithQr(qrToken.trim());
+            return ResponseEntity.ok(ApiResponse.success("Staff authenticated via QR successfully", response));
+        }
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email(email != null ? email.trim() : "")
+                .password(password != null ? password : "")
+                .build();
+        AuthResponse response = authService.login(loginRequest);
+        return ResponseEntity.ok(ApiResponse.success("Staff authenticated successfully", response));
+    }
+
+    @PostMapping({"/admin/login", "/api/v1/auth/admin/login", "/api/auth/admin/login"})
+    public ResponseEntity<ApiResponse<AuthResponse>> adminLogin(@Valid @RequestBody LoginRequest request) {
+        return login(request);
+    }
+
+    @PostMapping({"/passenger/login", "/api/v1/auth/passenger/login", "/api/auth/passenger/login"})
+    public ResponseEntity<ApiResponse<AuthResponse>> passengerLogin(@Valid @RequestBody LoginRequest request) {
+        return login(request);
+    }
+
+    @PostMapping({"/passenger/register", "/api/v1/auth/passenger/register", "/api/auth/passenger/register"})
+    public ResponseEntity<ApiResponse<AuthResponse>> passengerRegister(@Valid @RequestBody RegisterRequest request) {
+        return register(request);
+    }
+
     @GetMapping({"/profile", "/me"})
     public ResponseEntity<ApiResponse<UserResponse>> getProfile(
             Authentication authentication,

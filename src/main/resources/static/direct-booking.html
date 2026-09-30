@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchBusLK — 24h Direct WhatsApp Booking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #10b981; --brand-dark: #059669; --amber: #f59e0b;
+      --bg: #090d16; --card-bg: #111827; --border: rgba(255,255,255,0.1);
+      --ink: #f8fafc; --ink-light: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; min-height: 100vh; padding: 40px 20px; }
+    .wrap { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
+    .badge { display: inline-block; background: var(--amber); color: #000000; font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 6px; letter-spacing: 1px; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; margin-top: 14px; line-height: 1.2; }
+    .lead { color: var(--ink-light); font-size: 15px; margin-top: 12px; }
+    .contact-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-top: 24px; }
+    .contact-item { margin-bottom: 12px; font-size: 14px; }
+    .contact-item strong { color: #ffffff; }
+    
+    .form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-light); text-transform: uppercase; margin-bottom: 6px; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.4);
+      color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--brand); }
+    .whatsapp-btn {
+      width: 100%; background: #25d366; color: #ffffff; border: none; border-radius: 14px; padding: 14px;
+      font-size: 16px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .whatsapp-btn:hover { background: #1ebd56; }
+    .back-link { display: inline-block; color: var(--ink-light); font-size: 13px; font-weight: 700; text-decoration: none; margin-bottom: 16px; }
+    .back-link:hover { color: #ffffff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <a href="schedule.html" class="back-link">&#8592; Back to Timetable</a><br>
+      <span class="badge">Islandwide 24h Assistance</span>
+      <h1>Direct Booking &amp; Seat Assistance</h1>
+      <p class="lead">Skip the seat map! Send your seat request directly to our 24h dispatch desk via WhatsApp. A representative will confirm your booking immediately.</p>
+      
+      <div class="contact-card">
+        <div class="contact-item"><strong>WhatsApp Hotline:</strong> 070 191 9700</div>
+        <div class="contact-item"><strong>Dispatch Desk:</strong> gamanasl@gmail.com</div>
+        <div class="contact-item"><strong>Coverage:</strong> Central Highway &amp; Inter-provincial SLTB / Private Network</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 style="font-family:'Space Grotesk'; font-size:20px; font-weight:800; margin-bottom:16px;">WhatsApp Message Generator</h3>
+      
+      <div class="form-group">
+        <label>Selected Route &amp; Departure</label>
+        <input type="text" id="routeSummary" readonly style="color:var(--brand); font-weight:700;">
+      </div>
+
+      <div class="form-group">
+        <label>Your Name</label>
+        <input type="text" id="pName" placeholder="e.g. Kasun Fernando" required>
+      </div>
+
+      <div class="form-group">
+        <label>Seat Request / Notes</label>
+        <textarea id="pMessage" rows="3">Can I please reserve seats together for this trip?</textarea>
+      </div>
+
+      <button type="button" class="whatsapp-btn" onclick="openWhatsApp()">
+        <span>&#9742;</span> Open WhatsApp Dispatch Chat
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from') || 'Colombo';
+    const to = params.get('to') || 'Kandy';
+    const date = params.get('date') || new Date().toISOString().slice(0, 10);
+    const time = params.get('time') || '08:00';
+    const op = params.get('operator') || 'SLTB Express';
+
+    document.getElementById('routeSummary').value = `${from} ⇄ ${to} | ${date} at ${time} (${op})`;
+
+    function openWhatsApp() {
+      const name = document.getElementById('pName').value.trim() || 'Valued Passenger';
+      const msg = document.getElementById('pMessage').value.trim();
+
+      const text = [
+        `Hi CatchBusLK, I would like to make a direct seat booking:`,
+        ``,
+        `Route: ${from} ⇄ ${to}`,
+        `Date: ${date}`,
+        `Departure: ${time} (${op})`,
+        `Name: ${name}`,
+        `Request: ${msg}`
+      ].join('\n');
+
+      const url = `https://wa.me/94701919700?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+  </script>
+</body>
+</html>

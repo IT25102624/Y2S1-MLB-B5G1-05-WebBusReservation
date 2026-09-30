@@ -20,6 +20,8 @@ public interface AuthService {
 
     AuthResponse login(LoginRequest request);
 
+    AuthResponse loginWithQr(String qrToken);
+
     UserResponse getCurrentUserProfile(String email);
 
     UserResponse updateProfile(String email, UpdateProfileRequest request);

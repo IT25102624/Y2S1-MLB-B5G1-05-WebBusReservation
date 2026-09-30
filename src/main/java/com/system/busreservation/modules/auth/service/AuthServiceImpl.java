@@ -46,6 +46,9 @@ public class AuthServiceImpl implements AuthService {
     private final TripRepository tripRepository;
     private final BookingRepository bookingRepository;
 
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private com.system.busreservation.modules.staff.repository.StaffRepository staffRepository;
+
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -86,6 +89,23 @@ public class AuthServiceImpl implements AuthService {
         }
 
         log.info("User {} authenticated successfully with role {}", user.getEmail(), user.getRole());
+        return toAuthResponse(user);
+    }
+
+    @Override
+    public AuthResponse loginWithQr(String qrToken) {
+        log.info("Processing staff QR login attempt with token: {}", qrToken);
+        if (staffRepository == null) {
+            throw new BadCredentialsException("Staff repository not available");
+        }
+        var staffOpt = staffRepository.findStaffByQr(qrToken.trim());
+        if (staffOpt.isEmpty()) {
+            throw new BadCredentialsException("Invalid or inactive staff QR code");
+        }
+        String email = (String) staffOpt.get().get("email");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Staff account associated with QR token not found"));
+        log.info("Staff member {} authenticated via QR token successfully", user.getEmail());
         return toAuthResponse(user);
     }
 

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchBusLK — Staff &amp; Operations Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #10b981; --brand-dark: #059669; --bg: #090d16;
+      --card-bg: #111827; --border: rgba(255,255,255,0.1);
+      --ink: #f8fafc; --ink-light: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; min-height: 100vh; padding: 40px 20px; display: grid; place-items: center; }
+    .portal-card { width: 100%; max-width: 480px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 28px; padding: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+    .logo { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 800; color: #ffffff; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+    .logo span { color: var(--brand); }
+    .tabs { display: flex; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 14px; margin-bottom: 24px; }
+    .tab-btn { flex: 1; border: none; background: transparent; padding: 10px; border-radius: 10px; color: var(--ink-light); font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { background: #1e293b; color: #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .form-group input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.5); color: #ffffff; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: var(--brand); }
+    .submit-btn { width: 100%; background: var(--brand); color: #ffffff; border: none; border-radius: 12px; padding: 13px; font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+    .submit-btn:hover { background: var(--brand-dark); }
+    .demo-box { background: rgba(255,255,255,0.03); border: 1px dashed var(--border); border-radius: 14px; padding: 14px; margin-top: 24px; }
+    .demo-pill { display: inline-block; background: rgba(255,255,255,0.08); padding: 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--brand); font-weight: 700; margin: 4px 2px; }
+    .demo-pill:hover { background: rgba(16, 185, 129, 0.2); }
+    .alert { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none; }
+    .alert-danger { background: rgba(225, 29, 72, 0.15); color: #fb7185; border: 1px solid rgba(225, 29, 72, 0.3); }
+    .back-home { display: block; text-align: center; color: var(--ink-light); font-size: 13px; font-weight: 700; text-decoration: none; margin-top: 20px; }
+    .back-home:hover { color: #ffffff; }
+  </style>
+</head>
+<body>
+  <div class="portal-card">
+    <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+    <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--cyan); letter-spacing:1.5px;">Staff &amp; Operations Portal</div>
+    <h2 style="font-family:'Space Grotesk'; font-size:24px; font-weight:800; color:#ffffff; margin-top:4px; margin-bottom:18px;">Sign in to your console</h2>
+
+    <div class="alert alert-danger" id="alertBox"></div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tabConductor" onclick="selectRole('CONDUCTOR')">Conductor</button>
+      <button class="tab-btn" id="tabDriver" onclick="selectRole('DRIVER')">Driver</button>
+      <button class="tab-btn" id="tabAdmin" onclick="selectRole('ADMIN')">Administrator</button>
+    </div>
+
+    <!-- Conductor QR or password form -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div id="qrGroup" class="form-group">
+        <label>Staff QR Token / Badge ID</label>
+        <input type="text" id="qrTokenInput" placeholder="e.g. CONDUCTOR-DEMO-QR">
+        <div style="font-size:11px; color:var(--ink-light); margin-top:4px;">You can sign in using either your QR token OR email/password below.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Official Email Address</label>
+        <input type="email" id="emailInput" placeholder="conductor@catchbus.lk">
+      </div>
+
+      <div class="form-group">
+        <label>Account Password</label>
+        <input type="password" id="passwordInput" placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="submit-btn" id="btnSubmit">Sign in to Conductor Console</button>
+    </form>
+
+    <!-- Quick Demo Fill Pills -->
+    <div class="demo-box">
+      <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-light); margin-bottom:6px;">Quick Demo 1-Click Credentials:</div>
+      <span class="demo-pill" onclick="quickFill('CONDUCTOR', 'conductor@catchbus.lk', 'Conductor@123', 'CONDUCTOR-DEMO-QR')">Demo Conductor</span>
+      <span class="demo-pill" onclick="quickFill('DRIVER', 'driver@catchbus.lk', 'Driver@123', 'DRIVER-DEMO-QR')">Demo Driver</span>
+      <span class="demo-pill" onclick="quickFill('ADMIN', 'admin@catchbus.lk', 'Admin@123', '')">Demo Admin</span>
+    </div>
+
+    <a href="index.html" class="back-home">&#8592; Back to CatchBusLK Public Site</a>
+  </div>
+
+  <script>
+    let activeRole = 'CONDUCTOR';
+
+    function selectRole(role) {
+      activeRole = role;
+      document.getElementById('tabConductor').classList.toggle('active', role === 'CONDUCTOR');
+      document.getElementById('tabDriver').classList.toggle('active', role === 'DRIVER');
+      document.getElementById('tabAdmin').classList.toggle('active', role === 'ADMIN');
+
+      const qrGroup = document.getElementById('qrGroup');
+      const submitBtn = document.getElementById('btnSubmit');
+
+      if (role === 'CONDUCTOR') {
+        qrGroup.style.display = 'block';
+        submitBtn.innerText = 'Sign in to Conductor Console';
+      } else if (role === 'DRIVER') {
+        qrGroup.style.display = 'block';
+        submitBtn.innerText = 'Sign in to Driver Console';
+      } else {
+        qrGroup.style.display = 'none';
+        submitBtn.innerText = 'Sign in to Admin Dashboard';
+      }
+    }
+
+    function quickFill(role, email, pass, qr) {
+      selectRole(role);
+      document.getElementById('emailInput').value = email;
+      document.getElementById('passwordInput').value = pass;
+      document.getElementById('qrTokenInput').value = qr;
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const qr = document.getElementById('qrTokenInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      const pass = document.getElementById('passwordInput').value;
+      const alertBox = document.getElementById('alertBox');
+      alertBox.style.display = 'none';
+
+      let payload = { role: activeRole };
+      if (qr) {
+        payload.qrToken = qr;
+      } else {
+        payload.email = email;
+        payload.password = pass;
+      }
+
+      try {
+        const res = await fetch('/api/v1/auth/staff/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || 'Login failed. Please verify credentials.');
+        }
+
+        const token = data.data?.accessToken;
+        const user = data.data?.user;
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('user_info', JSON.stringify(user));
+        localStorage.setItem('bus_jwt_token', token);
+        localStorage.setItem('bus_user', JSON.stringify(user));
+
+        if (activeRole === 'CONDUCTOR') {
+          window.location.href = 'conductor.html';
+        } else if (activeRole === 'DRIVER') {
+          window.location.href = 'driver.html';
+        } else {
+          window.location.href = 'admin.html';
+        }
+      } catch (err) {
+        alertBox.innerText = err.message;
+        alertBox.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CatchBusLK — Driver Route &amp; GPS Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand: #10b981; --brand-dark: #059669;
+      --amber: #f59e0b; --amber-dark: #d97706; --bg: #090d16;
+      --card-bg: #111827; --border: rgba(255, 255, 255, 0.1);
+      --ink: #f8fafc; --ink-light: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 60px; }
+    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; }
+    .nav-wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; }
+    .brand-title span.brand-bus { color: var(--brand); }
+    .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .logout-btn:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
+
+    .main-wrap { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+    .badge { display: inline-block; background: rgba(245, 158, 11, 0.15); color: var(--amber); font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 9999px; letter-spacing: 1px; border: 1px solid var(--border); }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #ffffff; margin-top: 8px; }
+
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+    @media (max-width: 800px) { .grid-layout { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+    
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; margin-top: 10px; }
+    .status-sharing { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status-stopped { background: rgba(255, 255, 255, 0.08); color: var(--ink-light); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+    .gps-btn { width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 18px; }
+    .gps-start { background: var(--amber); color: #000; }
+    .gps-start:hover { background: var(--amber-dark); }
+    .gps-stop { background: #ef4444; color: #fff; }
+
+    .info-list { margin-top: 20px; font-size: 14px; line-height: 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
+    .info-list strong { color: var(--ink-light); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <div class="brand-title">Catch<span class="brand-bus">Bus</span>LK &middot; Driver Console</div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span style="font-size:13px; color:var(--ink-light);" id="driverLabel">Demo Driver (DRV-001)</span>
+        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token')">Sign out</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-wrap">
+    <span class="badge">Live Highway Transit Console</span>
+    <h1>Route Schedule &amp; GPS Broadcaster</h1>
+    <p style="color:var(--ink-light); font-size:14px; margin-top:4px;">Broadcast real-time bus telemetry and track preceding buses along the expressway corridor.</p>
+
+    <div class="grid-layout">
+      <!-- Live GPS Broadcasting Card -->
+      <section class="card">
+        <h2 class="card-title">Live GPS Telemetry Sharing</h2>
+        <p style="color:var(--ink-light); font-size:13px;">Broadcasts your bus coordinates so the following bus and passengers can track your transit status.</p>
+
+        <div id="gpsStatusBadge" class="status-pill status-stopped">&#9679; GPS Sharing Offline</div>
+
+        <div class="info-list">
+          <div><strong>Current Coordinates:</strong> <span id="coordsDisplay">7.2906&deg; N, 80.6337&deg; E</span></div>
+          <div><strong>Current Speed:</strong> <span id="speedDisplay">52.4 km/h</span></div>
+          <div><strong>Heading / Bearing:</strong> <span id="headingDisplay">85&deg; (Eastbound Highway)</span></div>
+          <div><strong>Last Broadcast Synced:</strong> <span id="syncDisplay">Just now</span></div>
+        </div>
+
+        <button type="button" class="gps-btn gps-start" id="toggleGpsBtn" onclick="toggleGps()">Start GPS Sharing</button>
+      </section>
+
+      <!-- Preceding Bus Tracker Card -->
+      <section class="card">
+        <h2 class="card-title">Preceding Bus on Same Route</h2>
+        <p style="color:var(--ink-light); font-size:13px;">The bus running directly ahead of you on this route schedule.</p>
+
+        <div style="background:rgba(0,0,0,0.4); border-radius:18px; padding:18px; margin-top:16px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--amber);">Active Preceding Bus</div>
+          <div style="font-family:'Space Grotesk'; font-size:24px; font-weight:800; color:#ffffff; margin-top:4px;" id="prevPlateDisplay">CBL-000 &middot; CatchBusLK Express</div>
+          <div style="font-size:13px; color:var(--green); margin-top:4px;">&#9679; In Transit &middot; Departed 1h ahead</div>
+        </div>
+
+        <div class="info-list">
+          <div><strong>Preceding Bus Location:</strong> <span>7.2088&deg; N, 79.8358&deg; E</span></div>
+          <div><strong>Estimated Gap / Separation:</strong> <span style="color:var(--amber); font-weight:700;">~28 km ahead (35 min gap)</span></div>
+          <div><strong>Route:</strong> <span>Colombo Central &#8594; Kandy Transit</span></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    let isSharing = false;
+    let gpsInterval = null;
+
+    function getAuthHeaders() {
+      const token = localStorage.getItem('auth_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+      }
+      return headers;
+    }
+
+    async function loadDashboard() {
+      try {
+        const userInfo = localStorage.getItem('user_info');
+        if (userInfo) {
+          const u = JSON.parse(userInfo);
+          document.getElementById('driverLabel').innerText = `${u.fullName || 'Demo Driver'} (${u.email || 'DRV-001'})`;
+        }
+
+        const res = await fetch('/api/v1/staff/dashboard', { headers: getAuthHeaders() });
+        const data = await res.json();
+        if (data.data?.precedingBus) {
+          const p = data.data.precedingBus;
+          document.getElementById('prevPlateDisplay').innerText = `${p.busNumber} · ${p.operatorName || 'CatchBusLK'}`;
+        }
+      } catch (e) {
+        console.error('Error loading dashboard:', e);
+      }
+    }
+
+    function toggleGps() {
+      const btn = document.getElementById('toggleGpsBtn');
+      const badge = document.getElementById('gpsStatusBadge');
+
+      if (!isSharing) {
+        isSharing = true;
+        btn.innerText = 'Stop GPS Sharing';
+        btn.className = 'gps-btn gps-stop';
+        badge.innerText = '● Broadcasting Live GPS';
+        badge.className = 'status-pill status-sharing';
+
+        gpsInterval = setInterval(broadcastCoordinates, 8000);
+        broadcastCoordinates();
+      } else {
+        isSharing = false;
+        clearInterval(gpsInterval);
+        btn.innerText = 'Start GPS Sharing';
+        btn.className = 'gps-btn gps-start';
+        badge.innerText = '● GPS Sharing Offline';
+        badge.className = 'status-pill status-stopped';
+      }
+    }
+
+    async function broadcastCoordinates() {
+      // Simulate live progression along Kandy highway
+      const lat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(4);
+      const lon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(4);
+      const speed = (50 + Math.random() * 10).toFixed(1);
+
+      document.getElementById('coordsDisplay').innerText = `${lat}° N, ${lon}° E`;
+      document.getElementById('speedDisplay').innerText = `${speed} km/h`;
+      document.getElementById('syncDisplay').innerText = new Date().toLocaleTimeString();
+
+      try {
+        await fetch('/api/v1/staff/location', {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lon), speedKmh: parseFloat(speed), headingDegrees: 85.0 })
+        });
+      } catch (e) {
+        console.error('Location broadcast error:', e);
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

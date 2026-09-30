@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div>
       {/* ---------------- HERO ---------------- */}
-      <section className="relative overflow-visible bg-gradient-to-b from-brand-50 to-sand-50">
+      <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 to-sand-50">
         <div className="mx-auto max-w-6xl px-6 pb-40 pt-14 sm:pt-20">
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <div className="animate-rise">
@@ -42,8 +42,8 @@ export default function Home() {
         </div>
 
         {/* Search widget overlapping hero/content boundary, FlixBus-style */}
-        <div className="absolute inset-x-0 bottom-5 translate-y-1/2 px-6">
-          <form onSubmit={search} className="animate-rise stagger-2 relative z-10 mx-auto max-w-4xl rounded-3xl border border-ink-900/5 bg-white p-3 shadow-card-lg">
+        <div className="absolute inset-x-0 bottom-0 translate-y-1/2 px-6">
+          <form onSubmit={search} className="animate-rise stagger-2 mx-auto max-w-4xl rounded-3xl border border-ink-900/5 bg-white p-3 shadow-card-lg">
             <div className="grid gap-2 rounded-2xl bg-sand-100/70 p-4 sm:grid-cols-[1fr_auto_1fr_1fr_auto] sm:items-end sm:p-3">
               <Field label="From">
                 <input required value={form.from} onChange={(e) => setForm({ ...form, from: e.target.value })}
@@ -60,7 +60,7 @@ export default function Home() {
                 <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="field" />
               </Field>
               <button type="submit" className="mt-2 rounded-xl bg-brand-500 px-6 py-3 font-bold text-white shadow-card transition hover:bg-brand-600 sm:mt-0">
-                Search buses
+                Book a Trip
               </button>
             </div>
             <datalist id="city-list">
@@ -194,7 +194,7 @@ function RoleTeaser({ title, desc, to }) {
     <Link to={to} className="group block rounded-2xl border border-ink-900/8 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-lg">
       <h3 className="font-display text-lg font-bold text-ink-950">{title}</h3>
       <p className="mt-2 text-sm text-ink-700/70">{desc}</p>
-      <span className="mt-4 inline-block text-sm font-bold text-brand-600 ">Enter portal →</span>
+      <span className="mt-4 inline-block text-sm font-bold text-brand-600 group-hover:underline">Enter portal →</span>
     </Link>
   )
 }

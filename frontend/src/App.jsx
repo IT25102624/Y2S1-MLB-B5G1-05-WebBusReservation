@@ -7,6 +7,9 @@ import ProtectedRoute from './components/ProtectedRoute.jsx'
 import Home from './pages/Home.jsx'
 import Destinations from './pages/Destinations.jsx'
 import Schedule from './pages/Schedule.jsx'
+import DirectBooking from './pages/DirectBooking.jsx'
+import SeatSelection from './pages/SeatSelection.jsx'
+import BookingConfirmation from './pages/BookingConfirmation.jsx'
 import PassengerLogin from './pages/PassengerLogin.jsx'
 import PassengerRegister from './pages/PassengerRegister.jsx'
 import StaffLogin from './pages/StaffLogin.jsx'
@@ -19,7 +22,7 @@ export default function App() {
   const location = useLocation()
   // The operations portal and its dashboards render their own full-bleed
   // dark backgrounds — skip the public site's footer there.
-  const isOpsSurface = ['/staff/login', '/admin', '/conductor', '/driver'].some((p) => location.pathname.startsWith(p))
+  const isOpsSurface = ['/staff/login', '/admin', '/conductor', '/driver', '/direct-booking'].some((p) => location.pathname.startsWith(p))
 
   return (
     <div className="min-h-screen bg-sand-50">
@@ -28,6 +31,9 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/destinations" element={<Destinations />} />
         <Route path="/schedule" element={<Schedule />} />
+        <Route path="/direct-booking" element={<DirectBooking />} />
+        <Route path="/seat-selection" element={<SeatSelection />} />
+        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
 
         {/* Passenger — optional auth */}
         <Route path="/login" element={<PassengerLogin />} />

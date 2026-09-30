@@ -3,25 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bus Reservation System | Sign In &amp; Admin Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>CatchBusLK — Administration &amp; Governance Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-dark: #047857;
+            --primary-light: #ecfdf5;
+            --primary-border: rgba(16, 185, 129, 0.25);
+            --secondary: #090d16;
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border: #e2e8f0;
-            --success: #16a34a;
-            --warning: #d97706;
-            --danger: #dc2626;
-            --purple: #7c3aed;
-            --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --radius: 16px;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        h1, h2, h3, .section-title, .modal-title, .logo, .stat-value { font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 60px; }
 
         .navbar {
@@ -68,7 +75,7 @@
             gap: 16px;
         }
         .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
-        .stat-icon-total { background: #eff6ff; }
+        .stat-icon-total { background: #ecfdf5; }
         .stat-icon-passenger { background: #dcfce7; }
         .stat-icon-conductor { background: #fef3c7; }
         .stat-icon-driver { background: #e0f2fe; }
@@ -91,7 +98,7 @@
             outline: none;
             width: 260px;
         }
-        .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+        .search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
         .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; color: var(--text-muted); pointer-events: none; }
         .filter-select, .form-group input, .form-group select {
             padding: 9px 14px;
@@ -101,7 +108,7 @@
             outline: none;
             background: #fff;
         }
-        .filter-select:focus, .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+        .filter-select:focus, .form-group input:focus, .form-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
 
         .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 0.85rem; font-weight: 600; color: #334155; }
@@ -136,7 +143,7 @@
         .btn-outline:hover { background: #f1f5f9; color: var(--text-main); }
         .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
         .btn-icon-sm { padding: 6px 8px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: #fff; }
-        .btn-icon-edit:hover { background: #eff6ff; border-color: var(--primary); color: var(--primary); }
+        .btn-icon-edit:hover { background: #ecfdf5; border-color: var(--primary); color: var(--primary); }
         .btn-icon-delete:hover { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
 
         .quick-login-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
@@ -146,14 +153,14 @@
             padding: 8px 4px; border-radius: 8px; font-size: 0.78rem; font-weight: 600;
             cursor: pointer; border: 1.5px solid; background: transparent;
         }
-        .quick-btn-admin { border-color: #6d28d9; color: #6d28d9; }
+        .quick-btn-admin { border-color: #8b5cf6; color: #7c3aed; }
         .quick-btn-admin:hover { background: #ede9fe; }
         .quick-btn-conductor { border-color: var(--warning); color: #92400e; }
         .quick-btn-conductor:hover { background: #fef3c7; }
         .quick-btn-driver { border-color: #0284c7; color: #0369a1; }
         .quick-btn-driver:hover { background: #e0f2fe; }
         .quick-btn-passenger { border-color: var(--primary); color: var(--primary); }
-        .quick-btn-passenger:hover { background: #eff6ff; }
+        .quick-btn-passenger:hover { background: #ecfdf5; }
 
         .table-wrap { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
@@ -162,7 +169,7 @@
         tr:hover td { background: #f8fafc; }
 
         .user-cell { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #2563eb, #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
 
         .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
         .badge-admin { background: #ede9fe; color: #6d28d9; }
@@ -185,7 +192,7 @@
         .profile-header { text-align: center; margin-bottom: 24px; }
         .profile-avatar {
             width: 72px; height: 72px; border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            background: linear-gradient(135deg, #10b981, #059669);
             display: flex; align-items: center; justify-content: center;
             font-size: 1.6rem; font-weight: 700; color: white; margin: 0 auto 16px;
         }
@@ -206,7 +213,7 @@
         .toast { padding: 12px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; max-width: 340px; animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .toast-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .toast-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-        .toast-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+        .toast-info { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
         @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
 
         @media (max-width: 768px) {
@@ -216,6 +223,33 @@
             .profile-details { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+
+        /* Commuter Eco & Metrics Grid */
+        .eco-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .eco-metric-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+        .eco-metric-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .eco-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; flex-shrink: 0; background: var(--primary-light);
+        }
+        .eco-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .eco-label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.4px; }
     </style>
 </head>
 <body>
@@ -223,15 +257,14 @@
 
     <nav class="navbar">
         <div class="navbar-brand">
-            <span class="logo">🚍</span>
-            <div>
-                <h1>Bus Reservation System</h1>
-                <span>Sign In &amp; Staff Portal</span>
-            </div>
+            <a href="index.html" class="logo" style="text-decoration:none; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:800; color:#090d16;">Catch<span style="color:var(--primary);">Bus</span>LK</a>
+            <span id="adminNavBadge" style="font-size:0.75rem; background:var(--primary-light); color:var(--primary-dark); padding:3px 10px; border-radius:9999px; font-weight:700; border:1px solid var(--primary-border); letter-spacing:0.5px;">ACCOUNT &amp; SERVICES</span>
         </div>
         <div class="nav-links">
-            <a href="/search.html" class="nav-link">🔍 Search Trips</a>
-            <a href="/admin.html" class="nav-link active">🛡️ Accounts &amp; Portal</a>
+            <a href="index.html" class="nav-link">🏠 Home</a>
+            <a href="schedule.html" class="nav-link">📅 Timetable</a>
+            <a href="search.html" class="nav-link">🔍 Book a Trip</a>
+            <a href="search.html?mode=operator" id="navOperatorModeLink" class="nav-link" style="display:none;">🛠️ Operator Mode</a>
             <span id="sessionChip" class="session-chip" style="display:none;"></span>
             <button id="navLogoutBtn" class="btn btn-outline btn-sm" style="display:none;" onclick="handleLogout()">Sign out</button>
         </div>
@@ -241,8 +274,8 @@
         <div class="page-tabs" id="pageTabs">
             <button class="page-tab active" id="tabSignIn" onclick="switchTab('signin')">🔑 Sign In</button>
             <button class="page-tab" id="tabRegister" onclick="switchTab('register')">📝 Create Account</button>
-            <button class="page-tab" id="tabPortal" onclick="switchTab('portal')">🛡️ Portal</button>
-            <button class="page-tab" id="tabProfile" onclick="switchTab('profile')">👤 My Account</button>
+            <button class="page-tab" id="tabPortal" onclick="switchTab('portal')" style="display:none;">🛡️ Portal</button>
+            <button class="page-tab" id="tabProfile" onclick="switchTab('profile')" style="display:none;">👤 My Account</button>
         </div>
 
         <div id="panelSignin" class="tab-panel active">
@@ -409,8 +442,12 @@
 
                 <div class="card">
                     <div class="section-header">
-                        <h2 class="section-title">👥 User Management</h2>
-                        <div style="display:flex; gap:8px;">
+                        <div>
+                            <h2 class="section-title">👥 User Management &amp; System Governance</h2>
+                            <p class="section-sub">Manage platform roles, dispatchers, crew, and commuter accounts.</p>
+                        </div>
+                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none; font-weight:700;">🛠️ Fleet &amp; Dispatch Console ➔</a>
                             <button class="btn btn-outline" onclick="loadData()">🔄 Refresh</button>
                             <button class="btn btn-primary" onclick="openAddModal()">➕ Add User</button>
                         </div>
@@ -463,16 +500,20 @@
             <div id="notLoggedIn" class="card auth-narrow" style="text-align:center; padding: 40px 28px;">
                 <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
                 <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:8px;">Not Signed In</h2>
-                <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Sign in to view and manage your profile.</p>
+                <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Sign in to view your tickets, travel metrics, and account details.</p>
                 <button class="btn btn-primary" onclick="switchTab('signin')">🔑 Sign In</button>
             </div>
             <div id="profileContent" style="display:none;">
-                <div class="card" style="margin-bottom:16px;">
+                <!-- Profile Header Card -->
+                <div class="card" style="margin-bottom:20px;">
                     <div class="profile-header">
                         <div class="profile-avatar" id="profileAvatar">KP</div>
-                        <div style="font-size:1.2rem; font-weight:700;" id="profileName">Loading...</div>
+                        <div style="font-size:1.35rem; font-weight:800;" id="profileName">Loading...</div>
                         <div style="font-size:0.88rem; color:var(--text-muted); margin-top:4px;" id="profileEmail">Loading...</div>
                         <div id="profileBadge" class="badge badge-passenger" style="margin-top:8px;">Passenger</div>
+                        
+                        <!-- Role specific quick links -->
+                        <div id="profileRoleActions" style="margin-top:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;"></div>
                     </div>
                     <div class="profile-details">
                         <div class="profile-detail-item">
@@ -488,42 +529,116 @@
                             <div class="profile-detail-value" id="profileCreatedAt">—</div>
                         </div>
                     </div>
-                    <button class="btn btn-danger btn-block" onclick="handleLogout()">🚪 Sign Out</button>
                 </div>
-                <div class="card" style="margin-bottom:16px;">
-                    <h3 class="section-title" style="margin-bottom:16px;">✏️ Update Profile</h3>
-                    <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)">
-                        <div class="form-group">
-                            <label for="updateName">Full Name</label>
-                            <input type="text" id="updateName" required minlength="2" maxlength="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="updatePhone">Phone Number</label>
-                            <input type="tel" id="updatePhone" required pattern="^\+?[0-9]{9,15}$">
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="updateProfileBtn">💾 Save Changes</button>
-                    </form>
+
+                <!-- Commuter Travel & Eco Metrics Dashboard -->
+                <div class="section-header" style="margin-bottom:12px;">
+                    <div>
+                        <h3 class="section-title">🌱 Travel &amp; Eco Dashboard</h3>
+                        <p class="section-sub">Your personal transit footprint and commuter milestones</p>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3 class="section-title" style="margin-bottom:16px;">🔐 Change Password</h3>
-                    <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
-                        <div class="form-group">
-                            <label for="currentPassword">Current Password</label>
-                            <div class="password-wrap">
-                                <input type="password" id="currentPassword" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)">👁️</button>
+                <div class="eco-metrics-grid">
+                    <div class="eco-metric-card">
+                        <div class="eco-icon">🛣️</div>
+                        <div>
+                            <div class="eco-value" id="metricDistance">0 km</div>
+                            <div class="eco-label">Distance Traveled</div>
+                        </div>
+                    </div>
+                    <div class="eco-metric-card">
+                        <div class="eco-icon">⏱️</div>
+                        <div>
+                            <div class="eco-value" id="metricTime">0h 0m</div>
+                            <div class="eco-label">Transit Time</div>
+                        </div>
+                    </div>
+                    <div class="eco-metric-card">
+                        <div class="eco-icon">🌿</div>
+                        <div>
+                            <div class="eco-value" id="metricEco">0.0 kg CO₂</div>
+                            <div class="eco-label">Carbon Offset</div>
+                        </div>
+                    </div>
+                    <div class="eco-metric-card">
+                        <div class="eco-icon">🎖️</div>
+                        <div>
+                            <div class="eco-value" id="metricTier" style="font-size:1.05rem;">Silver Traveler</div>
+                            <div class="eco-label">Commuter Tier</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Bus Tickets & Passes Section -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">🎫 Active Bus Tickets &amp; Boarding Passes</h3>
+                            <p class="section-sub">Confirmed trips with verified seat reservations</p>
+                        </div>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;">➕ Book Another Trip</a>
+                    </div>
+                    <div id="activeTicketsList">
+                        <div class="empty-state" style="padding:28px 16px;">
+                            <div class="icon">⏳</div>
+                            <p>Loading your tickets...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Past Trips / Booking History Section -->
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="section-header">
+                        <div>
+                            <h3 class="section-title">📜 Travel History &amp; Past Journeys</h3>
+                            <p class="section-sub">Archived and completed journeys</p>
+                        </div>
+                    </div>
+                    <div id="pastTicketsList">
+                        <p style="color:var(--text-muted); font-size:0.85rem;">Loading travel history...</p>
+                    </div>
+                </div>
+
+                <!-- Account Settings & Security -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                    <div class="card" style="margin-bottom:0;">
+                        <h3 class="section-title" style="margin-bottom:16px;">✏️ Update Profile</h3>
+                        <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)">
+                            <div class="form-group">
+                                <label for="updateName">Full Name</label>
+                                <input type="text" id="updateName" required minlength="2" maxlength="100">
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="newPassword">New Password</label>
-                            <div class="password-wrap">
-                                <input type="password" id="newPassword" required minlength="6" maxlength="50">
-                                <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)">👁️</button>
+                            <div class="form-group">
+                                <label for="updatePhone">Phone Number</label>
+                                <input type="tel" id="updatePhone" required pattern="^\+?[0-9]{9,15}$">
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="changePasswordBtn">🔐 Update Password</button>
-                    </form>
+                            <button type="submit" class="btn btn-primary btn-block" id="updateProfileBtn">💾 Save Changes</button>
+                        </form>
+                    </div>
+                    <div class="card" style="margin-bottom:0;">
+                        <h3 class="section-title" style="margin-bottom:16px;">🔐 Change Password</h3>
+                        <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                            <div class="form-group">
+                                <label for="currentPassword">Current Password</label>
+                                <div class="password-wrap">
+                                    <input type="password" id="currentPassword" required>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)">👁️</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPassword">New Password</label>
+                                <div class="password-wrap">
+                                    <input type="password" id="newPassword" required minlength="6" maxlength="50">
+                                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)">👁️</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block" id="changePasswordBtn">🔐 Update Password</button>
+                        </form>
+                    </div>
                 </div>
+
+                <!-- Sign Out Button -->
+                <button class="btn btn-danger btn-block" style="padding:12px;" onclick="handleLogout()">🚪 Sign Out of Account</button>
             </div>
         </div>
     </div>
@@ -617,17 +732,52 @@
         </div>
     </div>
 
+    <!-- Digital Boarding Pass Modal -->
+    <div class="modal-overlay" id="boardingPassModal">
+        <div class="modal" style="max-width:440px; text-align:center;">
+            <div class="modal-header">
+                <span class="modal-title">🎟️ Digital Boarding Pass</span>
+                <button class="modal-close" onclick="closeBoardingPassModal()">✕</button>
+            </div>
+            <div style="background:var(--primary-light); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--primary-border);">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--primary-dark); text-transform:uppercase; letter-spacing:0.5px;">E-Ticket Reference</div>
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:800; color:#0f172a;" id="passModalRef">CB00000000</div>
+            </div>
+            <div style="margin: 10px auto; display:inline-block; padding:12px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <img id="passModalQr" src="" alt="Ticket QR" style="width:180px; height:180px; display:block;" />
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">Present this QR code or booking reference to the bus conductor upon boarding.</p>
+            <div class="modal-footer" style="justify-content:center; margin-top:16px;">
+                <button class="btn btn-outline" onclick="closeBoardingPassModal()">Close</button>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ Print Pass</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API = '/api/v1/admin';
         let allUsers = [];
         let deleteTargetId = null;
 
-        function getToken() { return localStorage.getItem('bus_jwt_token'); }
-        function setToken(token) { localStorage.setItem('bus_jwt_token', token); }
-        function getUser() { const u = localStorage.getItem('bus_user'); return u ? JSON.parse(u) : null; }
-        function setUser(user) { localStorage.setItem('bus_user', JSON.stringify(user)); }
+        function getToken() {
+            return localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
+        }
+        function setToken(token) {
+            localStorage.setItem('auth_token', token);
+            localStorage.setItem('bus_jwt_token', token);
+        }
+        function getUser() {
+            const u = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
+            return u ? JSON.parse(u) : null;
+        }
+        function setUser(user) {
+            localStorage.setItem('user_info', JSON.stringify(user));
+            localStorage.setItem('bus_user', JSON.stringify(user));
+        }
         function clearSession() {
+            localStorage.removeItem('auth_token');
             localStorage.removeItem('bus_jwt_token');
+            localStorage.removeItem('user_info');
             localStorage.removeItem('bus_user');
         }
         function authHeaders() {
@@ -668,30 +818,78 @@
         }
         function refreshSessionUi() {
             const user = getUser();
+            const token = getToken();
             const chip = document.getElementById('sessionChip');
             const logout = document.getElementById('navLogoutBtn');
-            if (user) {
-                chip.style.display = 'inline-block';
-                chip.textContent = `${user.fullName} · ${user.role}`;
-                logout.style.display = 'inline-flex';
+            const tabSignIn = document.getElementById('tabSignIn');
+            const tabRegister = document.getElementById('tabRegister');
+            const tabPortal = document.getElementById('tabPortal');
+            const tabProfile = document.getElementById('tabProfile');
+            const navOperator = document.getElementById('navOperatorModeLink');
+            const navBadge = document.getElementById('adminNavBadge');
+
+            if (user && token) {
+                if (tabSignIn) tabSignIn.style.display = 'none';
+                if (tabRegister) tabRegister.style.display = 'none';
+                if (tabProfile) tabProfile.style.display = 'inline-block';
+
+                if (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
+                    if (tabPortal) {
+                        tabPortal.style.display = 'inline-block';
+                        tabPortal.textContent = user.role === 'ADMIN' ? '🛡️ Admin Portal' : '📋 Staff Portal';
+                    }
+                } else {
+                    if (tabPortal) tabPortal.style.display = 'none';
+                }
+
+                if (navOperator) {
+                    navOperator.style.display = user.role === 'ADMIN' ? 'inline-flex' : 'none';
+                }
+
+                if (navBadge) {
+                    navBadge.textContent = user.role === 'ADMIN' ? 'ADMINISTRATION & PORTAL' : 'COMMUTER ACCOUNT';
+                }
+
+                if (chip) {
+                    chip.style.display = 'inline-block';
+                    chip.textContent = `${user.fullName} · ${user.role}`;
+                }
+                if (logout) logout.style.display = 'inline-flex';
             } else {
-                chip.style.display = 'none';
-                logout.style.display = 'none';
+                if (tabSignIn) tabSignIn.style.display = 'inline-block';
+                if (tabRegister) tabRegister.style.display = 'inline-block';
+                if (tabPortal) tabPortal.style.display = 'none';
+                if (tabProfile) tabProfile.style.display = 'none';
+                if (navOperator) navOperator.style.display = 'none';
+                if (navBadge) navBadge.textContent = 'ACCOUNT & SERVICES';
+                if (chip) chip.style.display = 'none';
+                if (logout) logout.style.display = 'none';
             }
         }
         function switchTab(tab) {
+            const user = getUser();
+            const token = getToken();
+
+            if (tab === 'portal' && (!user || !token || (user.role !== 'ADMIN' && user.role !== 'CONDUCTOR' && user.role !== 'DRIVER'))) {
+                showToast('Portal access is restricted to Administrators and Crew.', 'error');
+                switchTab('signin');
+                return;
+            }
+
             document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             const tabMap = { signin: 'tabSignIn', register: 'tabRegister', portal: 'tabPortal', profile: 'tabProfile' };
             const panelMap = { signin: 'panelSignin', register: 'panelRegister', portal: 'panelPortal', profile: 'panelProfile' };
-            document.getElementById(tabMap[tab]).classList.add('active');
-            document.getElementById(panelMap[tab]).classList.add('active');
+            if (document.getElementById(tabMap[tab])) document.getElementById(tabMap[tab]).classList.add('active');
+            if (document.getElementById(panelMap[tab])) document.getElementById(panelMap[tab]).classList.add('active');
             if (tab === 'profile') loadProfile();
             if (tab === 'portal') renderPortal();
         }
         function afterAuthSuccess(user) {
             refreshSessionUi();
-            if (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
+            if (user.role === 'ADMIN') {
+                switchTab('portal');
+            } else if (user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
                 switchTab('portal');
             } else {
                 switchTab('profile');
@@ -730,7 +928,7 @@
         }
         async function quickLogin(email) {
             document.getElementById('loginEmail').value = email;
-            document.getElementById('loginPassword').value = 'Password@123';
+            document.getElementById('loginPassword').value = email.includes('admin') ? 'Admin@123' : 'Password@123';
             await handleLogin(new Event('submit'));
         }
         async function handleRegister(event) {
@@ -847,6 +1045,18 @@
                 }
             } catch (e) { /* cached profile */ }
         }
+
+        const ROUTE_DISTANCES = {
+            'colombo-kandy': 115, 'kandy-colombo': 115,
+            'colombo-galle': 126, 'galle-colombo': 126,
+            'colombo-matara': 160, 'matara-colombo': 160,
+            'colombo-jaffna': 396, 'jaffna-colombo': 396,
+            'colombo-nuwara eliya': 180, 'nuwara eliya-colombo': 180,
+            'colombo-trincomalee': 257, 'trincomalee-colombo': 257,
+            'colombo-badulla': 225, 'badulla-colombo': 225,
+            'colombo-anuradhapura': 205, 'anuradhapura-colombo': 205
+        };
+
         function renderProfile(user) {
             document.getElementById('profileAvatar').textContent = initials(user.fullName);
             document.getElementById('profileName').textContent = user.fullName;
@@ -863,6 +1073,230 @@
             badge.className = `badge ${roleClass[user.role] || 'badge-passenger'}`;
             document.getElementById('updateName').value = user.fullName;
             document.getElementById('updatePhone').value = user.phoneNumber;
+
+            // Role-specific action buttons
+            const actionsEl = document.getElementById('profileRoleActions');
+            if (actionsEl) {
+                if (user.role === 'ADMIN') {
+                    actionsEl.innerHTML = `
+                        <a href="search.html?mode=operator" class="btn btn-outline btn-sm" style="text-decoration:none;">🛠️ Fleet &amp; Dispatch Console ➔</a>
+                        <button class="btn btn-primary btn-sm" onclick="switchTab('portal')">🛡️ Admin Management Portal</button>
+                    `;
+                } else if (user.role === 'CONDUCTOR') {
+                    actionsEl.innerHTML = `
+                        <a href="conductor.html" class="btn btn-primary btn-sm" style="text-decoration:none;">📱 Conductor Boarding Terminal ➔</a>
+                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">📋 Staff Trip Board</button>
+                    `;
+                } else if (user.role === 'DRIVER') {
+                    actionsEl.innerHTML = `
+                        <a href="driver.html" class="btn btn-primary btn-sm" style="text-decoration:none;">🧭 Driver Live Telemetry ➔</a>
+                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">📋 Staff Trip Board</button>
+                    `;
+                } else {
+                    actionsEl.innerHTML = `
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;">🔍 Book Bus Seats ➔</a>
+                        <a href="schedule.html" class="btn btn-outline btn-sm" style="text-decoration:none;">📅 View Corridor Timetables ➔</a>
+                    `;
+                }
+            }
+
+            // Load user's bookings and compute travel & eco metrics
+            loadUserTickets(user.email);
+        }
+
+        async function loadUserTickets(email) {
+            const activeCont = document.getElementById('activeTicketsList');
+            const pastCont = document.getElementById('pastTicketsList');
+            if (!activeCont) return;
+
+            try {
+                let bookings = [];
+                const res = await fetch(`/api/v1/bookings?email=${encodeURIComponent(email)}`, {
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        bookings = json.data;
+                    }
+                }
+
+                // If in-browser last booking is present and matches this user or guest, add it
+                const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+                if (localBooking && localBooking.reference) {
+                    const alreadyHas = bookings.some(b => b.reference === localBooking.reference);
+                    if (!alreadyHas) {
+                        bookings.unshift(localBooking);
+                    }
+                }
+
+                renderUserTicketsAndMetrics(bookings);
+            } catch(err) {
+                activeCont.innerHTML = '<div class="empty-state" style="padding:20px; color:var(--text-muted);"><p>No active bookings found.</p></div>';
+            }
+        }
+
+        function renderUserTicketsAndMetrics(bookings) {
+            let totalKm = 0;
+            let totalMinutes = 0;
+            let activeTickets = [];
+            let pastTickets = [];
+
+            bookings.forEach(b => {
+                const from = (b.from || 'Colombo').toLowerCase().trim();
+                const to = (b.to || 'Kandy').toLowerCase().trim();
+                const key = `${from}-${to}`;
+                const km = ROUTE_DISTANCES[key] || 120;
+                
+                const isConfirmed = (b.status === 'CONFIRMED' || !b.status);
+                if (isConfirmed) {
+                    totalKm += km;
+                    totalMinutes += Math.round(km * 1.5);
+                    activeTickets.push(b);
+                } else {
+                    pastTickets.push(b);
+                }
+            });
+
+            // Update Eco & Travel Metrics
+            const distEl = document.getElementById('metricDistance');
+            const timeEl = document.getElementById('metricTime');
+            const ecoEl = document.getElementById('metricEco');
+            const tierEl = document.getElementById('metricTier');
+
+            if (distEl) distEl.textContent = `${totalKm} km`;
+            if (timeEl) {
+                const hrs = Math.floor(totalMinutes / 60);
+                const mins = totalMinutes % 60;
+                timeEl.textContent = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+            }
+            if (ecoEl) {
+                const co2 = (totalKm * 0.092).toFixed(1);
+                ecoEl.textContent = `${co2} kg CO₂`;
+            }
+            if (tierEl) {
+                if (totalKm >= 500) tierEl.textContent = '🌟 Gold Commuter';
+                else if (totalKm >= 200) tierEl.textContent = '🌿 Emerald Commuter';
+                else tierEl.textContent = '🌱 Silver Traveler';
+            }
+
+            // Render Active Tickets
+            const activeCont = document.getElementById('activeTicketsList');
+            if (activeTickets.length === 0) {
+                activeCont.innerHTML = `
+                    <div class="empty-state" style="padding:24px 16px;">
+                        <div style="font-size:2rem; margin-bottom:8px;">🎫</div>
+                        <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">No Active Bookings</div>
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">You have no upcoming journeys right now.</p>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="margin-top:14px; text-decoration:none;">Book a Trip Now &rarr;</a>
+                    </div>
+                `;
+            } else {
+                activeCont.innerHTML = activeTickets.map(t => {
+                    const seats = Array.isArray(t.seats) ? t.seats.join(', ') : (t.seats || 'S12');
+                    const total = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 850.00');
+                    const date = t.date || '2026-10-01';
+                    const time = t.time || '08:30';
+                    const busType = t.busType || 'Expressway AC';
+                    const operator = t.operator || 'CatchBus Express';
+
+                    return `
+                        <div class="ticket-card" style="background:#ffffff; border:1.5px solid var(--primary-border); border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 4px 14px rgba(16,185,129,0.06); display:flex; flex-direction:column; gap:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--border); padding-bottom:10px;">
+                                <div>
+                                    <span style="font-size:0.72rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;">E-TICKET REFERENCE</span>
+                                    <div style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:800; color:#0f172a;">${t.reference}</div>
+                                </div>
+                                <span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:700;">CONFIRMED</span>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; align-items:center;">
+                                <div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">ROUTE</div>
+                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">${t.from} ➔ ${t.to}</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${operator} &bull; ${busType}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">DEPARTURE</div>
+                                    <div style="font-size:0.92rem; font-weight:700; color:#0f172a;">${date}</div>
+                                    <div style="font-size:0.85rem; font-weight:800; color:var(--primary);">${time}</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">SEATS &amp; FARE</div>
+                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a;">Seats: ${seats}</div>
+                                    <div style="font-size:0.88rem; font-weight:800; color:var(--primary);">${total}</div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:4px; flex-wrap:wrap; gap:8px;">
+                                <span style="font-size:0.76rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;">
+                                    📱 Present this pass to Conductor upon boarding
+                                </span>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="btn btn-outline btn-sm" onclick="showBoardingPassModal('${t.reference}')">🎟️ View Pass &amp; QR</button>
+                                    <button class="btn btn-danger btn-sm" onclick="cancelUserBooking('${t.reference}')">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render Past / Cancelled Tickets
+            const pastCont = document.getElementById('pastTicketsList');
+            if (pastCont) {
+                if (pastTickets.length === 0) {
+                    pastCont.innerHTML = '<p style="color:var(--text-muted); font-size:0.84rem; text-align:center; padding:12px;">No past or cancelled journeys.</p>';
+                } else {
+                    pastCont.innerHTML = pastTickets.map(t => {
+                        const total = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 850.00');
+                        const date = t.date || '2026-10-01';
+                        const statusColor = t.status === 'CANCELLED' ? 'background:#fee2e2; color:#b91c1c;' : 'background:#f1f5f9; color:#475569;';
+                        return `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border-radius:8px; border:1px solid var(--border); margin-bottom:8px;">
+                                <div>
+                                    <span style="font-weight:700; font-size:0.88rem; color:#1e293b;">${t.from} ➔ ${t.to}</span>
+                                    <span style="font-size:0.78rem; color:var(--text-muted); margin-left:8px;">${date} (${t.reference})</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <span style="font-weight:700; font-size:0.85rem; color:#0f172a;">${total}</span>
+                                    <span class="badge" style="${statusColor} font-size:0.72rem;">${t.status || 'COMPLETED'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        async function cancelUserBooking(ref) {
+            if (!confirm(`Are you sure you want to cancel booking ${ref}? The seat lock will be released.`)) return;
+            try {
+                const res = await fetch(`/api/v1/bookings/${encodeURIComponent(ref)}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(`Booking ${ref} cancelled successfully.`, 'success');
+                    const user = getUser();
+                    if (user) loadUserTickets(user.email);
+                } else {
+                    showToast(json.message || 'Failed to cancel booking', 'error');
+                }
+            } catch(e) {
+                showToast('Error cancelling booking.', 'error');
+            }
+        }
+
+        function showBoardingPassModal(ref) {
+            document.getElementById('passModalRef').textContent = ref;
+            document.getElementById('passModalQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ref)}`;
+            document.getElementById('boardingPassModal').classList.add('open');
+        }
+
+        function closeBoardingPassModal() {
+            document.getElementById('boardingPassModal').classList.remove('open');
         }
         async function handleUpdateProfile(event) {
             event.preventDefault();
@@ -1130,17 +1564,51 @@
                 deleteTargetId = null;
             }
         }
-        ['addModal','editModal','deleteModal'].forEach(id => {
-            document.getElementById(id).addEventListener('click', function(e) {
-                if (e.target === this) this.classList.remove('open');
-            });
-        });
-        document.addEventListener('DOMContentLoaded', () => {
-            refreshSessionUi();
-            const user = getUser();
-            if (user && getToken()) {
-                afterAuthSuccess(user);
+        ['addModal','editModal','deleteModal','boardingPassModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('click', function(e) {
+                    if (e.target === this) this.classList.remove('open');
+                });
             }
+        });
+
+        function applyUrlTab() {
+            refreshSessionUi();
+            const params = new URLSearchParams(window.location.search);
+            const tabParam = params.get('tab');
+            const user = getUser();
+            const token = getToken();
+
+            if (tabParam === 'register') {
+                switchTab('register');
+            } else if (tabParam === 'signin') {
+                switchTab('signin');
+            } else if (tabParam === 'profile') {
+                if (user && token) {
+                    switchTab('profile');
+                } else {
+                    switchTab('signin');
+                }
+            } else if (tabParam === 'portal') {
+                if (user && token && (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER')) {
+                    switchTab('portal');
+                } else {
+                    showToast('Portal access is restricted to Administrators and Crew.', 'error');
+                    switchTab('signin');
+                }
+            } else {
+                if (user && token) {
+                    if (user.role === 'ADMIN') switchTab('portal');
+                    else switchTab('profile');
+                } else {
+                    switchTab('signin');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyUrlTab();
         });
     </script>
 </body>

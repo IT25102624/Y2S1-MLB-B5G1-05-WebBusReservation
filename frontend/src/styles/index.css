@@ -40,6 +40,9 @@ body {
 }
 .animate-drive { animation: drive 6s ease-in-out infinite; }
 
+@keyframes wheel-spin { to { transform: rotate(360deg); } }
+.animate-wheel { animation: wheel-spin 1.4s linear infinite; transform-origin: center; }
+
 .scanline {
   background: linear-gradient(180deg, transparent, rgba(94,234,212,0.55), transparent);
   animation: scan 2.6s ease-in-out infinite;
