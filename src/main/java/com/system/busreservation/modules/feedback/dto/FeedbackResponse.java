@@ -16,6 +16,7 @@ import java.time.LocalTime;
 public class FeedbackResponse {
 
     private Long feedbackId;
+    private Long id;
     private Long userId;
     private String name;
     private String type;
@@ -25,9 +26,14 @@ public class FeedbackResponse {
     private LocalTime complainTime;
     private String reply;
 
+    public Long getId() {
+        return id != null ? id : feedbackId;
+    }
+
     public static FeedbackResponse fromEntity(Feedback feedback) {
         return FeedbackResponse.builder()
                 .feedbackId(feedback.getFeedbackId())
+                .id(feedback.getFeedbackId())
                 .userId(feedback.getUser() != null ? feedback.getUser().getUserId() : null)
                 .name(feedback.getName())
                 .type(feedback.getType())

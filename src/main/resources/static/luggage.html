@@ -3,8 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CatchBusLK — Luggage Registration &amp; Tracking</title>
+    <title>CatchBusLK — Luggage Registration, QR Tagging &amp; Cargo Tracking</title>
     <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        .tab-bar {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: var(--primary-dark);
+        }
+        .tab-btn.active {
+            color: var(--primary-darker);
+            border-bottom-color: var(--primary);
+        }
+        /* Printable Luggage Tag Card */
+        .printable-tag-card {
+            background: #ffffff;
+            border: 2px dashed #059669;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .tag-hole {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-page);
+            border: 2px solid var(--gray-400);
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .qr-frame {
+            background: #ffffff;
+            border: 2px solid var(--gray-200);
+            border-radius: 14px;
+            padding: 10px;
+            display: inline-block;
+            box-shadow: var(--shadow-sm);
+        }
+        /* Cargo Progression Stepper */
+        .stepper-container {
+            margin: 16px 0 12px;
+            padding: 12px 14px;
+            background: #f8fafc;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+        }
+        .stepper-track {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+        .stepper-bar {
+            height: 6px;
+            border-radius: 9999px;
+            background: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .stepper-bar.done {
+            background: var(--primary);
+        }
+        .stepper-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--gray-400);
+            margin-top: 6px;
+            display: block;
+        }
+        .stepper-label.done {
+            color: var(--primary-darker);
+        }
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+        }
+        @media print {
+            body * { visibility: hidden; }
+            #printableSection, #printableSection * { visibility: visible; }
+            #printableSection { position: absolute; left: 0; top: 0; width: 100%; }
+            .print-hide { display: none !important; }
+        }
+    </style>
 </head>
 <body>
     <nav class="top-nav">
@@ -15,27 +133,41 @@
             <a href="luggage.html" class="active">Luggage</a>
             <a href="feedback.html">Feedback</a>
             <a href="notifications.html">Alerts</a>
+            <a href="customer-care.html">🛡️ Customer Care</a>
             <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
             <button id="logoutBtn" class="hidden">Sign Out</button>
         </div>
     </nav>
 
     <main class="container">
-        <div style="margin-bottom: 24px;">
-            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🧳 Luggage Registration &amp; Tracking</h1>
-            <p style="color:var(--gray-600); font-size:0.95rem;">Generate secure luggage tracking tags, associate bags with your bus bookings, and monitor transit baggage status.</p>
+        <div style="margin-bottom: 20px;">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🧳 Luggage Registration, QR Tagging &amp; Tracking</h1>
+            <p style="color:var(--gray-600); font-size:0.95rem;">Generate secure digital baggage tags with scannable QR codes, track cargo checkpoints, and manage baggage manifests.</p>
         </div>
 
         <p id="message" class="message"></p>
 
-        <div class="grid">
-            <!-- Left: Tag Generation Form -->
+        <!-- Sub-Part Tabs -->
+        <div class="tab-bar">
+            <button id="tabBtnTag" class="tab-btn active" onclick="switchLuggageTab('tag')">🏷️ Tag Luggage &amp; QR Tag</button>
+            <button id="tabBtnManifest" class="tab-btn" onclick="switchLuggageTab('manifest')">📋 Cargo Manifest (<span id="manifestCount">0</span>)</button>
+            <button id="tabBtnTrack" class="tab-btn" onclick="switchLuggageTab('track')">🛰️ Live Luggage Tracker</button>
+        </div>
+
+        <!-- TAB 1: TAG LUGGAGE & PRINTABLE QR TAG -->
+        <div id="tabTagContent" class="grid">
+            <!-- Left: Form -->
             <section class="panel">
-                <h2>Register Luggage Tag</h2>
+                <h2 id="tagFormTitle">Register Baggage Tag</h2>
                 <form id="luggageForm" class="form-grid">
                     <label>
-                        E-Ticket / Active Booking
+                        Linked E-Ticket / Booking
                         <select id="bookingId" required></select>
+                    </label>
+
+                    <label>
+                        Passenger Name
+                        <input id="passengerNameInput" placeholder="Passenger Full Name" required>
                     </label>
 
                     <label>
@@ -44,74 +176,306 @@
                     </label>
 
                     <label>
-                        Luggage Description &amp; Identifying Marks
-                        <textarea id="description" placeholder="e.g. Maroon hardcase trolley bag with name tag, blue backpack"></textarea>
+                        Luggage Identifier &amp; Description
+                        <textarea id="description" placeholder="e.g. Maroon American Tourister trolley with red strap, blue backpack" required></textarea>
                     </label>
 
                     <label>
-                        Luggage Transit Status
+                        Transit Checkpoint Status
                         <select id="status">
-                            <option value="TAGGED">🏷️ Tagged &amp; Registered</option>
-                            <option value="CHECKED_IN">📋 Checked In at Bus Terminal</option>
-                            <option value="LOADED">🚌 Loaded into Luggage Compartment</option>
-                            <option value="COLLECTED">✅ Collected by Passenger</option>
+                            <option value="TAGGED">🏷️ TAGGED — Digital Tag Generated</option>
+                            <option value="CHECKED_IN">📋 CHECKED IN — Terminal Bag Counter</option>
+                            <option value="LOADED">🚌 LOADED — Bus Luggage Hold</option>
+                            <option value="COLLECTED">✅ COLLECTED — Claimed by Passenger</option>
                         </select>
                     </label>
 
                     <div class="item-actions">
-                        <button id="submitLuggageBtn" class="button" type="submit">Generate Tag &amp; Barcode</button>
+                        <button id="submitLuggageBtn" class="button" type="submit">Generate QR Baggage Tag</button>
                         <button id="cancelLuggageEditBtn" class="button secondary hidden" type="button">Cancel Edit</button>
                     </div>
                 </form>
             </section>
 
-            <!-- Right: Luggage Records List -->
-            <section class="panel">
-                <h2>My Active Luggage Tags</h2>
-                <div id="luggageList" class="form-grid">
-                    <p style="color:var(--gray-400);">Loading registered luggage tags…</p>
+            <!-- Right: Interactive Scannable Baggage Tag Card -->
+            <section class="panel" style="background:#f8fafc; text-align:center;">
+                <h2 style="margin-bottom:14px;">Baggage Tag &amp; Scannable QR Code</h2>
+
+                <div id="printableSection" class="printable-tag-card">
+                    <div class="tag-hole"></div>
+
+                    <div style="padding-top:16px; border-bottom:1px solid var(--gray-200); padding-bottom:12px; margin-bottom:14px;">
+                        <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--primary-dark);">CatchBusLK • Digital Baggage Tag</span>
+                        <div class="mono" id="cardTagNumber" style="font-size:1.5rem; margin:6px 0 2px; color:var(--primary-darker);">LUG-PENDING</div>
+                        <span id="cardStatusBadge" class="tag" style="margin:0;">TAGGED</span>
+                    </div>
+
+                    <div style="text-align:left; font-size:0.85rem; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+                        <div>
+                            <span style="display:block; font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--gray-400);">E-Ticket Ref</span>
+                            <strong id="cardBookingRef">#Pending</strong>
+                        </div>
+                        <div>
+                            <span style="display:block; font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--gray-400);">Total Bags</span>
+                            <strong id="cardBags" style="color:var(--primary-darker);">1 Piece</strong>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="display:block; font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--gray-400);">Passenger Name</span>
+                            <span id="cardPassenger" style="font-weight:600;">Passenger</span>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="display:block; font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--gray-400);">Route / Journey</span>
+                            <span id="cardRoute" style="color:var(--gray-700);">Colombo Express Network</span>
+                        </div>
+                        <div style="grid-column: span 2; background:#f1f5f9; padding:8px 10px; border-radius:8px;">
+                            <span style="display:block; font-size:0.7rem; text-transform:uppercase; font-weight:800; color:var(--gray-600);">Baggage Identifier</span>
+                            <span id="cardDesc" style="color:var(--gray-800); font-size:0.82rem;">Standard Luggage</span>
+                        </div>
+                    </div>
+
+                    <!-- Scannable QR Code -->
+                    <div style="border-top:1px solid var(--gray-200); padding-top:14px;">
+                        <div class="qr-frame" id="qrContainer">
+                            <svg width="180" height="180" viewBox="0 0 180 180">
+                                <rect width="180" height="180" fill="#f8fafc" />
+                                <text x="90" y="90" text-anchor="middle" fill="#94a3b8" font-size="12">QR Code Preview</text>
+                            </svg>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--gray-600); font-weight:700; margin-top:8px;">
+                            📷 Scan with any smartphone camera to verify cargo
+                        </div>
+                    </div>
+
+                    <!-- Print & Modal Actions -->
+                    <div class="print-hide" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--gray-200); padding-top:12px;">
+                        <button type="button" class="button secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="showQrModal()">🔍 Preview Data</button>
+                        <button type="button" class="button" style="font-size:0.8rem; padding:6px 16px;" onclick="window.print()">Print Tag 🖨️</button>
+                    </div>
                 </div>
             </section>
         </div>
+
+        <!-- TAB 2: BAGGAGE MANIFEST / MANAGEMENT -->
+        <div id="tabManifestContent" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
+                <h2 style="margin:0;">Registered Baggage Manifest</h2>
+                <button onclick="loadLuggage()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">🔄 Refresh Manifest</button>
+            </div>
+
+            <div id="luggageList" class="form-grid">
+                <p style="color:var(--gray-400); text-align:center; padding:30px;">Loading luggage records…</p>
+            </div>
+        </div>
+
+        <!-- TAB 3: LIVE LUGGAGE TRACKER -->
+        <div id="tabTrackContent" class="hidden">
+            <div style="max-width: 650px; margin: 0 auto;">
+                <div class="panel" style="text-align:center; padding:36px;">
+                    <div style="font-size:2.5rem; margin-bottom:10px;">🛰️</div>
+                    <h2 style="font-size:1.6rem; font-weight:700; margin-bottom:6px;">Track Baggage by Tag ID</h2>
+                    <p style="color:var(--gray-600); font-size:0.9rem; margin-bottom:20px;">
+                        Enter any unique Luggage Tag ID (e.g. <code>LUG-20261001-XXXXXX</code>) to inspect live cargo checkpoints and journey progression.
+                    </p>
+
+                    <form id="trackForm" style="display:flex; gap:10px; max-width:480px; margin:0 auto;" onsubmit="handleTagSearch(event)">
+                        <input id="trackTagInput" placeholder="e.g. LUG-20261001-XXXX" required style="font-family:'Space Grotesk',monospace; text-transform:uppercase; font-size:1rem; padding:10px 14px; border:2px solid var(--gray-200); border-radius:10px; flex:1;">
+                        <button type="submit" class="button" style="padding:10px 20px;">Track Cargo</button>
+                    </form>
+
+                    <div id="trackResult" class="hidden" style="margin-top:28px; text-align:left; border-top:1px solid var(--gray-200); padding-top:20px;">
+                        <!-- Injected result -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
+    <!-- Scanned QR Modal Preview -->
+    <div id="qrDataModal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gray-200); padding-bottom:12px; margin-bottom:14px;">
+                <h3 style="font-size:1.15rem; font-weight:700; margin:0;">📱 Scannable QR Payload</h3>
+                <button onclick="closeQrModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; font-weight:700;">✕</button>
+            </div>
+            <div id="modalQrSvg" style="display:flex; justify-content:center; margin-bottom:16px;"></div>
+            <pre id="modalQrPayload" style="background:#f8fafc; border:1px solid var(--gray-200); border-radius:8px; padding:14px; font-size:0.8rem; font-family:monospace; white-space:pre-wrap; color:var(--gray-900); line-height:1.5;"></pre>
+            <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+                <button class="button" onclick="closeQrModal()">Close Preview</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
+    <script src="js/qr-generator.js"></script>
     <script>
         const user = requireUser();
         let editingLuggageId = null;
+        let allLuggageRecords = [];
+        let currentSelectedLuggage = null;
         setupNav('luggage.html');
 
+        const luggageForm = document.getElementById('luggageForm');
+        const bookingIdSelect = document.getElementById('bookingId');
+        const passengerNameInput = document.getElementById('passengerNameInput');
+        const bagQuantity = document.getElementById('bagQuantity');
+        const description = document.getElementById('description');
+        const statusSelect = document.getElementById('status');
+        const submitLuggageBtn = document.getElementById('submitLuggageBtn');
+        const cancelLuggageEditBtn = document.getElementById('cancelLuggageEditBtn');
+        const tagFormTitle = document.getElementById('tagFormTitle');
+
         if (user) {
+            if (user.fullName) passengerNameInput.value = user.fullName;
             loadBookings();
             loadLuggage();
         }
 
-        const luggageForm = document.getElementById('luggageForm');
-        const bookingId = document.getElementById('bookingId');
-        const bagQuantity = document.getElementById('bagQuantity');
-        const description = document.getElementById('description');
-        const status = document.getElementById('status');
-        const submitLuggageBtn = document.getElementById('submitLuggageBtn');
-        const cancelLuggageEditBtn = document.getElementById('cancelLuggageEditBtn');
-        const luggageList = document.getElementById('luggageList');
+        function switchLuggageTab(tab) {
+            const tabTag = document.getElementById('tabTagContent');
+            const tabManifest = document.getElementById('tabManifestContent');
+            const tabTrack = document.getElementById('tabTrackContent');
+
+            const btnTag = document.getElementById('tabBtnTag');
+            const btnManifest = document.getElementById('tabBtnManifest');
+            const btnTrack = document.getElementById('tabBtnTrack');
+
+            [tabTag, tabManifest, tabTrack].forEach(el => el.classList.add('hidden'));
+            [btnTag, btnManifest, btnTrack].forEach(el => el.classList.remove('active'));
+
+            if (tab === 'tag') {
+                tabTag.classList.remove('hidden');
+                btnTag.classList.add('active');
+            } else if (tab === 'manifest') {
+                tabManifest.classList.remove('hidden');
+                btnManifest.classList.add('active');
+                renderManifest();
+            } else if (tab === 'track') {
+                tabTrack.classList.remove('hidden');
+                btnTrack.classList.add('active');
+            }
+        }
+
+        async function loadBookings() {
+            const uid = user.id || user.userId || 2;
+            try {
+                const response = await fetch(`/api/v1/bookings/user/${uid}`);
+                if (response.ok) {
+                    const bookings = await response.json();
+                    if (bookings && bookings.length > 0) {
+                        bookingIdSelect.innerHTML = bookings.map(b => `
+                            <option value="${b.bookingId}" data-route="${b.route || 'Express Bus'}" data-name="${b.passengerName || user.fullName || 'Passenger'}">
+                                Booking #${b.bookingId} — ${b.route || 'Express Service'}
+                            </option>
+                        `).join('');
+                    } else {
+                        bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+                    }
+                } else {
+                    bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+                }
+            } catch (err) {
+                bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+            }
+        }
+
+        async function loadLuggage() {
+            const uid = user.id || user.userId || 2;
+            try {
+                const response = await fetch(`/api/v1/luggage/user/${uid}`);
+                if (response.ok) {
+                    allLuggageRecords = await response.json();
+                    document.getElementById('manifestCount').textContent = allLuggageRecords.length;
+                    renderManifest();
+                    if (allLuggageRecords.length > 0 && !currentSelectedLuggage) {
+                        updateTagCardDisplay(allLuggageRecords[0]);
+                    }
+                }
+            } catch (e) {
+                console.error('Could not load luggage records:', e);
+            }
+        }
+
+        function renderManifest() {
+            const container = document.getElementById('luggageList');
+            if (!allLuggageRecords.length) {
+                container.innerHTML = '<div style="background:#ffffff; border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:40px; text-align:center; color:var(--gray-600);"><p>No luggage records registered yet. Tag your luggage to start tracking.</p></div>';
+                return;
+            }
+
+            const statuses = ['TAGGED', 'CHECKED_IN', 'LOADED', 'COLLECTED'];
+
+            container.innerHTML = allLuggageRecords.map(item => {
+                const lid = item.id || item.luggageId;
+                const bId = item.bookingId || (item.booking ? item.booking.bookingId : 'N/A');
+                const st = (item.status || 'TAGGED').toUpperCase();
+                const currentIdx = statuses.indexOf(st);
+
+                return `
+                <article class="item" style="background:#ffffff; border-radius:var(--radius-md); padding:20px; box-shadow:var(--shadow-sm);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <span class="tag" style="margin-bottom:4px;">Status: ${st}</span>
+                            <div class="mono" style="font-size:1.25rem; color:var(--primary-darker);">${item.tagNumber || 'LUG-PENDING'}</div>
+                            <div style="font-size:0.85rem; color:var(--gray-600);">Booking #${bId} ${item.routeInfo ? '• ' + item.routeInfo : ''}</div>
+                        </div>
+                        <small style="color:var(--gray-400);">${item.createdAt ? formatDateTime(item.createdAt) : 'Registered'}</small>
+                    </div>
+
+                    <!-- Cargo Stepper -->
+                    <div class="stepper-container">
+                        <div class="stepper-track">
+                            ${statuses.map((step, idx) => `
+                                <div>
+                                    <div class="stepper-bar ${idx <= currentIdx ? 'done' : ''}"></div>
+                                    <span class="stepper-label ${idx <= currentIdx ? 'done' : ''}">${step.replace('_', ' ')}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <p style="font-size:0.9rem; color:var(--gray-700); margin:8px 0;">
+                        Pieces: <strong>${item.bagQuantity}</strong> | Marks: <em>${escapeHtml(item.description || 'Standard travel bag')}</em>
+                    </p>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:14px; pt:8px; border-top:1px solid var(--gray-100);">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <label style="font-size:0.75rem; font-weight:700; color:var(--gray-600); margin:0;">Status:</label>
+                            <select onchange="updateLuggageStatus(${lid}, this.value)" style="padding:4px 8px; font-size:0.8rem; border:1px solid var(--gray-200); border-radius:6px; font-weight:600;">
+                                ${statuses.map(s => `<option value="${s}" ${s === st ? 'selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="item-actions" style="margin:0;">
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="previewRecordTag(${lid})">Print QR 🖨️</button>
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editLuggageRecord(${lid})">✏️ Edit</button>
+                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteLuggageRecord(${lid})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
 
         luggageForm.addEventListener('submit', async event => {
             event.preventDefault();
             const uid = user.id || user.userId || 2;
             const url = editingLuggageId ? `/api/v1/luggage/${editingLuggageId}` : '/api/v1/luggage';
-            
+
             submitLuggageBtn.disabled = true;
-            submitLuggageBtn.textContent = 'Saving…';
+            submitLuggageBtn.textContent = 'Generating…';
+
+            const selectedOption = bookingIdSelect.options[bookingIdSelect.selectedIndex];
+            const routeStr = selectedOption ? selectedOption.getAttribute('data-route') : 'Express Bus';
 
             try {
                 const response = await fetch(url, {
                     method: editingLuggageId ? 'PUT' : 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        bookingId: Number(bookingId.value),
+                        bookingId: Number(bookingIdSelect.value),
                         bagQuantity: Number(bagQuantity.value),
                         description: description.value.trim(),
-                        status: status.value,
+                        status: statusSelect.value,
                         userId: uid
                     })
                 });
@@ -120,15 +484,21 @@
                     showMessage(await response.text(), 'error');
                     return;
                 }
-                const luggage = await response.json();
-                showMessage(editingLuggageId ? 'Luggage record updated successfully.' : `Luggage tag generated successfully: ${luggage.tagNumber}`);
+
+                const savedRecord = await response.json();
+                savedRecord.passengerName = passengerNameInput.value.trim();
+                savedRecord.routeInfo = routeStr;
+
+                updateTagCardDisplay(savedRecord);
+                showMessage(editingLuggageId ? 'Luggage record updated successfully.' : `Luggage tag generated successfully: ${savedRecord.tagNumber}`);
+
                 resetLuggageForm();
-                loadLuggage();
+                await loadLuggage();
             } catch (err) {
-                showMessage('Network error while saving luggage tag.', 'error');
+                showMessage('Network error while saving luggage record.', 'error');
             } finally {
                 submitLuggageBtn.disabled = false;
-                submitLuggageBtn.textContent = editingLuggageId ? 'Update Luggage' : 'Generate Tag & Barcode';
+                submitLuggageBtn.textContent = editingLuggageId ? 'Update Luggage' : 'Generate QR Baggage Tag';
             }
         });
 
@@ -138,74 +508,188 @@
             editingLuggageId = null;
             luggageForm.reset();
             bagQuantity.value = 1;
-            status.value = 'TAGGED';
-            bookingId.disabled = false;
-            submitLuggageBtn.textContent = 'Generate Tag & Barcode';
+            statusSelect.value = 'TAGGED';
+            bookingIdSelect.disabled = false;
+            submitLuggageBtn.textContent = 'Generate QR Baggage Tag';
+            tagFormTitle.textContent = 'Register Baggage Tag';
             cancelLuggageEditBtn.classList.add('hidden');
         }
 
-        async function loadBookings() {
-            const uid = user.id || user.userId || 2;
-            try {
-                const response = await fetch(`/api/v1/bookings/user/${uid}`);
-                const bookings = await response.json();
-                bookingId.innerHTML = bookings.length ? bookings.map(booking =>
-                    `<option value="${booking.bookingId}">Booking #${booking.bookingId} - ${booking.route || 'Express Bus'}</option>`
-                ).join('') : '<option value="1">Booking #1 - Colombo to Kandy (Default)</option>';
-            } catch (e) {
-                bookingId.innerHTML = '<option value="1">Booking #1 - Colombo to Kandy (Default)</option>';
+        function updateTagCardDisplay(record) {
+            currentSelectedLuggage = record;
+            document.getElementById('cardTagNumber').textContent = record.tagNumber || 'LUG-PENDING';
+            document.getElementById('cardStatusBadge').textContent = record.status || 'TAGGED';
+            document.getElementById('cardBookingRef').textContent = '#' + (record.bookingId || '1');
+            document.getElementById('cardBags').textContent = `${record.bagQuantity} ${record.bagQuantity === 1 ? 'Piece' : 'Pieces'}`;
+            document.getElementById('cardPassenger').textContent = record.passengerName || user.fullName || 'Passenger';
+            document.getElementById('cardRoute').textContent = record.routeInfo || 'Express Highway Service';
+            document.getElementById('cardDesc').textContent = record.description || 'Standard travel bag';
+
+            // Generate Pure SVG QR Code
+            const qrPayload = `CATCHBUS LK BAGGAGE TAG\nTag ID: ${record.tagNumber || 'LUG-PENDING'}\nE-Ticket: #${record.bookingId || '1'}\nPassenger: ${record.passengerName || user.fullName || 'Passenger'}\nRoute: ${record.routeInfo || 'Express Network'}\nBags: ${record.bagQuantity} Pieces\nStatus: ${record.status || 'TAGGED'}`;
+
+            if (window.generateQRCodeSVG) {
+                const svgString = window.generateQRCodeSVG(qrPayload, 180, 2);
+                document.getElementById('qrContainer').innerHTML = svgString;
             }
         }
 
-        async function loadLuggage() {
-            const uid = user.id || user.userId || 2;
-            try {
-                const response = await fetch(`/api/v1/luggage/user/${uid}`);
-                const records = await response.json();
-                luggageList.innerHTML = records.length ? records.map(record => {
-                    const bId = record.bookingId || (record.booking ? record.booking.bookingId : 'N/A');
-                    return `
-                    <article class="item" data-luggage='${JSON.stringify(record).replaceAll("'", "&#39;")}'>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span class="tag">${record.status}</span>
-                            <small style="color:var(--gray-400);">${formatDateTime(record.createdAt)}</small>
-                        </div>
-                        <h3 class="mono">${record.tagNumber}</h3>
-                        <p style="font-size:0.9rem; font-weight:600; color:var(--gray-700);">Booking #${bId} ${record.routeInfo ? '• ' + record.routeInfo : ''}</p>
-                        <p style="font-size:0.88rem; color:var(--gray-600); margin:4px 0;">Bags: <strong>${record.bagQuantity}</strong> | ${record.description || 'No special marks'}</p>
-                        <div class="item-actions">
-                            <button class="button secondary" style="font-size:0.8rem; padding:6px 12px;" type="button" onclick="editLuggage(this)">Edit Tag</button>
-                            <button class="button danger" style="font-size:0.8rem; padding:6px 12px;" type="button" onclick="deleteLuggage(${record.id})">Delete</button>
-                        </div>
-                    </article>
-                `}).join('') : '<p style="color:var(--gray-400); text-align:center; padding:20px;">No luggage registered yet. Use the form to tag your luggage.</p>';
-            } catch (e) {
-                luggageList.innerHTML = '<p style="color:var(--gray-400);">Could not load luggage records.</p>';
+        function previewRecordTag(id) {
+            const item = allLuggageRecords.find(l => (l.id || l.luggageId) == id);
+            if (item) {
+                updateTagCardDisplay(item);
+                switchLuggageTab('tag');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
-        function editLuggage(button) {
-            const record = JSON.parse(button.closest('.item').dataset.luggage);
-            editingLuggageId = record.id;
-            bookingId.value = record.bookingId || (record.booking ? record.booking.bookingId : '');
-            bookingId.disabled = true;
-            bagQuantity.value = record.bagQuantity || 1;
-            description.value = record.description || '';
-            status.value = record.status || 'TAGGED';
-            submitLuggageBtn.textContent = 'Update Luggage';
+        function editLuggageRecord(id) {
+            const item = allLuggageRecords.find(l => (l.id || l.luggageId) == id);
+            if (!item) return;
+
+            editingLuggageId = id;
+            bookingIdSelect.value = item.bookingId || 1;
+            bookingIdSelect.disabled = true;
+            bagQuantity.value = item.bagQuantity || 1;
+            description.value = item.description || '';
+            statusSelect.value = item.status || 'TAGGED';
+
+            submitLuggageBtn.textContent = 'Update Luggage Record';
+            tagFormTitle.textContent = `Edit Luggage #${id}`;
             cancelLuggageEditBtn.classList.remove('hidden');
+
+            updateTagCardDisplay(item);
+            switchLuggageTab('tag');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        async function deleteLuggage(id) {
-            if (!confirm('Are you sure you want to remove this luggage record?')) return;
-            const response = await fetch(`/api/v1/luggage/${id}`, { method: 'DELETE' });
-            if (!response.ok) {
-                showMessage(await response.text(), 'error');
-                return;
+        async function updateLuggageStatus(id, newStatus) {
+            try {
+                const response = await fetch(`/api/v1/luggage/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    showMessage('Failed to update luggage status: ' + await response.text(), 'error');
+                    return;
+                }
+
+                showMessage(`Luggage status updated to ${newStatus}.`);
+                loadLuggage();
+            } catch (e) {
+                showMessage('Network error while updating status.', 'error');
             }
-            showMessage('Luggage record deleted.');
-            loadLuggage();
+        }
+
+        async function deleteLuggageRecord(id) {
+            if (!confirm(`Are you sure you want to permanently delete luggage record #${id}?`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/luggage/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    showMessage(await response.text(), 'error');
+                    return;
+                }
+                showMessage('Luggage record deleted.');
+                loadLuggage();
+            } catch (e) {
+                showMessage('Network error while deleting luggage.', 'error');
+            }
+        }
+
+        async function handleTagSearch(event) {
+            event.preventDefault();
+            const tagNumber = document.getElementById('trackTagInput').value.trim();
+            const resultBox = document.getElementById('trackResult');
+
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = '<p style="color:var(--gray-400); text-align:center;">Querying live cargo satellite tracking…</p>';
+
+            try {
+                const response = await fetch(`/api/v1/luggage/tag/${encodeURIComponent(tagNumber)}`);
+                if (!response.ok) {
+                    resultBox.innerHTML = `<div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; color:#b91c1c; text-align:center;">
+                        No active luggage tag found for <strong>${escapeHtml(tagNumber)}</strong>. Please verify the tag ID.
+                    </div>`;
+                    return;
+                }
+
+                const data = await response.json();
+                const statuses = ['TAGGED', 'CHECKED_IN', 'LOADED', 'COLLECTED'];
+                const st = (data.status || 'TAGGED').toUpperCase();
+                const currentIdx = statuses.indexOf(st);
+
+                resultBox.innerHTML = `
+                <div style="background:#f8fafc; border:1px solid var(--gray-200); border-radius:14px; padding:20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span class="mono" style="font-size:1.4rem; color:var(--primary-darker);">${data.tagNumber}</span>
+                        <span class="tag" style="background:#ecfdf5; color:#065f46; font-size:0.85rem;">${st}</span>
+                    </div>
+
+                    <!-- Progress Stepper -->
+                    <div class="stepper-container" style="background:#ffffff;">
+                        <div class="stepper-track">
+                            ${statuses.map((step, idx) => `
+                                <div>
+                                    <div class="stepper-bar ${idx <= currentIdx ? 'done' : ''}"></div>
+                                    <span class="stepper-label ${idx <= currentIdx ? 'done' : ''}">${step.replace('_', ' ')}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.88rem; margin-top:14px;">
+                        <div>
+                            <span style="color:var(--gray-400); font-size:0.75rem; text-transform:uppercase; font-weight:700; display:block;">Linked Booking</span>
+                            <strong>#${data.bookingId || (data.booking ? data.booking.bookingId : 'N/A')}</strong>
+                        </div>
+                        <div>
+                            <span style="color:var(--gray-400); font-size:0.75rem; text-transform:uppercase; font-weight:700; display:block;">Total Bags</span>
+                            <strong>${data.bagQuantity} Pieces</strong>
+                        </div>
+                        <div style="grid-column: span 2;">
+                            <span style="color:var(--gray-400); font-size:0.75rem; text-transform:uppercase; font-weight:700; display:block;">Route</span>
+                            <span>${data.routeInfo || 'Express Bus Network'}</span>
+                        </div>
+                        ${data.description ? `
+                            <div style="grid-column: span 2; background:#ffffff; border:1px solid var(--gray-200); border-radius:8px; padding:10px;">
+                                <span style="color:var(--gray-600); font-size:0.75rem; font-weight:700; display:block;">Description / Identifying Marks</span>
+                                <span>${escapeHtml(data.description)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+            } catch (err) {
+                resultBox.innerHTML = '<p style="color:#b91c1c; text-align:center;">Network error querying luggage tag.</p>';
+            }
+        }
+
+        function showQrModal() {
+            if (!currentSelectedLuggage) return;
+            const qrPayload = `CATCHBUS LK BAGGAGE TAG\nTag ID: ${currentSelectedLuggage.tagNumber || 'LUG-PENDING'}\nE-Ticket: #${currentSelectedLuggage.bookingId || '1'}\nPassenger: ${currentSelectedLuggage.passengerName || user.fullName || 'Passenger'}\nRoute: ${currentSelectedLuggage.routeInfo || 'Express Network'}\nBags: ${currentSelectedLuggage.bagQuantity} Pieces\nStatus: ${currentSelectedLuggage.status || 'TAGGED'}`;
+
+            document.getElementById('modalQrPayload').textContent = qrPayload;
+            if (window.generateQRCodeSVG) {
+                document.getElementById('modalQrSvg').innerHTML = window.generateQRCodeSVG(qrPayload, 160, 2);
+            }
+            document.getElementById('qrDataModal').classList.remove('hidden');
+        }
+
+        function closeQrModal() {
+            document.getElementById('qrDataModal').classList.add('hidden');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
     </script>
 </body>

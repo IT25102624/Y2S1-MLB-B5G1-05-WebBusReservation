@@ -5,6 +5,95 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CatchBusLK — Passenger Feedback &amp; Journey Reviews</title>
     <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        .tab-bar {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: var(--primary-dark);
+        }
+        .tab-btn.active {
+            color: var(--primary-darker);
+            border-bottom-color: var(--primary);
+        }
+        .metrics-card {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .rating-hero {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            margin-bottom: 16px;
+        }
+        .rating-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-darker);
+            line-height: 1;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px dashed var(--gray-100);
+        }
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+        .review-card {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+        .review-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+        .filter-chip {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: 9999px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--gray-700);
+            transition: all 0.2s;
+        }
+        .filter-chip.active {
+            background: #022c22;
+            color: #ffffff;
+            border-color: #022c22;
+        }
+    </style>
 </head>
 <body>
     <nav class="top-nav">
@@ -15,23 +104,31 @@
             <a href="luggage.html">Luggage</a>
             <a href="feedback.html" class="active">Feedback</a>
             <a href="notifications.html">Alerts</a>
+            <a href="customer-care.html">🛡️ Customer Care</a>
             <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
             <button id="logoutBtn" class="hidden">Sign Out</button>
         </div>
     </nav>
 
     <main class="container">
-        <div style="margin-bottom: 24px;">
-            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">⭐ Passenger Feedback &amp; Support Inquiries</h1>
-            <p style="color:var(--gray-600); font-size:0.95rem;">Share your travel experience, rate your bus journey, or submit complaints and suggestions to National Transit operations.</p>
+        <div style="margin-bottom: 20px;">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">⭐ Passenger Feedback &amp; Journey Reviews</h1>
+            <p style="color:var(--gray-600); font-size:0.95rem;">Share your travel experience, rate your bus journey, explore community feedback, or submit service inquiries.</p>
         </div>
 
         <p id="message" class="message"></p>
 
-        <div class="grid">
-            <!-- Left: Feedback Form -->
+        <!-- Sub-Part Tabs -->
+        <div class="tab-bar">
+            <button id="tabBtnSubmit" class="tab-btn active" onclick="switchTab('submit')">✍️ Submit Experience &amp; Reviews</button>
+            <button id="tabBtnDatabase" class="tab-btn" onclick="switchTab('database')">📋 Customer Reviews Database (<span id="tabCountReviews">0</span>)</button>
+        </div>
+
+        <!-- TAB 1: SUBMIT EXPERIENCE & SATISFACTION METRICS -->
+        <div id="tabSubmitContent" class="grid">
+            <!-- Left: Form -->
             <section class="panel">
-                <h2>Submit Your Review</h2>
+                <h2 id="formTitle">Submit Your Review</h2>
                 <form id="feedbackForm" class="form-grid">
                     <label>
                         Your Name
@@ -41,8 +138,8 @@
                     <label>
                         Category
                         <select id="type" required>
-                            <option value="feedback">🌟 General Journey Feedback</option>
-                            <option value="complain">⚠️ Service Complaint / Issue</option>
+                            <option value="feedback">🌟 General Journey Feedback &amp; Praise</option>
+                            <option value="complain">⚠️ Service Complaint / Operational Issue</option>
                             <option value="inquiry">💬 Route or Schedule Inquiry</option>
                         </select>
                     </label>
@@ -51,33 +148,76 @@
                         Star Rating (1 - 5)
                         <select id="rating">
                             <option value="">No rating (Inquiry / Non-rated)</option>
-                            <option value="5">⭐⭐⭐⭐⭐ 5 - Exceptional Experience</option>
-                            <option value="4">⭐⭐⭐⭐ 4 - Good &amp; Punctual</option>
-                            <option value="3">⭐⭐⭐ 3 - Satisfactory / Average</option>
-                            <option value="2">⭐⭐ 2 - Needs Improvement</option>
-                            <option value="1">⭐ 1 - Poor / Unsatisfactory</option>
+                            <option value="5">★★★★★ 5 - Exceptional Experience</option>
+                            <option value="4">★★★★☆ 4 - Good &amp; Punctual</option>
+                            <option value="3">★★★☆☆ 3 - Satisfactory / Average</option>
+                            <option value="2">★★☆☆☆ 2 - Needs Improvement</option>
+                            <option value="1">★☆☆☆☆ 1 - Poor / Unsatisfactory</option>
                         </select>
                     </label>
 
                     <label>
                         Written Experience &amp; Comments
-                        <textarea id="description" placeholder="Describe the bus condition, driver courtesy, punctuality, or issue encountered..." required></textarea>
+                        <textarea id="description" placeholder="Describe the bus condition, driver courtesy, punctuality, or issue encountered..." required style="min-height: 110px;"></textarea>
                     </label>
 
                     <div class="item-actions">
-                        <button id="submitFeedbackBtn" class="button" type="submit">Post Feedback</button>
+                        <button id="submitFeedbackBtn" class="button" type="submit">Submit Travel Review</button>
                         <button id="cancelEditBtn" class="button secondary hidden" type="button">Cancel Edit</button>
                     </div>
                 </form>
             </section>
 
-            <!-- Right: Feedback History -->
-            <section class="panel">
-                <h2>Recent Community Reviews</h2>
-                <div id="feedbackList" class="form-grid">
-                    <p style="color:var(--gray-400);">Loading passenger reviews…</p>
+            <!-- Right: Satisfaction Metrics Sidebar -->
+            <aside class="metrics-card">
+                <span style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--primary-dark);">Satisfaction Metrics</span>
+                <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700; margin:4px 0 16px;">Passenger Trust Rating</h3>
+
+                <div class="rating-hero">
+                    <div class="rating-number" id="avgRatingDisplay">4.8</div>
+                    <div>
+                        <div style="color:#f59e0b; font-size:1.25rem;">★★★★★</div>
+                        <span style="font-size:0.8rem; color:var(--gray-600);">Verified passenger reviews</span>
+                    </div>
                 </div>
-            </section>
+
+                <div style="margin-top:12px;">
+                    <div class="metric-row">
+                        <span style="color:var(--gray-600);">Total Logged Reviews:</span>
+                        <strong id="metricTotal">0</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span style="color:var(--gray-600);">Complaints Resolved:</span>
+                        <strong id="metricResolved" style="color:#059669;">0</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span style="color:var(--gray-600);">Review Database Status:</span>
+                        <strong style="color:var(--primary-dark);">✓ Active &amp; Synced</strong>
+                    </div>
+                </div>
+
+                <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--gray-100);">
+                    <a href="customer-care.html" class="button secondary" style="width:100%; text-align:center; font-size:0.85rem; display:block; text-decoration:none;">
+                        🛡️ Open Customer Care Resolution Center
+                    </a>
+                </div>
+            </aside>
+        </div>
+
+        <!-- TAB 2: CUSTOMER REVIEWS DATABASE -->
+        <div id="tabDatabaseContent" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+                <div style="display:flex; gap:8px;">
+                    <button class="filter-chip active" onclick="setDbFilter('ALL', this)">All (<span id="chipAllCount">0</span>)</button>
+                    <button class="filter-chip" onclick="setDbFilter('FEEDBACK', this)">Reviews (<span id="chipReviewsCount">0</span>)</button>
+                    <button class="filter-chip" onclick="setDbFilter('COMPLAIN', this)">Complaints (<span id="chipComplaintsCount">0</span>)</button>
+                </div>
+                <button onclick="loadFeedbackData()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">🔄 Refresh Database</button>
+            </div>
+
+            <div id="databaseList" class="form-grid">
+                <p style="color:var(--gray-400); text-align:center; padding:30px;">Loading customer reviews database…</p>
+            </div>
         </div>
     </main>
 
@@ -85,6 +225,8 @@
     <script>
         const user = requireUser();
         let editingFeedbackId = null;
+        let allFeedbacks = [];
+        let dbFilter = 'ALL';
         setupNav('feedback.html');
 
         const feedbackForm = document.getElementById('feedbackForm');
@@ -94,13 +236,138 @@
         const descInput = document.getElementById('description');
         const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
         const cancelEditBtn = document.getElementById('cancelEditBtn');
-        const feedbackList = document.getElementById('feedbackList');
+        const formTitle = document.getElementById('formTitle');
 
         if (user && user.fullName) {
             nameInput.value = user.fullName;
         }
 
-        loadFeedback();
+        loadFeedbackData();
+
+        function switchTab(tab) {
+            const submitContent = document.getElementById('tabSubmitContent');
+            const dbContent = document.getElementById('tabDatabaseContent');
+            const btnSubmit = document.getElementById('tabBtnSubmit');
+            const btnDb = document.getElementById('tabBtnDatabase');
+
+            if (tab === 'submit') {
+                submitContent.classList.remove('hidden');
+                dbContent.classList.add('hidden');
+                btnSubmit.classList.add('active');
+                btnDb.classList.remove('active');
+            } else {
+                submitContent.classList.add('hidden');
+                dbContent.classList.remove('hidden');
+                btnSubmit.classList.remove('active');
+                btnDb.classList.add('active');
+                renderDatabase();
+            }
+        }
+
+        function setDbFilter(filter, btn) {
+            dbFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderDatabase();
+        }
+
+        async function loadFeedbackData() {
+            try {
+                const [statsRes, listRes] = await Promise.all([
+                    fetch('/api/v1/feedback/stats'),
+                    fetch('/api/v1/feedback')
+                ]);
+
+                if (statsRes.ok) {
+                    const stats = await statsRes.json();
+                    document.getElementById('metricTotal').textContent = stats.totalFeedback || 0;
+                    document.getElementById('metricResolved').textContent = stats.withReplies || 0;
+                }
+
+                if (listRes.ok) {
+                    allFeedbacks = await listRes.json();
+                    document.getElementById('tabCountReviews').textContent = allFeedbacks.length;
+                    document.getElementById('chipAllCount').textContent = allFeedbacks.length;
+                    document.getElementById('chipReviewsCount').textContent = allFeedbacks.filter(f => (f.type || '').toLowerCase() !== 'complain').length;
+                    document.getElementById('chipComplaintsCount').textContent = allFeedbacks.filter(f => (f.type || '').toLowerCase() === 'complain').length;
+
+                    // Calculate average rating
+                    const rated = allFeedbacks.filter(f => f.rating && f.rating > 0);
+                    if (rated.length > 0) {
+                        const sum = rated.reduce((acc, curr) => acc + curr.rating, 0);
+                        const avg = (sum / rated.length).toFixed(1);
+                        document.getElementById('avgRatingDisplay').textContent = avg;
+                    }
+
+                    renderDatabase();
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('databaseList').innerHTML = '<p style="color:var(--gray-400);">Could not load feedback records.</p>';
+            }
+        }
+
+        function renderDatabase() {
+            const container = document.getElementById('databaseList');
+            let items = allFeedbacks;
+
+            if (dbFilter === 'FEEDBACK') {
+                items = items.filter(f => (f.type || '').toLowerCase() !== 'complain');
+            } else if (dbFilter === 'COMPLAIN') {
+                items = items.filter(f => (f.type || '').toLowerCase() === 'complain');
+            }
+
+            if (!items.length) {
+                container.innerHTML = '<div style="background:#ffffff; border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:40px; text-align:center; color:var(--gray-600);"><p>No feedback entries found in this category.</p></div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => {
+                const fid = item.feedbackId || item.id;
+                const type = (item.type || 'feedback').toLowerCase();
+                const isComplain = type === 'complain';
+                const stars = item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : '';
+                const dateStr = item.complainDate ? `${item.complainDate}` : 'Recently';
+
+                return `
+                <article class="review-card" data-feedback='${JSON.stringify(item).replaceAll("'", "&#39;")}'>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 style="font-size:1.05rem; font-weight:700; margin:0;">${escapeHtml(item.name || 'Anonymous Passenger')}</h3>
+                                <span class="tag" style="margin:0; ${isComplain ? 'background:#fef3c7; color:#92400e;' : 'background:#ecfdf5; color:#065f46;'}">
+                                    ${isComplain ? 'Complaint' : 'Review'}
+                                </span>
+                                ${stars ? `<span style="color:#f59e0b; font-size:0.95rem; font-weight:700;">${stars}</span>` : ''}
+                            </div>
+                        </div>
+                        <small style="color:var(--gray-400);">${dateStr}</small>
+                    </div>
+
+                    <p style="font-size:0.92rem; color:var(--gray-700); line-height:1.5; margin:8px 0;">"${escapeHtml(item.description)}"</p>
+
+                    ${item.reply ? `
+                        <div style="background:#ecfdf5; border-left:4px solid var(--primary); padding:10px 14px; border-radius:8px; margin-top:10px; font-size:0.88rem; color:#065f46;">
+                            <strong style="display:block; margin-bottom:2px;">🛡️ Customer Service Resolution:</strong>
+                            <p style="margin:0;">${escapeHtml(item.reply)}</p>
+                        </div>
+                    ` : isComplain ? `
+                        <div style="background:#fffbeb; border:1px solid #fde68a; padding:8px 12px; border-radius:6px; margin-top:10px; font-size:0.82rem; color:#92400e;">
+                            ⏳ <strong>Under Investigation:</strong> Customer service team is preparing an official response.
+                        </div>
+                    ` : ''}
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; pt:8px; border-top:1px solid var(--gray-100);">
+                        <small style="color:var(--gray-400);">Ref ID: #${fid}</small>
+                        <div class="item-actions" style="margin:0;">
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editFeedback(${fid})">✏️ Edit</button>
+                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteFeedback(${fid})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
 
         feedbackForm.addEventListener('submit', async event => {
             event.preventDefault();
@@ -128,14 +395,15 @@
                     return;
                 }
 
-                showMessage(editingFeedbackId ? 'Feedback updated successfully.' : 'Thank you! Your feedback has been posted.');
+                showMessage(editingFeedbackId ? 'Feedback updated successfully.' : 'Thank you! Your feedback has been recorded.');
                 resetFeedbackForm();
-                loadFeedback();
+                await loadFeedbackData();
+                switchTab('database');
             } catch (err) {
                 showMessage('Network error while saving feedback.', 'error');
             } finally {
                 submitFeedbackBtn.disabled = false;
-                submitFeedbackBtn.textContent = editingFeedbackId ? 'Update Feedback' : 'Post Feedback';
+                submitFeedbackBtn.textContent = editingFeedbackId ? 'Update Feedback' : 'Submit Travel Review';
             }
         });
 
@@ -145,58 +413,52 @@
             editingFeedbackId = null;
             feedbackForm.reset();
             if (user && user.fullName) nameInput.value = user.fullName;
-            submitFeedbackBtn.textContent = 'Post Feedback';
+            submitFeedbackBtn.textContent = 'Submit Travel Review';
+            formTitle.textContent = 'Submit Your Review';
             cancelEditBtn.classList.add('hidden');
         }
 
-        async function loadFeedback() {
-            try {
-                const response = await fetch('/api/v1/feedback');
-                const items = await response.json();
-                feedbackList.innerHTML = items.length ? items.map(item => `
-                    <article class="item" data-feedback='${JSON.stringify(item).replaceAll("'", "&#39;")}'>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span class="tag">${item.type}</span>
-                            <span style="color:#f59e0b; font-size:14px;">${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : ''}</span>
-                        </div>
-                        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:4px;">${item.name}</h3>
-                        <p style="font-size:0.9rem; color:var(--gray-700);">${item.description}</p>
-                        ${item.reply ? `<div style="background:#ecfdf5; border-left:3px solid var(--primary); padding:8px 12px; border-radius:6px; margin-top:8px; font-size:0.85rem; color:#065f46;"><strong>Admin Reply:</strong> ${item.reply}</div>` : ''}
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                            <small style="color:var(--gray-400);">${item.complainDate || 'Recently'}</small>
-                            <div class="item-actions" style="margin:0;">
-                                <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editFeedback(this)">Edit</button>
-                                <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteFeedback(${item.id})">Delete</button>
-                            </div>
-                        </div>
-                    </article>
-                `).join('') : '<p style="color:var(--gray-400); text-align:center; padding:20px;">No passenger feedback submitted yet.</p>';
-            } catch (e) {
-                feedbackList.innerHTML = '<p style="color:var(--gray-400);">Could not load feedback items.</p>';
-            }
-        }
+        function editFeedback(id) {
+            const item = allFeedbacks.find(f => (f.feedbackId || f.id) == id);
+            if (!item) return;
 
-        function editFeedback(button) {
-            const item = JSON.parse(button.closest('.item').dataset.feedback);
-            editingFeedbackId = item.id;
+            editingFeedbackId = id;
             nameInput.value = item.name || '';
             typeSelect.value = item.type || 'feedback';
             ratingSelect.value = item.rating || '';
             descInput.value = item.description || '';
-            submitFeedbackBtn.textContent = 'Update Feedback';
+            submitFeedbackBtn.textContent = 'Save Changes';
+            formTitle.textContent = `Edit Feedback #${id}`;
             cancelEditBtn.classList.remove('hidden');
+
+            switchTab('submit');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function deleteFeedback(id) {
-            if (!confirm('Are you sure you want to remove this feedback?')) return;
-            const response = await fetch(`/api/v1/feedback/${id}`, { method: 'DELETE' });
-            if (!response.ok) {
-                showMessage(await response.text(), 'error');
-                return;
+            if (!confirm(`Are you sure you want to permanently delete feedback #${id}?`)) return;
+
+            try {
+                const response = await fetch(`/api/v1/feedback/${id}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    showMessage(await response.text(), 'error');
+                    return;
+                }
+                showMessage('Feedback removed successfully.');
+                loadFeedbackData();
+            } catch (err) {
+                showMessage('Network error while removing feedback.', 'error');
             }
-            showMessage('Feedback removed.');
-            loadFeedback();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
     </script>
 </body>

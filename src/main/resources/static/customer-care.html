@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Customer Care &amp; Grievance Resolution</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .kpi-card .kpi-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--gray-600);
+        }
+        .kpi-card .kpi-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-top: 6px;
+            color: var(--gray-900);
+        }
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .filter-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pill-btn {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: 9999px;
+            padding: 6px 16px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--gray-700);
+            transition: all 0.2s;
+        }
+        .pill-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary-dark);
+        }
+        .pill-btn.active {
+            background: #022c22;
+            color: #ffffff;
+            border-color: #022c22;
+            box-shadow: var(--shadow-sm);
+        }
+        .feedback-card {
+            background: #ffffff;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 22px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+        .feedback-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #cbd5e1;
+        }
+        .badge-complain {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .badge-feedback {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .badge-inquiry {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        .badge-urgent {
+            background: #ffe4e6;
+            color: #9f1239;
+            border: 1px solid #fecdd3;
+            animation: pulse-soft 2s infinite;
+        }
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .resolution-box {
+            background: #ecfdf5;
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            font-size: 0.9rem;
+            color: #065f46;
+        }
+        .reply-editor {
+            background: #f8fafc;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 14px;
+        }
+        .reply-editor textarea {
+            width: 100%;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .reply-editor textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
+        <div class="nav-links">
+            <a href="search.html">Book a Trip</a>
+            <a href="schedule.html">Timetable</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="customer-care.html" class="active">🛡️ Customer Care</a>
+            <a href="admin.html">Admin Portal</a>
+            <button id="logoutBtn" class="hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+            <div>
+                <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🛡️ Customer Care &amp; Grievance Resolution</h1>
+                <p style="color:var(--gray-600); font-size:0.95rem;">National Transit Support: Oversee passenger feedback, investigate complaints, and dispatch official customer service responses.</p>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <a href="feedback.html" class="button secondary" style="font-size:0.85rem;">Passenger Feedback View</a>
+                <button onclick="loadAllCareData()" class="button" style="font-size:0.85rem;">🔄 Refresh Records</button>
+            </div>
+        </div>
+
+        <p id="message" class="message"></p>
+
+        <!-- KPI Metrics Bar -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <span class="kpi-label">Total Submissions</span>
+                <div class="kpi-value" id="kpiTotal">0</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" style="color:#b45309;">Grievances / Complaints</span>
+                <div class="kpi-value" id="kpiComplaints" style="color:#d97706;">0</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" style="color:#b91c1c;">Awaiting Response</span>
+                <div class="kpi-value" id="kpiNeedsReply" style="color:#dc2626;">0</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label" style="color:#047857;">Resolved with Official Reply</span>
+                <div class="kpi-value" id="kpiResolved" style="color:#059669;">0</div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-pills">
+                <button class="pill-btn active" data-filter="ALL" onclick="setFilter('ALL', this)">All Records (<span id="countAll">0</span>)</button>
+                <button class="pill-btn" data-filter="NEEDS_REPLY" onclick="setFilter('NEEDS_REPLY', this)">⚠️ Needs Reply (<span id="countNeedsReply">0</span>)</button>
+                <button class="pill-btn" data-filter="COMPLAINTS" onclick="setFilter('COMPLAINTS', this)">Complaints (<span id="countComplaints">0</span>)</button>
+                <button class="pill-btn" data-filter="REVIEWS" onclick="setFilter('REVIEWS', this)">Reviews &amp; Praise (<span id="countReviews">0</span>)</button>
+            </div>
+            <div style="display:flex; gap:8px;">
+                <input id="searchInput" type="text" placeholder="Search by passenger or text..." oninput="handleSearch()" style="padding:6px 12px; border:1px solid var(--gray-200); border-radius:8px; font-size:0.85rem; width:220px;">
+            </div>
+        </div>
+
+        <!-- Records List -->
+        <div id="careList">
+            <p style="color:var(--gray-400); text-align:center; padding:40px;">Loading customer care records…</p>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        setupNav('customer-care.html');
+
+        let allFeedbacks = [];
+        let currentFilter = 'ALL';
+        let replyingFeedbackId = null;
+
+        document.addEventListener('DOMContentLoaded', loadAllCareData);
+
+        async function loadAllCareData() {
+            try {
+                // Fetch stats and feedbacks concurrently
+                const [statsRes, feedbackRes] = await Promise.all([
+                    fetch('/api/v1/feedback/stats'),
+                    fetch('/api/v1/feedback')
+                ]);
+
+                if (statsRes.ok) {
+                    const stats = await statsRes.json();
+                    document.getElementById('kpiTotal').textContent = stats.totalFeedback || 0;
+                    document.getElementById('kpiComplaints').textContent = stats.complainCount || 0;
+                    document.getElementById('kpiNeedsReply').textContent = stats.withoutReplies || 0;
+                    document.getElementById('kpiResolved').textContent = stats.withReplies || 0;
+                }
+
+                if (feedbackRes.ok) {
+                    allFeedbacks = await feedbackRes.json();
+                    updatePillCounts();
+                    renderFeedbacks();
+                } else {
+                    document.getElementById('careList').innerHTML = '<p style="color:var(--gray-400); text-align:center; padding:30px;">Failed to load feedback records.</p>';
+                }
+            } catch (err) {
+                console.error('Error loading care data:', err);
+                document.getElementById('careList').innerHTML = '<p style="color:var(--gray-400); text-align:center; padding:30px;">Could not connect to Feedback service.</p>';
+            }
+        }
+
+        function updatePillCounts() {
+            const complaints = allFeedbacks.filter(f => (f.type || '').toLowerCase() === 'complain');
+            const needsReply = allFeedbacks.filter(f => (f.type || '').toLowerCase() === 'complain' && !f.reply);
+            const reviews = allFeedbacks.filter(f => (f.type || '').toLowerCase() !== 'complain');
+
+            document.getElementById('countAll').textContent = allFeedbacks.length;
+            document.getElementById('countNeedsReply').textContent = needsReply.length;
+            document.getElementById('countComplaints').textContent = complaints.length;
+            document.getElementById('countReviews').textContent = reviews.length;
+        }
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderFeedbacks();
+        }
+
+        function handleSearch() {
+            renderFeedbacks();
+        }
+
+        function renderFeedbacks() {
+            const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const listContainer = document.getElementById('careList');
+
+            let filtered = allFeedbacks.filter(item => {
+                const type = (item.type || '').toLowerCase();
+                const hasReply = !!(item.reply && item.reply.trim());
+
+                if (currentFilter === 'NEEDS_REPLY' && (type !== 'complain' || hasReply)) return false;
+                if (currentFilter === 'COMPLAINTS' && type !== 'complain') return false;
+                if (currentFilter === 'REVIEWS' && type === 'complain') return false;
+
+                if (query) {
+                    const matchName = (item.name || '').toLowerCase().includes(query);
+                    const matchDesc = (item.description || '').toLowerCase().includes(query);
+                    const matchReply = (item.reply || '').toLowerCase().includes(query);
+                    return matchName || matchDesc || matchReply;
+                }
+                return true;
+            });
+
+            if (!filtered.length) {
+                listContainer.innerHTML = '<div style="background:#ffffff; border:1px solid var(--gray-200); border-radius:var(--radius-md); padding:40px; text-align:center; color:var(--gray-600);"><p>No feedback or complaints match the selected filter criteria.</p></div>';
+                return;
+            }
+
+            listContainer.innerHTML = filtered.map(item => {
+                const fid = item.feedbackId || item.id;
+                const type = (item.type || 'feedback').toLowerCase();
+                const isComplain = type === 'complain';
+                const hasReply = !!(item.reply && item.reply.trim());
+
+                let badgeClass = 'badge-feedback';
+                let typeLabel = 'Review & Praise';
+                if (isComplain) {
+                    badgeClass = 'badge-complain';
+                    typeLabel = 'Complaint';
+                } else if (type === 'inquiry') {
+                    badgeClass = 'badge-inquiry';
+                    typeLabel = 'Inquiry';
+                }
+
+                const stars = item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : '';
+                const dateStr = item.complainDate ? `${item.complainDate} ${item.complainTime || ''}` : 'Recent submission';
+
+                return `
+                <article class="feedback-card" id="card-${fid}">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; border-bottom:1px solid var(--gray-100); padding-bottom:12px; margin-bottom:12px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <h3 style="font-size:1.1rem; font-weight:700; color:var(--gray-900); margin:0;">${escapeHtml(item.name || 'Anonymous Passenger')}</h3>
+                                <span class="tag ${badgeClass}" style="margin:0;">${typeLabel}</span>
+                                ${stars ? `<span style="color:#f59e0b; font-size:0.95rem; font-weight:700;">${stars}</span>` : ''}
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--gray-400); margin-top:4px;">
+                                Passenger ID: #${item.userId || 'Guest'} • Submitted: ${dateStr}
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${hasReply ? `
+                                <span class="tag badge-feedback" style="margin:0; font-weight:700;">✓ Resolved with Response</span>
+                            ` : isComplain ? `
+                                <span class="tag badge-urgent" style="margin:0; font-weight:700;">● Response Required</span>
+                            ` : `
+                                <span class="tag" style="margin:0; background:#f1f5f9; color:var(--gray-600);">Logged</span>
+                            `}
+                        </div>
+                    </div>
+
+                    <p style="font-size:0.95rem; color:var(--gray-700); line-height:1.6; margin:8px 0;">"${escapeHtml(item.description)}"</p>
+
+                    ${hasReply ? `
+                        <div class="resolution-box">
+                            <strong style="display:block; margin-bottom:4px;">🛡️ National Transit Official Response:</strong>
+                            <p style="margin:0; color:#064e3b; font-weight:500;">${escapeHtml(item.reply)}</p>
+                        </div>
+                    ` : ''}
+
+                    <div id="replyEditor-${fid}" class="reply-editor hidden">
+                        <label style="font-size:0.82rem; font-weight:700; color:var(--gray-700); display:block; margin-bottom:6px;">
+                            Compose Official Response to ${escapeHtml(item.name || 'Passenger')}:
+                        </label>
+                        <textarea id="replyText-${fid}" placeholder="Write formal resolution details, apology, or operational explanation...">${hasReply ? escapeHtml(item.reply) : ''}</textarea>
+                        <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
+                            <button class="button secondary" style="font-size:0.8rem; padding:6px 14px;" onclick="closeReplyEditor(${fid})">Cancel</button>
+                            <button class="button" style="font-size:0.8rem; padding:6px 14px;" onclick="submitReply(${fid})">Send Official Response</button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; pt:8px; border-top:1px solid var(--gray-100);">
+                        <div>
+                            <button class="button secondary" style="font-size:0.82rem; padding:6px 14px;" onclick="openReplyEditor(${fid})">
+                                ${hasReply ? '✏️ Edit Response' : '💬 Reply to Passenger'}
+                            </button>
+                        </div>
+                        <div>
+                            <button class="button danger" style="font-size:0.82rem; padding:6px 14px;" onclick="deleteFeedbackRecord(${fid})">
+                                🗑️ Delete Record
+                            </button>
+                        </div>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
+
+        function openReplyEditor(id) {
+            document.querySelectorAll('.reply-editor').forEach(el => el.classList.add('hidden'));
+            const editor = document.getElementById(`replyEditor-${id}`);
+            if (editor) {
+                editor.classList.remove('hidden');
+                const textarea = document.getElementById(`replyText-${id}`);
+                if (textarea) textarea.focus();
+            }
+        }
+
+        function closeReplyEditor(id) {
+            const editor = document.getElementById(`replyEditor-${id}`);
+            if (editor) editor.classList.add('hidden');
+        }
+
+        async function submitReply(id) {
+            const textarea = document.getElementById(`replyText-${id}`);
+            const reply = textarea ? textarea.value.trim() : '';
+
+            if (!reply) {
+                alert('Please enter a response message before submitting.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/feedback/${id}/reply`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reply })
+                });
+
+                if (!response.ok) {
+                    const err = await response.text();
+                    showMessage('Error sending reply: ' + err, 'error');
+                    return;
+                }
+
+                showMessage('Official customer service response dispatched successfully.');
+                loadAllCareData();
+            } catch (err) {
+                showMessage('Network error while dispatching response.', 'error');
+            }
+        }
+
+        async function deleteFeedbackRecord(id) {
+            if (!confirm(`Are you sure you want to permanently delete feedback record #${id}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/v1/feedback/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const err = await response.text();
+                    showMessage('Could not delete feedback: ' + err, 'error');
+                    return;
+                }
+
+                showMessage(`Feedback record #${id} deleted successfully.`);
+                loadAllCareData();
+            } catch (err) {
+                showMessage('Network error while deleting feedback.', 'error');
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
