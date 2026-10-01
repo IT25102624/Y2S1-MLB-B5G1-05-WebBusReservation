@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Passenger Feedback &amp; Journey Reviews</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
+        <div class="nav-links">
+            <a href="search.html">Book a Trip</a>
+            <a href="schedule.html">Timetable</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html" class="active">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
+            <button id="logoutBtn" class="hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="margin-bottom: 24px;">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">⭐ Passenger Feedback &amp; Support Inquiries</h1>
+            <p style="color:var(--gray-600); font-size:0.95rem;">Share your travel experience, rate your bus journey, or submit complaints and suggestions to National Transit operations.</p>
+        </div>
+
+        <p id="message" class="message"></p>
+
+        <div class="grid">
+            <!-- Left: Feedback Form -->
+            <section class="panel">
+                <h2>Submit Your Review</h2>
+                <form id="feedbackForm" class="form-grid">
+                    <label>
+                        Your Name
+                        <input id="name" placeholder="Full Name" required>
+                    </label>
+
+                    <label>
+                        Category
+                        <select id="type" required>
+                            <option value="feedback">🌟 General Journey Feedback</option>
+                            <option value="complain">⚠️ Service Complaint / Issue</option>
+                            <option value="inquiry">💬 Route or Schedule Inquiry</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Star Rating (1 - 5)
+                        <select id="rating">
+                            <option value="">No rating (Inquiry / Non-rated)</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 - Exceptional Experience</option>
+                            <option value="4">⭐⭐⭐⭐ 4 - Good &amp; Punctual</option>
+                            <option value="3">⭐⭐⭐ 3 - Satisfactory / Average</option>
+                            <option value="2">⭐⭐ 2 - Needs Improvement</option>
+                            <option value="1">⭐ 1 - Poor / Unsatisfactory</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Written Experience &amp; Comments
+                        <textarea id="description" placeholder="Describe the bus condition, driver courtesy, punctuality, or issue encountered..." required></textarea>
+                    </label>
+
+                    <div class="item-actions">
+                        <button id="submitFeedbackBtn" class="button" type="submit">Post Feedback</button>
+                        <button id="cancelEditBtn" class="button secondary hidden" type="button">Cancel Edit</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right: Feedback History -->
+            <section class="panel">
+                <h2>Recent Community Reviews</h2>
+                <div id="feedbackList" class="form-grid">
+                    <p style="color:var(--gray-400);">Loading passenger reviews…</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        let editingFeedbackId = null;
+        setupNav('feedback.html');
+
+        const feedbackForm = document.getElementById('feedbackForm');
+        const nameInput = document.getElementById('name');
+        const typeSelect = document.getElementById('type');
+        const ratingSelect = document.getElementById('rating');
+        const descInput = document.getElementById('description');
+        const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const feedbackList = document.getElementById('feedbackList');
+
+        if (user && user.fullName) {
+            nameInput.value = user.fullName;
+        }
+
+        loadFeedback();
+
+        feedbackForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const uid = user.id || user.userId || 2;
+            const url = editingFeedbackId ? `/api/v1/feedback/${editingFeedbackId}` : '/api/v1/feedback';
+
+            submitFeedbackBtn.disabled = true;
+            submitFeedbackBtn.textContent = 'Submitting…';
+
+            try {
+                const response = await fetch(url, {
+                    method: editingFeedbackId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: uid,
+                        name: nameInput.value.trim(),
+                        type: typeSelect.value,
+                        rating: ratingSelect.value ? Number(ratingSelect.value) : null,
+                        description: descInput.value.trim()
+                    })
+                });
+
+                if (!response.ok) {
+                    showMessage(await response.text(), 'error');
+                    return;
+                }
+
+                showMessage(editingFeedbackId ? 'Feedback updated successfully.' : 'Thank you! Your feedback has been posted.');
+                resetFeedbackForm();
+                loadFeedback();
+            } catch (err) {
+                showMessage('Network error while saving feedback.', 'error');
+            } finally {
+                submitFeedbackBtn.disabled = false;
+                submitFeedbackBtn.textContent = editingFeedbackId ? 'Update Feedback' : 'Post Feedback';
+            }
+        });
+
+        cancelEditBtn.addEventListener('click', resetFeedbackForm);
+
+        function resetFeedbackForm() {
+            editingFeedbackId = null;
+            feedbackForm.reset();
+            if (user && user.fullName) nameInput.value = user.fullName;
+            submitFeedbackBtn.textContent = 'Post Feedback';
+            cancelEditBtn.classList.add('hidden');
+        }
+
+        async function loadFeedback() {
+            try {
+                const response = await fetch('/api/v1/feedback');
+                const items = await response.json();
+                feedbackList.innerHTML = items.length ? items.map(item => `
+                    <article class="item" data-feedback='${JSON.stringify(item).replaceAll("'", "&#39;")}'>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span class="tag">${item.type}</span>
+                            <span style="color:#f59e0b; font-size:14px;">${item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : ''}</span>
+                        </div>
+                        <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:4px;">${item.name}</h3>
+                        <p style="font-size:0.9rem; color:var(--gray-700);">${item.description}</p>
+                        ${item.reply ? `<div style="background:#ecfdf5; border-left:3px solid var(--primary); padding:8px 12px; border-radius:6px; margin-top:8px; font-size:0.85rem; color:#065f46;"><strong>Admin Reply:</strong> ${item.reply}</div>` : ''}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                            <small style="color:var(--gray-400);">${item.complainDate || 'Recently'}</small>
+                            <div class="item-actions" style="margin:0;">
+                                <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editFeedback(this)">Edit</button>
+                                <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteFeedback(${item.id})">Delete</button>
+                            </div>
+                        </div>
+                    </article>
+                `).join('') : '<p style="color:var(--gray-400); text-align:center; padding:20px;">No passenger feedback submitted yet.</p>';
+            } catch (e) {
+                feedbackList.innerHTML = '<p style="color:var(--gray-400);">Could not load feedback items.</p>';
+            }
+        }
+
+        function editFeedback(button) {
+            const item = JSON.parse(button.closest('.item').dataset.feedback);
+            editingFeedbackId = item.id;
+            nameInput.value = item.name || '';
+            typeSelect.value = item.type || 'feedback';
+            ratingSelect.value = item.rating || '';
+            descInput.value = item.description || '';
+            submitFeedbackBtn.textContent = 'Update Feedback';
+            cancelEditBtn.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteFeedback(id) {
+            if (!confirm('Are you sure you want to remove this feedback?')) return;
+            const response = await fetch(`/api/v1/feedback/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage('Feedback removed.');
+            loadFeedback();
+        }
+    </script>
+</body>
+</html>

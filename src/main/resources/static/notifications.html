@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Passenger Alerts &amp; Notifications</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
+        <div class="nav-links">
+            <a href="search.html">Book a Trip</a>
+            <a href="schedule.html">Timetable</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html" class="active">Alerts</a>
+            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
+            <button id="logoutBtn" class="hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="margin-bottom: 24px;">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🔔 Notifications &amp; System Alerts</h1>
+            <p style="color:var(--gray-600); font-size:0.95rem;">Stay updated with real-time bus schedule modifications, booking status updates, baggage arrivals, and transit alerts.</p>
+        </div>
+
+        <section class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 18px;">
+                <h2 style="margin:0;">Recent Notifications</h2>
+                <button id="markAllBtn" class="button secondary" style="font-size:0.85rem;" type="button">Mark All as Read</button>
+            </div>
+
+            <p id="message" class="message"></p>
+
+            <div id="notificationList" class="form-grid">
+                <p style="color:var(--gray-400);">Loading notifications…</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        setupNav('notifications.html');
+
+        const markAllBtn = document.getElementById('markAllBtn');
+        const notificationList = document.getElementById('notificationList');
+
+        if (user) loadNotifications();
+
+        markAllBtn.addEventListener('click', async () => {
+            const uid = user.id || user.userId || 2;
+            try {
+                await fetch(`/api/v1/notifications/user/${uid}/read-all`, { method: 'PUT' });
+                showMessage('All notifications marked as read.');
+                loadNotifications();
+            } catch (e) {
+                showMessage('Could not update notifications.', 'error');
+            }
+        });
+
+        async function loadNotifications() {
+            const uid = user.id || user.userId || 2;
+            try {
+                const response = await fetch(`/api/v1/notifications/user/${uid}`);
+                const notifications = await response.json();
+                notificationList.innerHTML = (Array.isArray(notifications) && notifications.length) ? notifications.map(n => `
+                    <article class="item" style="${n.isRead ? 'opacity:0.75;' : 'border-left: 4px solid var(--primary);'}">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="tag" style="${n.isRead ? 'background:#e2e8f0; color:#64748b;' : ''}">${n.isRead ? 'READ' : 'NEW ALERT'}</span>
+                            <small style="color:var(--gray-400);">${formatDateTime(n.createdAt)}</small>
+                        </div>
+                        <h3 style="font-size:1.05rem; font-weight:700; margin: 4px 0;">${n.type || 'System Alert'}</h3>
+                        <p style="font-size:0.92rem; color:var(--gray-700);">${n.message}</p>
+                        ${n.isRead ? '' : `
+                            <div style="margin-top:10px;">
+                                <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" onclick="markRead(${n.id})">Mark as Read</button>
+                            </div>
+                        `}
+                    </article>
+                `).join('') : '<p style="color:var(--gray-400); text-align:center; padding:30px;">No alerts or notifications yet.</p>';
+            } catch (e) {
+                notificationList.innerHTML = '<p style="color:var(--gray-400);">Could not load notifications.</p>';
+            }
+        }
+
+        async function markRead(id) {
+            try {
+                await fetch(`/api/v1/notifications/${id}/read`, { method: 'PUT' });
+                loadNotifications();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

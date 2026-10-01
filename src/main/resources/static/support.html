@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Help, Support &amp; Passenger Services</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        .hero-banner {
+            background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+            color: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 3rem 2.5rem;
+            margin-bottom: 2.5rem;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        @media (max-width: 800px) {
+            .hero-banner { grid-template-columns: 1fr; padding: 2rem; }
+        }
+        .hero-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .faq-item {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+        .faq-question {
+            padding: 14px 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-question:hover {
+            background: #f8fafc;
+        }
+        .faq-answer {
+            padding: 0 18px 14px;
+            color: var(--gray-600);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
+        <div class="nav-links">
+            <a href="search.html">Book a Trip</a>
+            <a href="schedule.html">Timetable</a>
+            <a href="luggage.html">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
+            <button id="logoutBtn" class="hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero-banner">
+            <div>
+                <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2.4rem; font-weight:800; margin-bottom:12px; line-height:1.2;">
+                    Travel Help &amp; Passenger Support Center
+                </h1>
+                <p style="color:#a7f3d0; font-size:1.05rem; margin-bottom:20px; line-height:1.6;">
+                    Track baggage tags, stay updated with real-time route alerts, request refunds, and share your journey experience across Sri Lanka's intercity bus network.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <a href="luggage.html" class="button">🧳 Luggage Tracking</a>
+                    <a href="feedback.html" class="button secondary" style="background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.3);">⭐ Submit Feedback</a>
+                    <a href="notifications.html" class="button secondary" style="background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.3);">🔔 Live Alerts</a>
+                </div>
+            </div>
+
+            <div class="hero-card">
+                <div style="font-size:0.85rem; font-weight:700; color:#a7f3d0; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Fast Support Services</div>
+                <div style="font-size:1.15rem; font-weight:700; color:#fff; margin-bottom:12px;">Need Immediate Transit Assistance?</div>
+                <p style="font-size:0.88rem; color:#cbd5e1; margin-bottom:16px;">
+                    Hotline: <strong>1955</strong> (National Transport Commission)<br>
+                    CatchBusLK Desk: <strong>+94 11 234 5678</strong><br>
+                    Email: <strong>support@catchbus.lk</strong>
+                </p>
+                <a href="feedback.html" class="button" style="width:100%;">Contact Operations Desk</a>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How does Luggage Tagging work?</span>
+                    <span>▾</span>
+                </div>
+                <div class="faq-answer">
+                    When you book a ticket on CatchBusLK, visit the <a href="luggage.html" style="color:var(--primary); font-weight:600;">Luggage Page</a>, select your active booking reference, and specify the number of bags. You'll receive a unique luggage tag number (e.g. <code>LUG-xxxxxx</code>) to present to the conductor when loading baggage into the bus luggage compartment.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How can I check if my bus schedule has changed?</span>
+                    <span>▾</span>
+                </div>
+                <div class="faq-answer">
+                    Check the <a href="notifications.html" style="color:var(--primary); font-weight:600;">Alerts Page</a> or click the notification bell in the top navigation bar. System alerts automatically trigger when trips are rescheduled or when your luggage status is updated by station conductors.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How do refunds work if my journey is cancelled?</span>
+                    <span>▾</span>
+                </div>
+                <div class="faq-answer">
+                    If you purchased optional Refund Protection during seat checkout, you can request a cancellation and refund through your <a href="admin.html?tab=profile" style="color:var(--primary); font-weight:600;">Account Profile</a>. Refunds are credited directly to your registered Sri Lankan bank account within 7 business days.
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        setupNav('support.html');
+    </script>
+</body>
+</html>

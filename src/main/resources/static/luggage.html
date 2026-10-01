@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Luggage Registration &amp; Tracking</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+</head>
+<body>
+    <nav class="top-nav">
+        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
+        <div class="nav-links">
+            <a href="search.html">Book a Trip</a>
+            <a href="schedule.html">Timetable</a>
+            <a href="luggage.html" class="active">Luggage</a>
+            <a href="feedback.html">Feedback</a>
+            <a href="notifications.html">Alerts</a>
+            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
+            <button id="logoutBtn" class="hidden">Sign Out</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div style="margin-bottom: 24px;">
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🧳 Luggage Registration &amp; Tracking</h1>
+            <p style="color:var(--gray-600); font-size:0.95rem;">Generate secure luggage tracking tags, associate bags with your bus bookings, and monitor transit baggage status.</p>
+        </div>
+
+        <p id="message" class="message"></p>
+
+        <div class="grid">
+            <!-- Left: Tag Generation Form -->
+            <section class="panel">
+                <h2>Register Luggage Tag</h2>
+                <form id="luggageForm" class="form-grid">
+                    <label>
+                        E-Ticket / Active Booking
+                        <select id="bookingId" required></select>
+                    </label>
+
+                    <label>
+                        Number of Bags / Pieces
+                        <input id="bagQuantity" type="number" min="1" max="10" value="1" required>
+                    </label>
+
+                    <label>
+                        Luggage Description &amp; Identifying Marks
+                        <textarea id="description" placeholder="e.g. Maroon hardcase trolley bag with name tag, blue backpack"></textarea>
+                    </label>
+
+                    <label>
+                        Luggage Transit Status
+                        <select id="status">
+                            <option value="TAGGED">🏷️ Tagged &amp; Registered</option>
+                            <option value="CHECKED_IN">📋 Checked In at Bus Terminal</option>
+                            <option value="LOADED">🚌 Loaded into Luggage Compartment</option>
+                            <option value="COLLECTED">✅ Collected by Passenger</option>
+                        </select>
+                    </label>
+
+                    <div class="item-actions">
+                        <button id="submitLuggageBtn" class="button" type="submit">Generate Tag &amp; Barcode</button>
+                        <button id="cancelLuggageEditBtn" class="button secondary hidden" type="button">Cancel Edit</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right: Luggage Records List -->
+            <section class="panel">
+                <h2>My Active Luggage Tags</h2>
+                <div id="luggageList" class="form-grid">
+                    <p style="color:var(--gray-400);">Loading registered luggage tags…</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        const user = requireUser();
+        let editingLuggageId = null;
+        setupNav('luggage.html');
+
+        if (user) {
+            loadBookings();
+            loadLuggage();
+        }
+
+        const luggageForm = document.getElementById('luggageForm');
+        const bookingId = document.getElementById('bookingId');
+        const bagQuantity = document.getElementById('bagQuantity');
+        const description = document.getElementById('description');
+        const status = document.getElementById('status');
+        const submitLuggageBtn = document.getElementById('submitLuggageBtn');
+        const cancelLuggageEditBtn = document.getElementById('cancelLuggageEditBtn');
+        const luggageList = document.getElementById('luggageList');
+
+        luggageForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const uid = user.id || user.userId || 2;
+            const url = editingLuggageId ? `/api/v1/luggage/${editingLuggageId}` : '/api/v1/luggage';
+            
+            submitLuggageBtn.disabled = true;
+            submitLuggageBtn.textContent = 'Saving…';
+
+            try {
+                const response = await fetch(url, {
+                    method: editingLuggageId ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bookingId: Number(bookingId.value),
+                        bagQuantity: Number(bagQuantity.value),
+                        description: description.value.trim(),
+                        status: status.value,
+                        userId: uid
+                    })
+                });
+
+                if (!response.ok) {
+                    showMessage(await response.text(), 'error');
+                    return;
+                }
+                const luggage = await response.json();
+                showMessage(editingLuggageId ? 'Luggage record updated successfully.' : `Luggage tag generated successfully: ${luggage.tagNumber}`);
+                resetLuggageForm();
+                loadLuggage();
+            } catch (err) {
+                showMessage('Network error while saving luggage tag.', 'error');
+            } finally {
+                submitLuggageBtn.disabled = false;
+                submitLuggageBtn.textContent = editingLuggageId ? 'Update Luggage' : 'Generate Tag & Barcode';
+            }
+        });
+
+        cancelLuggageEditBtn.addEventListener('click', resetLuggageForm);
+
+        function resetLuggageForm() {
+            editingLuggageId = null;
+            luggageForm.reset();
+            bagQuantity.value = 1;
+            status.value = 'TAGGED';
+            bookingId.disabled = false;
+            submitLuggageBtn.textContent = 'Generate Tag & Barcode';
+            cancelLuggageEditBtn.classList.add('hidden');
+        }
+
+        async function loadBookings() {
+            const uid = user.id || user.userId || 2;
+            try {
+                const response = await fetch(`/api/v1/bookings/user/${uid}`);
+                const bookings = await response.json();
+                bookingId.innerHTML = bookings.length ? bookings.map(booking =>
+                    `<option value="${booking.bookingId}">Booking #${booking.bookingId} - ${booking.route || 'Express Bus'}</option>`
+                ).join('') : '<option value="1">Booking #1 - Colombo to Kandy (Default)</option>';
+            } catch (e) {
+                bookingId.innerHTML = '<option value="1">Booking #1 - Colombo to Kandy (Default)</option>';
+            }
+        }
+
+        async function loadLuggage() {
+            const uid = user.id || user.userId || 2;
+            try {
+                const response = await fetch(`/api/v1/luggage/user/${uid}`);
+                const records = await response.json();
+                luggageList.innerHTML = records.length ? records.map(record => {
+                    const bId = record.bookingId || (record.booking ? record.booking.bookingId : 'N/A');
+                    return `
+                    <article class="item" data-luggage='${JSON.stringify(record).replaceAll("'", "&#39;")}'>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="tag">${record.status}</span>
+                            <small style="color:var(--gray-400);">${formatDateTime(record.createdAt)}</small>
+                        </div>
+                        <h3 class="mono">${record.tagNumber}</h3>
+                        <p style="font-size:0.9rem; font-weight:600; color:var(--gray-700);">Booking #${bId} ${record.routeInfo ? '• ' + record.routeInfo : ''}</p>
+                        <p style="font-size:0.88rem; color:var(--gray-600); margin:4px 0;">Bags: <strong>${record.bagQuantity}</strong> | ${record.description || 'No special marks'}</p>
+                        <div class="item-actions">
+                            <button class="button secondary" style="font-size:0.8rem; padding:6px 12px;" type="button" onclick="editLuggage(this)">Edit Tag</button>
+                            <button class="button danger" style="font-size:0.8rem; padding:6px 12px;" type="button" onclick="deleteLuggage(${record.id})">Delete</button>
+                        </div>
+                    </article>
+                `}).join('') : '<p style="color:var(--gray-400); text-align:center; padding:20px;">No luggage registered yet. Use the form to tag your luggage.</p>';
+            } catch (e) {
+                luggageList.innerHTML = '<p style="color:var(--gray-400);">Could not load luggage records.</p>';
+            }
+        }
+
+        function editLuggage(button) {
+            const record = JSON.parse(button.closest('.item').dataset.luggage);
+            editingLuggageId = record.id;
+            bookingId.value = record.bookingId || (record.booking ? record.booking.bookingId : '');
+            bookingId.disabled = true;
+            bagQuantity.value = record.bagQuantity || 1;
+            description.value = record.description || '';
+            status.value = record.status || 'TAGGED';
+            submitLuggageBtn.textContent = 'Update Luggage';
+            cancelLuggageEditBtn.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function deleteLuggage(id) {
+            if (!confirm('Are you sure you want to remove this luggage record?')) return;
+            const response = await fetch(`/api/v1/luggage/${id}`, { method: 'DELETE' });
+            if (!response.ok) {
+                showMessage(await response.text(), 'error');
+                return;
+            }
+            showMessage('Luggage record deleted.');
+            loadLuggage();
+        }
+    </script>
+</body>
+</html>
