@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CatchBusLK — Select Your Seats</title>
+  <title>CatchBusLK — Select Your Seats &amp; Secure Payment</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
@@ -26,8 +26,8 @@
     .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-light); font-size: 13px; font-weight: 700; text-decoration: none; margin-bottom: 20px; }
     .back-btn:hover { color: var(--brand); }
     
-    .layout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 28px; }
-    @media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }
+    .layout-grid { display: grid; grid-template-columns: 1fr 400px; gap: 28px; }
+    @media (max-width: 960px) { .layout-grid { grid-template-columns: 1fr; } }
 
     .seat-card { background: #ffffff; border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
     .bus-toggle { display: flex; background: #f1f5f9; padding: 4px; border-radius: 12px; margin: 20px 0; gap: 6px; }
@@ -50,7 +50,7 @@
       cursor: pointer; transition: all 0.15s; user-select: none;
     }
     .seat-btn:hover:not(.reserved) { border-color: var(--brand); transform: scale(1.05); }
-    .seat-btn.selected { background: var(--brand); border-color: var(--brand-dark); color: #ffffff; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35); }
+    .seat-btn.selected { background: var(--brand); border-color: var(--brand-dark); color: #ffffff; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.35); }
     .seat-btn.reserved { background: #e2e8f0; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
 
     .legend { display: flex; justify-content: center; gap: 20px; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--ink-light); }
@@ -65,13 +65,119 @@
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-light); text-transform: uppercase; margin-bottom: 4px; }
     .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; background: #f8fafc; }
-    .form-group input:focus { border-color: var(--brand); background: #ffffff; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--brand); background: #ffffff; }
 
     .submit-btn {
       width: 100%; background: var(--brand); color: #ffffff; border: none; border-radius: 14px; padding: 14px;
-      font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
+      font-size: 15px; font-weight: 800; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
     }
     .submit-btn:hover { background: var(--brand-dark); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .secondary-btn {
+      width: 100%; background: #f1f5f9; color: var(--ink-body); border: 1px solid var(--border);
+      border-radius: 14px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px;
+    }
+    .secondary-btn:hover { background: #e2e8f0; }
+
+    /* Payment Card Showcase */
+    .payment-showcase {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+      border-radius: 18px;
+      padding: 18px;
+      margin: 16px 0;
+      color: #fff;
+    }
+    .brand-selector {
+      display: flex; gap: 8px; margin-bottom: 12px;
+    }
+    .brand-choice {
+      padding: 6px 14px; border-radius: 8px; background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2); font-size: 11px; font-weight: 800; cursor: pointer;
+      color: #cbd5e1;
+    }
+    .brand-choice.active {
+      background: var(--brand); color: #fff; border-color: var(--brand);
+    }
+    .card-scene {
+      perspective: 1000px;
+      height: 175px;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .payment-card {
+      width: 100%; height: 100%; position: relative;
+      transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .payment-card.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute; width: 100%; height: 100%;
+      backface-visibility: hidden; border-radius: 16px;
+      padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .payment-card.visa .card-front {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    }
+    .payment-card.mastercard .card-front {
+      background: linear-gradient(135deg, #991b1b 0%, #ea580c 100%);
+    }
+    .payment-card .card-back {
+      background: #1e293b;
+      transform: rotateY(180deg);
+      padding: 16px 0;
+    }
+    .card-top { display: flex; justify-content: space-between; align-items: center; }
+    .card-chip {
+      width: 36px; height: 26px; background: linear-gradient(135deg, #fbbf24, #d97706);
+      border-radius: 5px; display: inline-block;
+    }
+    .card-number-preview {
+      font-family: 'Space Grotesk', monospace;
+      font-size: 16px; font-weight: 700; letter-spacing: 2px;
+      color: #ffffff; text-align: center; margin: 8px 0;
+    }
+    .card-bottom {
+      display: flex; justify-content: space-between; font-size: 9px; color: rgba(255,255,255,0.7);
+    }
+    .card-caption { display: block; font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-value { display: block; font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; }
+    .card-stripe { width: 100%; height: 34px; background: #0f172a; margin-bottom: 12px; }
+    .card-signature {
+      background: #fff; margin: 0 20px; padding: 6px 12px; border-radius: 4px; text-align: right;
+      color: #0f172a; font-family: monospace; font-weight: 700; font-size: 13px;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .check-box-label {
+      display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--ink-light);
+      margin-bottom: 12px; cursor: pointer; user-select: none;
+    }
+    .check-box-label input { margin-top: 3px; accent-color: var(--brand); }
+    .alert-banner {
+      display: none; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600;
+      margin-bottom: 14px; line-height: 1.4;
+    }
+    .alert-banner.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+    .alert-banner.ok { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+
+    /* Modal / Ticket Stage */
+    .ticket-modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(4px); z-index: 100; place-items: center; padding: 20px;
+    }
+    .ticket-modal-content {
+      background: #ffffff; border-radius: 24px; max-width: 500px; width: 100%;
+      padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); text-align: center;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .qr-preview-box {
+      background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 16px;
+      padding: 16px; margin: 20px auto; width: 220px; height: 220px; display: grid; place-items: center;
+    }
+    .qr-preview-box img { width: 180px; height: 180px; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -79,16 +185,18 @@
     <div class="nav-container">
       <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
       <div class="breadcrumb">
-        <span class="active">1. Select Seats</span> &rarr; <span>2. Passenger Details</span> &rarr; <span>3. Confirmation</span>
+        <span id="bc1" class="active">1. Select Seats</span> &rarr;
+        <span id="bc2">2. Secure Payment</span> &rarr;
+        <span id="bc3">3. Boarding Pass</span>
       </div>
     </div>
   </header>
 
   <main class="main-wrap">
-    <a href="schedule.html" class="back-btn">&#8592; Back to Timetable</a>
+    <a href="search.html" class="back-btn">&#8592; Back to Bus Search</a>
 
     <div class="layout-grid">
-      <!-- Seat Map Section -->
+      <!-- Left: Seat Map Section -->
       <section class="seat-card">
         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
           <div>
@@ -117,7 +225,7 @@
           <div class="seats-matrix" id="seatMatrix"></div>
 
           <div style="text-align:center; padding-top:20px; font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">
-            Rear of Bus / Exit
+            Rear of Bus / Emergency Exit
           </div>
         </div>
 
@@ -128,22 +236,38 @@
         </div>
       </section>
 
-      <!-- Booking Side Panel -->
+      <!-- Right: Booking & Payment Side Panel -->
       <aside class="summary-card">
         <div class="timer-badge">
           <div style="font-size:10px; font-weight:800; text-transform:uppercase; color:var(--rose); letter-spacing:1px;">Seats Held For</div>
           <div class="timer-val" id="timerDisplay">10:00</div>
         </div>
 
-        <h3 style="font-family:'Space Grotesk'; font-size:18px; font-weight:800; margin-bottom:12px;">Booking Summary</h3>
+        <!-- Fare Breakdown Section -->
+        <h3 style="font-family:'Space Grotesk'; font-size:18px; font-weight:800; margin-bottom:12px;">Booking &amp; Fare Summary</h3>
         <div style="font-size:13px; line-height:1.8; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
-          <div><strong>Operator:</strong> <span id="summaryOp">SLTB Express</span></div>
+          <div><strong>Operator:</strong> <span id="summaryOp">CatchBusLK</span></div>
           <div><strong>Bus Tier:</strong> <span id="summaryType">Non A/C Normal</span></div>
           <div><strong>Selected Seats:</strong> <span id="selectedList" style="color:var(--brand); font-weight:800;">None yet</span></div>
-          <div style="margin-top:6px; font-size:16px;"><strong>Total Amount:</strong> <span id="totalAmount" style="font-weight:800; color:var(--brand);">LKR 0</span></div>
+          <div style="display:flex; justify-content:space-between; margin-top:4px;">
+            <span>Seats Subtotal:</span> <span id="summarySeatsSubtotal">LKR 0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span>Service Fee:</span> <span>LKR 100.00</span>
+          </div>
+          <div id="refundFeeRow" style="display:flex; justify-content:space-between; color:var(--brand-dark); font-weight:600;">
+            <span>Refund Protection:</span> <span id="summaryRefundFee">LKR 0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:16px; border-top:1px solid #e2e8f0; padding-top:6px;">
+            <strong>Total Payable:</strong> <span id="totalAmount" style="font-weight:800; color:var(--brand);">LKR 100.00</span>
+          </div>
         </div>
 
-        <form id="bookingForm" onsubmit="handleProceed(event)">
+        <div id="checkoutError" class="alert-banner error"></div>
+
+        <!-- STEP 1: Passenger Details Form -->
+        <div id="passengerSection">
+          <h4 style="font-size:14px; font-weight:800; margin-bottom:10px; color:var(--ink);">Passenger Details</h4>
           <div class="form-group">
             <label>Passenger Full Name</label>
             <input type="text" id="pName" placeholder="e.g. Nimal Perera" required>
@@ -153,27 +277,152 @@
             <input type="email" id="pEmail" placeholder="nimal@example.com" required>
           </div>
           <div class="form-group">
-            <label>Phone Number</label>
+            <label>Mobile Number</label>
             <input type="tel" id="pPhone" placeholder="077 123 4567" required>
           </div>
           <div class="form-group">
             <label>Boarding Point</label>
             <select id="pBoarding">
               <option value="Central Bus Stand">Central Bus Stand</option>
-              <option value="Town Hall / Expressway Interchange">Town Hall / Expressway Entrance</option>
-              <option value="Sub-Stop / Junction">Sub-Stop / Highway Halt</option>
+              <option value="Makumbura Multimodal Center">Makumbura Multimodal Center</option>
+              <option value="Town Hall / Expressway Entrance">Town Hall / Expressway Entrance</option>
+              <option value="Highway Intercity Halt">Highway Intercity Halt</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Destination Halt</label>
+            <select id="pDestination">
+              <option value="Main City Terminal">Main City Terminal</option>
+              <option value="Expressway Exit Point">Expressway Exit Point</option>
             </select>
           </div>
 
-          <button type="submit" class="submit-btn" id="proceedBtn">Confirm &amp; Reserve Seats</button>
-        </form>
+          <label class="check-box-label">
+            <input type="checkbox" id="refundProtection" onchange="updateSummary()">
+            <span><strong>Add Refund Protection (+LKR 150.00)</strong><br><small style="color:#64748b;">Enables refund claims under CatchBusLK policy (processed in 7 business days).</small></span>
+          </label>
+
+          <button type="button" class="submit-btn" id="toPaymentBtn" onclick="goToPaymentStep()">Continue to Payment &#8594;</button>
+        </div>
+
+        <!-- STEP 2: Card Payment Section -->
+        <div id="paymentSection" style="display:none;">
+          <h4 style="font-size:14px; font-weight:800; margin-bottom:10px; color:var(--ink);">Card Checkout</h4>
+
+          <!-- Live Card Preview Showcase -->
+          <div class="payment-showcase">
+            <div class="brand-selector">
+              <div id="visaChoice" class="brand-choice active">VISA</div>
+              <div id="mastercardChoice" class="brand-choice">MASTERCARD</div>
+            </div>
+            <div class="card-scene">
+              <div id="paymentCard" class="payment-card visa">
+                <!-- Card Front -->
+                <div class="card-face card-front">
+                  <div class="card-top">
+                    <span class="card-chip"></span>
+                    <span style="font-weight:800; font-size:18px; letter-spacing:1px;" id="cardBrandLabel">VISA</span>
+                  </div>
+                  <div id="cardDisplayNumber" class="card-number-preview">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;</div>
+                  <div class="card-bottom">
+                    <div>
+                      <span class="card-caption">Cardholder</span>
+                      <span id="cardDisplayName" class="card-value">PASSENGER NAME</span>
+                    </div>
+                    <div>
+                      <span class="card-caption">Expires</span>
+                      <span id="cardDisplayExpiry" class="card-value">MM/YY</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Card Back -->
+                <div class="card-face card-back">
+                  <div class="card-stripe"></div>
+                  <div class="card-signature">
+                    <span id="cardDisplayCvv">&bull;&bull;&bull;</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saved Card Selector (if authenticated) -->
+          <div id="savedCardArea" class="form-group" style="display:none;">
+            <label>Use Saved Payment Card</label>
+            <select id="savedCard" onchange="applySavedCard()">
+              <option value="">Enter a new card</option>
+            </select>
+          </div>
+
+          <form id="payForm" onsubmit="handlePaymentSubmit(event)">
+            <div class="form-group">
+              <label>Name on Card</label>
+              <input type="text" id="cardholder" placeholder="Name as printed on card" required maxlength="100">
+            </div>
+            <div class="form-group">
+              <label>Card Number (Visa / Mastercard)</label>
+              <input type="text" id="cardNumber" placeholder="4xxx xxxx xxxx xxxx" required inputmode="numeric" maxlength="19">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry (MM/YY)</label>
+                <input type="text" id="expiry" placeholder="12/28" required maxlength="5">
+              </div>
+              <div class="form-group">
+                <label>CVV (3 Digits)</label>
+                <input type="password" id="cvv" placeholder="&bull;&bull;&bull;" required maxlength="4">
+              </div>
+            </div>
+
+            <label class="check-box-label" id="saveCardLine" style="display:none;">
+              <input type="checkbox" id="saveCard">
+              <span>Save this card securely for future reservations.</span>
+            </label>
+
+            <label class="check-box-label">
+              <input type="checkbox" id="acceptTerms" required checked>
+              <span>I accept the booking, refund and payment terms.</span>
+            </label>
+
+            <button type="submit" class="submit-btn" id="payBtn">Pay &amp; Confirm Booking</button>
+            <button type="button" class="secondary-btn" onclick="backToPassengerStep()">&#8592; Back to Passenger Details</button>
+          </form>
+        </div>
       </aside>
     </div>
   </main>
 
+  <!-- STEP 3: Ticket Confirmation Modal -->
+  <div id="ticketModal" class="ticket-modal-overlay">
+    <div class="ticket-modal-content">
+      <div style="font-size:36px; margin-bottom:8px;">✅</div>
+      <h2 style="font-family:'Space Grotesk'; font-size:24px; font-weight:800; color:var(--brand-dark); margin-bottom:4px;">Booking &amp; Payment Confirmed!</h2>
+      <p style="color:var(--ink-light); font-size:13px; margin-bottom:16px;">Your digital QR boarding pass is active and registered in the transit network.</p>
+
+      <div class="qr-preview-box">
+        <img id="qrImage" src="" alt="Digital Boarding Pass QR Code">
+      </div>
+
+      <div id="ticketDetailsBox" style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; font-size:13px; line-height:1.7; margin-bottom:20px;">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <a id="downloadQrLink" class="submit-btn" style="text-decoration:none; text-align:center;" href="#" download="boarding-pass-qr.png">
+          📥 Download QR Boarding Pass
+        </a>
+        <a href="admin.html?tab=profile" class="secondary-btn" style="text-decoration:none; text-align:center;">
+          👤 View My Tickets in Account Portal
+        </a>
+        <a href="index.html" class="back-btn" style="justify-content:center; margin-top:6px;">Return to Home</a>
+      </div>
+    </div>
+  </div>
+
   <script>
+    const API = '/api/v1';
     const params = new URLSearchParams(window.location.search);
-    const tripId = params.get('tripId') || params.get('trip') || '1';
+    const tripId = Number(params.get('tripId') || params.get('trip') || '390');
     const fromCity = params.get('from') || params.get('source') || params.get('sourceCity') || 'Colombo';
     const toCity = params.get('to') || params.get('destination') || params.get('destinationCity') || 'Kandy';
     const travelDate = params.get('date') || params.get('travelDate') || new Date().toISOString().slice(0, 10);
@@ -183,13 +432,32 @@
     let basePrice = parseInt(params.get('price')) || parseInt(params.get('fare')) || parseInt(params.get('baseFare')) || 850;
 
     let selectedSeats = [];
+    let dbSeats = []; // [{ seatId, seatNumber }]
+    let savedCards = [];
     let secondsLeft = 600;
+    let confirmedTicket = null;
+
+    const authToken = localStorage.getItem('bus_jwt_token');
+    let currentUser = null;
+    try { currentUser = JSON.parse(localStorage.getItem('bus_user')); } catch (e) {}
+
+    const authHeaders = (json = true) => ({
+      ...(json ? { 'Content-Type': 'application/json' } : {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+    });
 
     document.getElementById('tripRouteHeading').innerText = `${fromCity} → ${toCity}`;
     document.getElementById('tripSubHeading').innerText = `${travelDate} · ${depTime} · ${operator}`;
     document.getElementById('summaryOp').innerText = operator;
 
-    // Timer countdown logic
+    if (currentUser) {
+      if (document.getElementById('pName') && currentUser.fullName) document.getElementById('pName').value = currentUser.fullName;
+      if (document.getElementById('pEmail') && currentUser.email) document.getElementById('pEmail').value = currentUser.email;
+      if (document.getElementById('pPhone') && currentUser.phoneNumber) document.getElementById('pPhone').value = currentUser.phoneNumber;
+      if (document.getElementById('cardholder') && currentUser.fullName) document.getElementById('cardholder').value = currentUser.fullName;
+    }
+
+    // 10-Minute Hold Countdown Timer
     setInterval(() => {
       if (secondsLeft > 0) {
         secondsLeft--;
@@ -206,6 +474,24 @@
       NON_AC_NORMAL: new Set(['S3', 'S8', 'S11', 'S19', 'S27', 'S31', 'S38', 'S45', 'S52']),
       AC_LUXURY: new Set(['S2', 'S7', 'S14', 'S21', 'S29', 'S36', 'S43'])
     };
+
+    async function loadTripSeatAvailability() {
+      try {
+        const res = await fetch(`${API}/seats/trip/${tripId}?busType=${encodeURIComponent(busType)}`);
+        const json = await res.json();
+        if (json.data) {
+          if (json.data.seats && json.data.seats.length > 0) {
+            dbSeats = json.data.seats;
+          }
+          if (json.data.reservedSeats && json.data.reservedSeats.length > 0) {
+            RESERVED_SETS[busType] = new Set(json.data.reservedSeats);
+          }
+        }
+      } catch (e) {
+        console.warn('Using local fallback layout for trip seats');
+      }
+      renderMatrix();
+    }
 
     function renderMatrix() {
       const container = document.getElementById('seatMatrix');
@@ -261,105 +547,297 @@
         backRow.appendChild(backPair);
       }
       container.appendChild(backRow);
-
       updateSummary();
     }
 
-    function createSeatButton(seatId, reserved) {
+    function createSeatButton(seatLabel, reserved) {
       const btn = document.createElement('div');
       btn.className = 'seat-btn';
-      btn.innerText = seatId;
+      btn.innerText = seatLabel;
 
-      if (reserved.has(seatId)) {
+      if (reserved.has(seatLabel) || reserved.has(seatLabel.replace('S', ''))) {
         btn.classList.add('reserved');
         btn.title = 'Seat already reserved';
       } else {
-        if (selectedSeats.includes(seatId)) {
+        if (selectedSeats.includes(seatLabel)) {
           btn.classList.add('selected');
         }
-        btn.onclick = () => toggleSeat(seatId);
+        btn.onclick = () => toggleSeat(seatLabel);
       }
       return btn;
     }
 
-    function toggleSeat(seatId) {
-      if (selectedSeats.includes(seatId)) {
-        selectedSeats = selectedSeats.filter(s => s !== seatId);
+    function toggleSeat(seatLabel) {
+      if (selectedSeats.includes(seatLabel)) {
+        selectedSeats = selectedSeats.filter(s => s !== seatLabel);
       } else {
         if (selectedSeats.length >= 6) {
           alert('You can select a maximum of 6 seats per booking.');
           return;
         }
-        selectedSeats.push(seatId);
-        secondsLeft = 600; // Reset 10-minute hold on seat interaction
+        selectedSeats.push(seatLabel);
+        secondsLeft = 600; // Reset timer on active seat engagement
       }
       renderMatrix();
     }
 
     function switchBusType(newType) {
       busType = newType;
-      basePrice = busType === 'AC_LUXURY' ? 1350 : 550;
+      basePrice = busType === 'AC_LUXURY' ? 1350 : 850;
       selectedSeats = [];
-      renderMatrix();
+      loadTripSeatAvailability();
     }
 
     function updateSummary() {
       const listEl = document.getElementById('selectedList');
+      const subtotalEl = document.getElementById('summarySeatsSubtotal');
+      const refundFeeEl = document.getElementById('summaryRefundFee');
       const totalEl = document.getElementById('totalAmount');
+
+      const seatCost = selectedSeats.length * basePrice;
+      const hasProtection = document.getElementById('refundProtection')?.checked;
+      const refundFee = hasProtection ? 150 : 0;
+      const grandTotal = seatCost + 100 + refundFee;
+
       if (selectedSeats.length === 0) {
         listEl.innerText = 'None yet';
-        totalEl.innerText = 'LKR 0';
       } else {
         listEl.innerText = selectedSeats.join(', ');
-        totalEl.innerText = `LKR ${(selectedSeats.length * basePrice).toLocaleString()}`;
       }
+
+      subtotalEl.innerText = `LKR ${seatCost.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+      refundFeeEl.innerText = `LKR ${refundFee.toLocaleString(undefined, {minimumFractionDigits:2})}`;
+      totalEl.innerText = `LKR ${grandTotal.toLocaleString(undefined, {minimumFractionDigits:2})}`;
     }
 
-    async function handleProceed(e) {
-      e.preventDefault();
+    // Step Transitions
+    function goToPaymentStep() {
+      const errBox = document.getElementById('checkoutError');
+      errBox.style.display = 'none';
+
       if (selectedSeats.length === 0) {
-        alert('Please click to select at least one seat before continuing.');
+        errBox.innerText = 'Please select at least one available seat before continuing.';
+        errBox.style.display = 'block';
         return;
       }
-      if (secondsLeft <= 0) {
-        alert('Your 10-minute seat hold has expired. Please reselect your seats.');
-        secondsLeft = 600;
+      const name = document.getElementById('pName').value.trim();
+      const phone = document.getElementById('pPhone').value.trim();
+      const email = document.getElementById('pEmail').value.trim();
+
+      if (!name || !phone || !email) {
+        errBox.innerText = 'Please fill out your passenger name, mobile phone, and email address.';
+        errBox.style.display = 'block';
         return;
       }
 
-      const payload = {
-        from: fromCity,
-        to: toCity,
-        date: travelDate,
-        time: depTime,
-        busType: busType === 'AC_LUXURY' ? 'A/C Luxury Bus' : 'Non A/C Normal Bus',
-        operator: operator,
-        seats: selectedSeats,
-        passengerName: document.getElementById('pName').value,
-        passengerEmail: document.getElementById('pEmail').value,
-        passengerPhone: document.getElementById('pPhone').value,
+      document.getElementById('passengerSection').style.display = 'none';
+      document.getElementById('paymentSection').style.display = 'block';
+      document.getElementById('bc1').classList.remove('active');
+      document.getElementById('bc2').classList.add('active');
+
+      if (currentUser && document.getElementById('cardholder').value.trim() === '') {
+        document.getElementById('cardholder').value = name;
+      }
+      renderCardPreview();
+      loadSavedCards();
+    }
+
+    function backToPassengerStep() {
+      document.getElementById('paymentSection').style.display = 'none';
+      document.getElementById('passengerSection').style.display = 'block';
+      document.getElementById('bc2').classList.remove('active');
+      document.getElementById('bc1').classList.add('active');
+    }
+
+    // Card Input and Live Preview
+    function detectedCardBrand(digits) {
+      if (digits.startsWith('4')) return 'VISA';
+      if (digits.startsWith('5') || digits.startsWith('2')) return 'MASTERCARD';
+      return 'VISA';
+    }
+
+    function renderCardPreview() {
+      const numInput = document.getElementById('cardNumber');
+      const digits = (numInput.value || '').replace(/\D/g, '');
+      const selectedSaved = savedCards.find(c => Number(c.cardId) === Number(document.getElementById('savedCard')?.value));
+      const brand = numInput.disabled && selectedSaved ? selectedSaved.cardBrand : detectedCardBrand(digits);
+
+      const card = document.getElementById('paymentCard');
+      card.classList.toggle('visa', brand === 'VISA');
+      card.classList.toggle('mastercard', brand === 'MASTERCARD');
+      document.getElementById('cardBrandLabel').innerText = brand;
+      document.getElementById('visaChoice').classList.toggle('active', brand === 'VISA');
+      document.getElementById('mastercardChoice').classList.toggle('active', brand === 'MASTERCARD');
+
+      let preview = numInput.disabled && digits.length === 4
+        ? '•••• •••• •••• ' + digits
+        : (digits + '••••••••••••••••').slice(0, 16).match(/.{1,4}/g).join(' ');
+
+      document.getElementById('cardDisplayNumber').innerText = preview;
+      document.getElementById('cardDisplayName').innerText = (document.getElementById('cardholder').value.trim() || 'PASSENGER NAME').toUpperCase();
+      document.getElementById('cardDisplayExpiry').innerText = document.getElementById('expiry').value || 'MM/YY';
+      document.getElementById('cardDisplayCvv').innerText = document.getElementById('cvv').value.replace(/./g, '•') || '•••';
+    }
+
+    document.getElementById('cardNumber').oninput = e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+      e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
+      renderCardPreview();
+    };
+    document.getElementById('cardholder').oninput = renderCardPreview;
+    document.getElementById('expiry').oninput = e => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = v.length > 2 ? v.slice(0, 2) + '/' + v.slice(2) : v;
+      renderCardPreview();
+    };
+    document.getElementById('cvv').oninput = renderCardPreview;
+    document.getElementById('cvv').onfocus = () => document.getElementById('paymentCard').classList.add('flipped');
+    document.getElementById('cvv').onblur = () => document.getElementById('paymentCard').classList.remove('flipped');
+
+    async function loadSavedCards() {
+      if (!authToken) return;
+      try {
+        const r = await fetch(`${API}/payments/cards`, { headers: authHeaders() });
+        const j = await r.json();
+        if (r.ok && j.data && j.data.length > 0) {
+          savedCards = j.data;
+          const select = document.getElementById('savedCard');
+          select.innerHTML = '<option value="">Use a new card</option>' +
+            savedCards.map(c => `<option value="${c.cardId}">${c.cardBrand} •••• ${c.lastFour}${c.isDefault ? ' (Default)' : ''}</option>`).join('');
+          document.getElementById('savedCardArea').style.display = 'block';
+          document.getElementById('saveCardLine').style.display = 'flex';
+
+          const def = savedCards.find(c => c.isDefault);
+          if (def) {
+            select.value = def.cardId;
+            applySavedCard();
+          }
+        } else {
+          document.getElementById('saveCardLine').style.display = 'flex';
+        }
+      } catch (e) {}
+    }
+
+    function applySavedCard() {
+      const id = Number(document.getElementById('savedCard').value);
+      const card = savedCards.find(c => Number(c.cardId) === id);
+      const numInput = document.getElementById('cardNumber');
+
+      if (card) {
+        document.getElementById('cardholder').value = card.cardholderName;
+        document.getElementById('expiry').value = card.expiry;
+        numInput.value = `•••• •••• •••• ${card.lastFour}`;
+        numInput.disabled = true;
+        document.getElementById('saveCardLine').style.display = 'none';
+      } else {
+        numInput.value = '';
+        numInput.disabled = false;
+        document.getElementById('saveCardLine').style.display = 'flex';
+      }
+      renderCardPreview();
+    }
+
+    // Resolve seat IDs for payment request
+    function resolveSeatIds() {
+      // Try to find matching seat IDs in dbSeats
+      const resolved = [];
+      for (const label of selectedSeats) {
+        const numOnly = label.replace(/\D/g, '');
+        const match = dbSeats.find(s => String(s.seatNumber) === numOnly || String(s.seatNumber) === label);
+        if (match) {
+          resolved.push(match.seatId);
+        }
+      }
+      // If we found all or some
+      if (resolved.length === selectedSeats.length) {
+        return resolved;
+      }
+      // Fallback: if dbSeats not loaded yet, query or return numeric seat indices
+      return dbSeats.slice(0, selectedSeats.length).map(s => s.seatId);
+    }
+
+    // Process Payment
+    async function handlePaymentSubmit(e) {
+      e.preventDefault();
+      const errBox = document.getElementById('checkoutError');
+      const payBtn = document.getElementById('payBtn');
+      errBox.style.display = 'none';
+      payBtn.disabled = true;
+      payBtn.innerText = 'Authorizing & Processing Payment…';
+
+      const savedCardId = Number(document.getElementById('savedCard')?.value) || null;
+      const seatIdsToSend = resolveSeatIds();
+
+      if (seatIdsToSend.length === 0 && dbSeats.length > 0) {
+        seatIdsToSend.push(...dbSeats.slice(0, selectedSeats.length).map(s => s.seatId));
+      }
+
+      const body = {
+        tripId: tripId,
+        seatIds: seatIdsToSend,
+        passengerName: document.getElementById('pName').value.trim(),
+        phoneNumber: document.getElementById('pPhone').value.trim(),
+        email: document.getElementById('pEmail').value.trim(),
         boardingPoint: document.getElementById('pBoarding').value,
-        total: selectedSeats.length * basePrice
+        destinationPoint: document.getElementById('pDestination').value,
+        cardholderName: document.getElementById('cardholder').value.trim(),
+        cardNumber: savedCardId ? '' : document.getElementById('cardNumber').value.replace(/\s+/g, ''),
+        expiry: document.getElementById('expiry').value.trim(),
+        cvv: document.getElementById('cvv').value.trim(),
+        savedCardId: savedCardId,
+        saveCard: document.getElementById('saveCard')?.checked || false,
+        refundProtection: document.getElementById('refundProtection')?.checked || false,
+        termsAccepted: document.getElementById('acceptTerms').checked
       };
 
       try {
-        const res = await fetch('/api/v1/bookings', {
+        const r = await fetch(`${API}/payments/process`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          headers: authHeaders(),
+          body: JSON.stringify(body)
         });
-        const data = await res.json();
-        const ref = data.data?.reference || `CB${Date.now().toString().slice(-8)}`;
-        localStorage.setItem('catchbuslk-last-booking', JSON.stringify({ ...payload, reference: ref }));
-        window.location.href = `booking-confirmation.html?ref=${encodeURIComponent(ref)}`;
+        const j = await r.json();
+        if (!r.ok) {
+          throw new Error(j.message || Object.values(j.validationErrors || {}).join(', ') || 'Payment processing failed');
+        }
+
+        confirmedTicket = j.data;
+        showTicketConfirmation(confirmedTicket);
       } catch (err) {
-        const ref = `CB${Date.now().toString().slice(-8)}`;
-        localStorage.setItem('catchbuslk-last-booking', JSON.stringify({ ...payload, reference: ref }));
-        window.location.href = `booking-confirmation.html?ref=${encodeURIComponent(ref)}`;
+        errBox.innerText = err.message || 'Payment authorization failed. Please check your card details.';
+        errBox.style.display = 'block';
+      } finally {
+        payBtn.disabled = false;
+        payBtn.innerText = 'Pay & Confirm Booking';
       }
     }
 
-    renderMatrix();
+    function showTicketConfirmation(t) {
+      document.getElementById('bc2').classList.remove('active');
+      document.getElementById('bc3').classList.add('active');
+
+      const token = encodeURIComponent(t.ticketToken);
+      document.getElementById('qrImage').src = `${API}/payments/tickets/${token}/qr.png`;
+      document.getElementById('downloadQrLink').href = `${API}/payments/tickets/${token}/qr.png?download=true`;
+
+      document.getElementById('ticketDetailsBox').innerHTML = `
+        <div><strong>Booking ID:</strong> #${t.bookingId}</div>
+        <div><strong>Transaction Ref:</strong> ${t.transactionReference || 'N/A'}</div>
+        <div><strong>Passenger:</strong> ${t.passengerName}</div>
+        <div><strong>Corridor:</strong> ${t.sourceCity} → ${t.destinationCity}</div>
+        <div><strong>Bus &amp; Operator:</strong> ${t.busNumber} · ${t.operatorName}</div>
+        <div><strong>Reserved Seats:</strong> ${(t.seats || []).join(', ')}</div>
+        <div><strong>Boarding Halt:</strong> ${t.boardingPoint}</div>
+        <div><strong>Departure Time:</strong> ${new Date(t.departureTime).toLocaleString()}</div>
+        <div><strong>Amount Paid:</strong> LKR ${Number(t.totalAmount).toLocaleString(undefined, {minimumFractionDigits:2})}</div>
+        <div><strong>Refund Protection:</strong> ${t.refundFeePaid ? '✅ Active (Eligible)' : '❌ Not purchased'}</div>
+      `;
+
+      document.getElementById('ticketModal').style.display = 'grid';
+    }
+
+    // Initialize
+    loadTripSeatAvailability();
   </script>
 </body>
 </html>

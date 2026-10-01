@@ -1,7 +1,11 @@
 package com.system.busreservation.modules.seat.service;
 
 import com.system.busreservation.model.BookingSeat;
+import com.system.busreservation.model.Seat;
+import com.system.busreservation.model.Trip;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
+import com.system.busreservation.modules.search.repository.TripRepository;
+import com.system.busreservation.modules.seat.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,8 @@ import java.util.*;
 public class SeatService {
 
     private final BookingSeatRepository bookingSeatRepository;
+    private final TripRepository tripRepository;
+    private final SeatRepository seatRepository;
 
     public Map<String, Object> getSeatLayout(String busType) {
         boolean isLuxury = busType != null && busType.toUpperCase().contains("LUXURY");
@@ -80,6 +86,23 @@ public class SeatService {
         result.put("reservedSeats", reserved);
         int total = (int) result.get("totalSeats");
         result.put("availableSeatsCount", Math.max(0, total - reserved.size()));
+
+        List<Map<String, Object>> seatList = new ArrayList<>();
+        if (tripId != null && tripId > 0) {
+            tripRepository.findById(tripId).ifPresent(trip -> {
+                if (trip.getBus() != null) {
+                    List<Seat> busSeats = seatRepository.findByBus_BusId(trip.getBus().getBusId());
+                    for (Seat s : busSeats) {
+                        Map<String, Object> sm = new HashMap<>();
+                        sm.put("seatId", s.getSeatId());
+                        sm.put("seatNumber", s.getSeatNumber());
+                        sm.put("deckType", s.getDeckType() != null ? s.getDeckType().name() : "LOWER");
+                        seatList.add(sm);
+                    }
+                }
+            });
+        }
+        result.put("seats", seatList);
         return result;
     }
 }

@@ -16,6 +16,16 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
     boolean existsByTrip_TripIdAndSeat_SeatId(Long tripId, Long seatId);
 
     @Query("""
+        SELECT bs.seat.seatId
+        FROM BookingSeat bs
+        WHERE bs.trip.tripId = :tripId
+          AND bs.booking.bookingStatus NOT IN (
+              com.system.busreservation.model.enums.BookingStatus.CANCELLED,
+              com.system.busreservation.model.enums.BookingStatus.REFUNDED)
+    """)
+    List<Long> findActiveBookedSeatIds(@Param("tripId") Long tripId);
+
+    @Query("""
         SELECT COUNT(bs.bookingSeatId)
         FROM BookingSeat bs
         WHERE bs.trip.tripId = :tripId
