@@ -53,3 +53,6 @@ desktop.ini
 # Virtual Machine crash logs
 hs_err_pid*
 replay_pid*
+
+# Local maintenance utilities
+fix-sqlserver.bat

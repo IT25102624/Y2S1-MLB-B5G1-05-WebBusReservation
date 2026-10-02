@@ -522,10 +522,12 @@
 
       if (ticket.luggage && ticket.luggage.length > 0) {
         ticket.luggage.forEach((lug, idx) => {
-          values.push([`Luggage #${idx + 1}`, `${lug.tagNumber} (${lug.bagQuantity} pcs) — ${lug.status} [${lug.description || 'Standard'}]`]);
+          const qty = lug.bagQuantity || lug.bagCount || 1;
+          const desc = lug.description || 'Standard travel baggage';
+          values.push([`Luggage #${idx + 1}`, `Tag: ${lug.tagNumber || lug.tagReference} | Amount: ${qty} Bag(s) | Description: ${desc} (${lug.status || 'TAGGED'})`]);
         });
       } else {
-        values.push(['Hold Luggage', 'None Declared (Carry-on Only)']);
+        values.push(['Hold Luggage', 'None Declared (Hand luggage only)']);
       }
 
       document.getElementById('rows').innerHTML = values.map(v => `

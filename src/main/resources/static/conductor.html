@@ -17,8 +17,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 60px; min-height: 100vh; }
     
-    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 24px; position: sticky; top: 0; z-index: 100; }
-    .nav-wrap { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 0; position: sticky; top: 0; z-index: 100; }
+    .nav-wrap { max-width: 1240px; margin: 0 auto; width: 100%; padding: 0 24px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
     .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 4px; }
     .brand-title span { color: var(--cyan); }
     .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
@@ -333,14 +333,28 @@
         document.getElementById('confirmBoardBtn').style.display = 'block';
       }
 
-      // Render Luggage info if present
+      // Render Luggage info if present (Tag, Amount/Quantity, Description, Status)
       const lugVal = document.getElementById('tpLuggageVal');
       if (t.luggage && t.luggage.length > 0) {
-        lugVal.innerHTML = t.luggage.map(l => `
-          <span class="luggage-badge">${l.tagReference || 'TAG'} (${l.weightKg}kg &middot; ${l.bagCount || 1} bags)</span>
-        `).join(' ');
+        lugVal.innerHTML = t.luggage.map(l => {
+          const qty = l.bagQuantity || l.bagCount || 1;
+          const tag = l.tagNumber || l.tagReference || 'TAG';
+          const desc = l.description ? String(l.description).replace(/[<>&"']/g, '') : 'Standard Baggage';
+          const st = l.status ? `<span style="font-size:10px; background:#10b981; color:#fff; padding:1px 6px; border-radius:4px; margin-left:4px;">${l.status}</span>` : '';
+          return `
+            <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:8px 10px; margin-top:6px; text-align:left;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span class="luggage-badge">${tag}</span>
+                <span style="font-weight:700; color:#38bdf8; font-size:12px;">Amount: ${qty} ${qty > 1 ? 'Bags' : 'Bag'}${st}</span>
+              </div>
+              <div style="font-size:12px; color:#cbd5e1;">
+                <span style="color:var(--ink-light); font-weight:600;">Description:</span> ${desc}
+              </div>
+            </div>
+          `;
+        }).join('');
       } else {
-        lugVal.innerHTML = '<span style="color:var(--ink-light); font-size:12px;">Standard Hand Luggage Only</span>';
+        lugVal.innerHTML = '<span style="color:var(--ink-light); font-size:12px;">Standard Hand Luggage Only (No hold luggage)</span>';
       }
 
       showSuccess(`QR ticket for ${t.passengerName} decoded successfully!`);

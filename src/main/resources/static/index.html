@@ -41,9 +41,8 @@
     .hero-title span { color: var(--brand); }
     .hero-sub { color: var(--ink-light); font-size: 16px; margin-top: 16px; max-width: 480px; }
 
-    /* Spinning Bus Wheels Animation */
-    @keyframes wheel-spin { to { transform: rotate(360deg); } }
-    .animate-wheel { animation: wheel-spin 1.4s linear infinite; transform-origin: center; }
+    /* Hero Visual */
+    .bus-illustration { filter: drop-shadow(0 20px 30px rgba(15, 23, 42, 0.08)); }
 
     /* Search Widget */
     .search-widget {
@@ -92,7 +91,6 @@
         <a href="search.html" id="navLinkSearch">Book a Trip</a>
         <a href="schedule.html" id="navLinkSchedule">Timetable</a>
         <a href="feedback.html" id="navLinkFeedback">Feedback</a>
-        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
       </nav>
       <div class="nav-actions">
         <div class="notification-area" id="navNotificationArea">
@@ -138,9 +136,13 @@
         <p class="hero-sub">Live seat layouts (2+2 Ashok Leyland &amp; Luxury Coaches), 10-minute seat lock with countdown timer, QR-coded boarding passes, and live bus GPS tracking.</p>
       </div>
 
-      <!-- Hero Bus Graphic with Spinning Wheels -->
+      <!-- Hero Bus Graphic -->
       <div style="text-align: center;">
-        <svg viewBox="0 0 540 280" style="max-width: 100%; height: auto; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.08));">
+        <svg viewBox="0 0 540 280" class="bus-illustration" style="max-width: 100%; height: auto;">
+          <!-- Road line -->
+          <line x1="30" y1="231" x2="510" y2="231" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round" />
+          <line x1="120" y1="231" x2="180" y2="231" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
+          <line x1="360" y1="231" x2="430" y2="231" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round" />
           <!-- Bus body -->
           <rect x="70" y="80" width="410" height="120" rx="20" fill="#16a34a" />
           <rect x="70" y="160" width="410" height="40" fill="#0f172a" />
@@ -154,14 +156,17 @@
           <rect x="426" y="95" width="44" height="60" rx="8" fill="#f8fafc" opacity="0.9" />
           <!-- Headlight -->
           <circle cx="478" cy="180" r="7" fill="#fef08a" />
-          <!-- Wheels with spinning animation -->
-          <g class="animate-wheel">
-            <circle cx="150" cy="205" r="26" fill="#0f172a" />
-            <circle cx="150" cy="205" r="10" fill="#dcfce7" />
+          <!-- Front Wheel -->
+          <g>
+            <circle cx="150" cy="205" r="26" fill="#1e293b" />
+            <circle cx="150" cy="205" r="15" fill="#64748b" />
+            <circle cx="150" cy="205" r="6" fill="#e2e8f0" />
           </g>
-          <g class="animate-wheel">
-            <circle cx="400" cy="205" r="26" fill="#0f172a" />
-            <circle cx="400" cy="205" r="10" fill="#dcfce7" />
+          <!-- Rear Wheel -->
+          <g>
+            <circle cx="400" cy="205" r="26" fill="#1e293b" />
+            <circle cx="400" cy="205" r="15" fill="#64748b" />
+            <circle cx="400" cy="205" r="6" fill="#e2e8f0" />
           </g>
         </svg>
       </div>

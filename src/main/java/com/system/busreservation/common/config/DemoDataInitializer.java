@@ -46,15 +46,12 @@ public class DemoDataInitializer implements CommandLineRunner {
         long conductor = ensureUser("Demo Conductor", "conductor@catchbus.lk", "0710000001", "Conductor@123", "CONDUCTOR");
         long driver = ensureUser("Demo Driver", "driver@catchbus.lk", "0710000002", "Driver@123", "DRIVER");
 
-        // Also ensure kandy staff from data-seed.sql have staff profiles
-        Long kandyConductor = oneLong("SELECT TOP 1 user_id FROM dbo.users WHERE email = 'conductor.kandy@busreservation.lk'");
-        if (kandyConductor != null) {
-            ensureStaff(kandyConductor, "CON-KANDY-01", "CONDUCTOR-KANDY-QR");
-        }
-        Long kandyDriver = oneLong("SELECT TOP 1 user_id FROM dbo.users WHERE email = 'driver.kandy@busreservation.lk'");
-        if (kandyDriver != null) {
-            ensureStaff(kandyDriver, "DRV-KANDY-01", "DRIVER-KANDY-QR");
-        }
+        // Also ensure kandy staff from data-seed.sql have valid passwords and staff profiles
+        long kandyConductor = ensureUser("Kandy Demo Conductor", "conductor.kandy@busreservation.lk", "+94771234568", "Password@123", "CONDUCTOR");
+        ensureStaff(kandyConductor, "CON-KANDY-01", "CONDUCTOR-KANDY-QR");
+
+        long kandyDriver = ensureUser("Kandy Demo Driver", "driver.kandy@busreservation.lk", "+94771234569", "Password@123", "DRIVER");
+        ensureStaff(kandyDriver, "DRV-KANDY-01", "DRIVER-KANDY-QR");
 
         ensureStaff(conductor, "CON-001", "CONDUCTOR-DEMO-QR");
         ensureStaff(driver, "DRV-001", "DRIVER-DEMO-QR");
@@ -103,6 +100,8 @@ public class DemoDataInitializer implements CommandLineRunner {
                 """, previousTrip, bus2);
         }
 
+        seedDemoNotifications();
+
         log.info("DemoDataInitializer: Verified CatchBusLK demo staff accounts and trip assignments.");
     }
 
@@ -144,5 +143,49 @@ public class DemoDataInitializer implements CommandLineRunner {
 
     private Long oneLong(String sql, Object... args) {
         return jdbc.query(sql, rs -> rs.next() ? rs.getLong(1) : null, args);
+    }
+
+    private void seedDemoNotifications() {
+        try {
+            Integer tableCount = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'notifications'
+                """, Integer.class);
+            if (tableCount == null || tableCount == 0) return;
+
+            Integer count = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM dbo.notifications WHERE type IN ('BOOKING_CONFIRMED', 'JOURNEY_REMINDER', 'ROUTE_DELAY')
+                """, Integer.class);
+            if (count != null && count > 0) return;
+
+            Long adminId = oneLong("SELECT TOP 1 user_id FROM dbo.users WHERE LOWER(email) = 'admin@catchbus.lk'");
+            if (adminId == null) adminId = oneLong("SELECT TOP 1 user_id FROM dbo.users WHERE role = 'ADMIN'");
+            Long passengerId = oneLong("SELECT TOP 1 user_id FROM dbo.users WHERE role = 'PASSENGER' ORDER BY user_id ASC");
+            if (passengerId == null) passengerId = adminId;
+
+            Long booking = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings ORDER BY booking_id DESC");
+
+            LocalDateTime now = LocalDateTime.now();
+
+            insertNotification(passengerId, booking, "Booking Confirmed: E-Ticket #CBL-8842 issued for Colombo to Kandy (Express Luxury AC). Departure today at 14:30 from Platform Bay 03. QR boarding pass ready.", "BOOKING_CONFIRMED", now.minusMinutes(15), false);
+            insertNotification(passengerId, booking, "Luggage Tag Registered: Tag #LUG-20261002-882163 (1 standard bag, 12.5 kg) verified and assigned to Bay B security hold. QR Baggage Tag synced.", "LUGGAGE_TAGGED", now.minusMinutes(35), false);
+            insertNotification(passengerId, booking, "Departure Reminder: Bus CBL-001 departs in 45 minutes from Bastian Mawatha Terminal Bay 3. Conductor check-in is now open.", "JOURNEY_REMINDER", now.minusMinutes(55), false);
+            insertNotification(adminId != null ? adminId : passengerId, null, "Traffic & Road Advisory: Road resurfacing near Dodangoda on Southern Expressway (E01). Minor 12-minute transit delay expected.", "ROUTE_DELAY", now.minusHours(2), true);
+            insertNotification(passengerId, booking, "Luggage Status Update: Bag Tag #LUG-20261001-527512 status updated to CHECKED_IN by Galle Conductor.", "LUGGAGE_STATUS", now.minusHours(3), true);
+            insertNotification(passengerId, booking, "Boarding Gate Assignment: Northern Superline (Colombo to Jaffna) will board from Terminal 2, Platform Bay 05.", "GATE_UPDATE", now.minusHours(4), true);
+            insertNotification(passengerId, null, "Customer Care Resolution: Support response received regarding your recent inquiry — 'Our fleet team has verified the air-conditioning unit on bus CBL-001. Thank you for your feedback!'", "FEEDBACK_REPLY", now.minusHours(6), true);
+            insertNotification(passengerId, booking, "Booking Confirmed: E-Ticket #CBL-9102 issued for Colombo to Badulla (Ella Superline). Reserved Seat: 14A. Safe travels!", "BOOKING_CONFIRMED", now.minusHours(8), true);
+
+            log.info("DemoDataInitializer: Seeded demo platform and passenger notifications.");
+        } catch (Exception e) {
+            log.warn("DemoDataInitializer seed notifications note: {}", e.getMessage());
+        }
+    }
+
+    private void insertNotification(Long userId, Long bookingId, String message, String type, LocalDateTime createdAt, boolean isRead) {
+        if (userId == null) return;
+        jdbc.update("""
+            INSERT INTO dbo.notifications (user_id, booking_id, message, type, created_at, is_read)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, userId, bookingId, message, type, createdAt, isRead ? 1 : 0);
     }
 }

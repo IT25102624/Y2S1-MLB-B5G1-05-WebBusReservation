@@ -1,18 +1,29 @@
 const API_BASE = "/api/v1/admin";
 const ROUTES_BASE = "/api/v1/routes";
 
+function getAuthToken() {
+    return localStorage.getItem("auth_token") || 
+           localStorage.getItem("authToken") || 
+           localStorage.getItem("bus_jwt_token") || "";
+}
+
 async function request(path, options = {}) {
-    const token = localStorage.getItem("authToken");
+    const token = getAuthToken();
 
     const headers = {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {})
     };
 
-    const response = await fetch(`${API_BASE}${path}`, {
-        ...options,
-        headers
-    });
+    let response;
+    try {
+        response = await fetch(`/admin${path}`, { ...options, headers });
+        if (!response.ok && response.status === 404) {
+            response = await fetch(`/api/v1/admin${path}`, { ...options, headers });
+        }
+    } catch (e) {
+        response = await fetch(`/api/v1/admin${path}`, { ...options, headers });
+    }
 
     if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
@@ -30,17 +41,22 @@ async function request(path, options = {}) {
 }
 
 async function routeRequest(path, options = {}) {
-    const token = localStorage.getItem("authToken");
+    const token = getAuthToken();
 
     const headers = {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {})
     };
 
-    const response = await fetch(`${ROUTES_BASE}${path}`, {
-        ...options,
-        headers
-    });
+    let response;
+    try {
+        response = await fetch(`${ROUTES_BASE}${path}`, { ...options, headers });
+        if (!response.ok && response.status === 404) {
+            response = await fetch(`/routes${path}`, { ...options, headers });
+        }
+    } catch (e) {
+        response = await fetch(`/routes${path}`, { ...options, headers });
+    }
 
     if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));

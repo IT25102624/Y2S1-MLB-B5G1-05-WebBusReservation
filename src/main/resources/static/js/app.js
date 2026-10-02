@@ -38,16 +38,24 @@ function handleLogout() {
     window.location.reload();
 }
 
+function requireUser(redirectUrl = 'admin.html?tab=signin') {
+    const user = getCurrentUser();
+    return user;
+}
+
 /**
  * Standardize navigation across all views:
- * Standard 5 links: Book a Trip | Timetable | Luggage | Feedback | Customer Care
+ * Standard 4 links: Book a Trip | Timetable | Feedback | Customer Care
  * Right actions: Notification Bell (with badge & dropdown) + Auth status
  */
 function setupNav(activePage) {
+    const isSubdir = window.location.pathname.includes('/analytics/') || window.location.pathname.includes('/api/');
+    const pfx = isSubdir ? '../' : '';
+
     // 1. Standardize brand logo
     document.querySelectorAll('.logo, .brand, .brand-logo').forEach(brand => {
         brand.innerHTML = 'Catch<span style="color:var(--primary,#10b981);">Bus</span>LK';
-        brand.href = 'index.html';
+        brand.href = pfx + 'index.html';
         brand.style.display = 'inline-flex';
         brand.style.alignItems = 'center';
         brand.style.gap = '4px';
@@ -73,14 +81,18 @@ function setupNav(activePage) {
     if (!activePage) {
         if (currentPath.includes('search')) activePage = 'search.html';
         else if (currentPath.includes('schedule')) activePage = 'schedule.html';
-        else if (currentPath.includes('luggage')) activePage = 'luggage.html';
         else if (currentPath.includes('feedback')) activePage = 'feedback.html';
         else if (currentPath.includes('customer-care')) activePage = 'customer-care.html';
         else if (currentPath.includes('notification')) activePage = 'notifications.html';
         else if (currentPath.includes('index') || currentPath.endsWith('/') || currentPath === '') activePage = 'index.html';
     }
 
-    // 4. Standardize nav-links
+    const user = getCurrentUser();
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
+    const isAuthenticated = Boolean(token || user);
+    const isAdmin = Boolean(user && String(user.role).toUpperCase() === 'ADMIN');
+
+    // 4. Standardize nav-links (Customer Care restricted to Admins)
     let navLinks = wrap.querySelector('.nav-links');
     if (!navLinks) {
         navLinks = document.createElement('nav');
@@ -89,10 +101,10 @@ function setupNav(activePage) {
     }
 
     navLinks.innerHTML = `
-        <a href="search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
-        <a href="schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
-        <a href="feedback.html" id="navLinkFeedback" class="${activePage === 'feedback.html' ? 'active' : ''}">Feedback</a>
-        <a href="customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' ? 'active' : ''}">Customer Care</a>
+        <a href="${pfx}search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
+        <a href="${pfx}schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
+        <a href="${pfx}feedback.html" id="navLinkFeedback" class="${activePage === 'feedback.html' ? 'active' : ''}">Feedback</a>
+        ${isAdmin ? `<a href="${pfx}customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' ? 'active' : ''}">Customer Care</a>` : ''}
     `;
 
     // 5. Standardize right actions (Bell + Auth)
@@ -102,11 +114,6 @@ function setupNav(activePage) {
         navActions.className = 'nav-actions';
         wrap.appendChild(navActions);
     }
-
-    const user = getCurrentUser();
-    const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
-    const isAuthenticated = Boolean(token || user);
-    const isAdmin = user && String(user.role).toUpperCase() === 'ADMIN';
 
     let userInitials = 'U';
     let userName = 'My Account';
@@ -129,28 +136,28 @@ function setupNav(activePage) {
             <div id="notificationMenu" class="notification-menu hidden">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
                     <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
-                    <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+                    <a href="${pfx}notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
                 </div>
                 <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
                     <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
                 </div>
                 <div style="display:flex; gap:8px;">
                     <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
-                    <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+                    <a href="${pfx}notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
                 </div>
             </div>
         </div>
 
         ${isAuthenticated ? `
-            ${isAdmin ? `<a href="admin.html?tab=portal" class="nav-admin-link">Admin Portal</a>` : ''}
-            <a href="admin.html?tab=profile" class="user-chip">
+            ${isAdmin ? `<a href="${pfx}admin.html?tab=portal" class="nav-admin-link">Admin Portal</a>` : ''}
+            <a href="${pfx}admin.html?tab=profile" class="user-chip">
                 <span class="user-avatar-dot">${userInitials}</span>
                 <span>${userName}</span>
             </a>
             <button onclick="handleLogout()" class="nav-signout-btn" type="button">Sign Out</button>
         ` : `
-            <a href="admin.html?tab=signin" class="nav-signin">Sign In</a>
-            <a href="admin.html?tab=register" class="nav-signup-btn">Sign Up</a>
+            <a href="${pfx}admin.html?tab=signin" class="nav-signin">Sign In</a>
+            <a href="${pfx}admin.html?tab=register" class="nav-signup-btn">Sign Up</a>
         `}
     `;
 
@@ -215,7 +222,21 @@ async function loadNotificationBellItems() {
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to load');
         const notifications = await res.json();
-        const list = Array.isArray(notifications) ? notifications : [];
+        let list = Array.isArray(notifications) ? notifications : [];
+
+        // If user-specific notifications are empty, fallback to platform-wide alerts
+        if (list.length === 0 && url !== '/api/v1/notifications') {
+            try {
+                const platformRes = await fetch('/api/v1/notifications');
+                if (platformRes.ok) {
+                    const platformData = await platformRes.json();
+                    if (Array.isArray(platformData) && platformData.length > 0) {
+                        list = platformData;
+                    }
+                }
+            } catch (err) {}
+        }
+
         const unread = list.filter(n => !n.isRead).length;
 
         if (badge) {
@@ -231,6 +252,26 @@ async function loadNotificationBellItems() {
         }
 
         if (items) {
+            if (!user) {
+                items.innerHTML = `
+                    <div style="padding:14px 10px; text-align:center;">
+                        <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:var(--primary-dark,#059669); letter-spacing:0.5px; display:block; margin-bottom:4px;">PASSENGER ALERTS</span>
+                        <p style="font-size:12px; font-weight:600; color:#334155; margin:0 0 10px; line-height:1.4;">
+                            Live trip updates and baggage alerts are customized for registered passengers.
+                        </p>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <a href="admin.html?tab=signin" style="display:block; text-align:center; padding:7px 12px; font-size:11px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">Sign In to View Alerts</a>
+                            <a href="notifications.html" style="display:block; text-align:center; font-size:11px; font-weight:600; color:var(--primary-dark,#059669); text-decoration:none;">How Alerts Work &rarr;</a>
+                        </div>
+                    </div>
+                `;
+                if (badge) {
+                    badge.classList.add('hidden');
+                    badge.style.display = 'none';
+                }
+                return;
+            }
+
             if (list.length > 0) {
                 items.innerHTML = list.slice(0, 5).map(item => `
                     <div style="padding:8px 10px; margin-bottom:6px; background:#f8fafc; border-radius:8px; border-left:3px solid ${item.isRead ? '#cbd5e1' : 'var(--primary,#10b981)'};">

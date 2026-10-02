@@ -146,7 +146,7 @@
         .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
         .btn-outline:hover { background: #f1f5f9; color: var(--text-main); }
         .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
-        .btn-icon-sm { padding: 6px 8px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: #fff; }
+        .btn-icon-sm { padding: 6px 8px; font-size: 0.8rem; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); background: #fff; display: inline-flex; align-items: center; justify-content: center; }
         .btn-icon-edit:hover { background: #ecfdf5; border-color: var(--primary); color: var(--primary); }
         .btn-icon-delete:hover { background: #fee2e2; border-color: var(--danger); color: var(--danger); }
 
@@ -266,7 +266,6 @@
         <a href="search.html" id="navLinkSearch">Book a Trip</a>
         <a href="schedule.html" id="navLinkSchedule">Timetable</a>
         <a href="feedback.html" id="navLinkFeedback">Feedback</a>
-        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
       </nav>
       <div class="nav-actions">
         <div class="notification-area" id="navNotificationArea">
@@ -559,40 +558,42 @@
                     </div>
                 </div>
 
-                <!-- Commuter Travel & Eco Metrics Dashboard -->
-                <div class="section-header" style="margin-bottom:12px;">
-                    <div>
-                        <h3 class="section-title">Travel &amp; Eco Dashboard</h3>
-                        <p class="section-sub">Your personal transit footprint and commuter milestones</p>
-                    </div>
-                </div>
-                <div class="eco-metrics-grid">
-                    <div class="eco-metric-card">
-                        <div class="eco-icon">KM</div>
+                <!-- Commuter Travel & Eco Metrics Dashboard (Role-tailored) -->
+                <div id="travelEcoSection">
+                    <div class="section-header" style="margin-bottom:12px;">
                         <div>
-                            <div class="eco-value" id="metricDistance">0 km</div>
-                            <div class="eco-label">Distance Traveled</div>
+                            <h3 class="section-title">Travel &amp; Eco Dashboard</h3>
+                            <p class="section-sub">Your personal transit footprint and commuter milestones</p>
                         </div>
                     </div>
-                    <div class="eco-metric-card">
-                        <div class="eco-icon">HRS</div>
-                        <div>
-                            <div class="eco-value" id="metricTime">0h 0m</div>
-                            <div class="eco-label">Transit Time</div>
+                    <div class="eco-metrics-grid">
+                        <div class="eco-metric-card" id="cardDistance">
+                            <div class="eco-icon">KM</div>
+                            <div>
+                                <div class="eco-value" id="metricDistance">0 km</div>
+                                <div class="eco-label">Distance Traveled</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="eco-metric-card">
-                        <div class="eco-icon">CO2</div>
-                        <div>
-                            <div class="eco-value" id="metricEco">0.0 kg CO₂</div>
-                            <div class="eco-label">Carbon Offset</div>
+                        <div class="eco-metric-card" id="cardTime">
+                            <div class="eco-icon">HRS</div>
+                            <div>
+                                <div class="eco-value" id="metricTime">0h 0m</div>
+                                <div class="eco-label">Transit Time</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="eco-metric-card">
-                        <div class="eco-icon">PTS</div>
-                        <div>
-                            <div class="eco-value" id="metricTier" style="font-size:1.05rem;">Silver Traveler</div>
-                            <div class="eco-label">Commuter Tier</div>
+                        <div class="eco-metric-card" id="cardEco">
+                            <div class="eco-icon">CO2</div>
+                            <div>
+                                <div class="eco-value" id="metricEco">0.0 kg CO₂</div>
+                                <div class="eco-label">Carbon Offset</div>
+                            </div>
+                        </div>
+                        <div class="eco-metric-card" id="cardTier">
+                            <div class="eco-icon">PTS</div>
+                            <div>
+                                <div class="eco-value" id="metricTier" style="font-size:1.05rem;">Silver Traveler</div>
+                                <div class="eco-label">Commuter Tier</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1131,6 +1132,34 @@
                 }
             }
 
+            // Role-tailored visibility for Travel & Eco Dashboard:
+            // - Admin: strip whole dashboard
+            // - Driver & Conductor: keep Distance and Transit Time, hide Carbon Offset and Commuter Tier
+            // - Passenger: keep all 4 cards
+            const travelEcoSec = document.getElementById('travelEcoSection');
+            const cardDistance = document.getElementById('cardDistance');
+            const cardTime = document.getElementById('cardTime');
+            const cardEco = document.getElementById('cardEco');
+            const cardTier = document.getElementById('cardTier');
+
+            if (travelEcoSec) {
+                if (user.role === 'ADMIN') {
+                    travelEcoSec.style.display = 'none';
+                } else if (user.role === 'DRIVER' || user.role === 'CONDUCTOR') {
+                    travelEcoSec.style.display = 'block';
+                    if (cardDistance) cardDistance.style.display = '';
+                    if (cardTime) cardTime.style.display = '';
+                    if (cardEco) cardEco.style.display = 'none';
+                    if (cardTier) cardTier.style.display = 'none';
+                } else {
+                    travelEcoSec.style.display = 'block';
+                    if (cardDistance) cardDistance.style.display = '';
+                    if (cardTime) cardTime.style.display = '';
+                    if (cardEco) cardEco.style.display = '';
+                    if (cardTier) cardTier.style.display = '';
+                }
+            }
+
             // Load user's bookings and compute travel & eco metrics
             loadUserTickets(user.email);
         }
@@ -1508,8 +1537,8 @@
                     <td style="color:var(--text-muted); white-space:nowrap;">${formatDate(u.createdAt)}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')"></button>
-                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')"></button>
+                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" aria-label="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" aria-label="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></button>
                         </div>
                     </td>
                 </tr>`).join('');
