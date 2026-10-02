@@ -112,7 +112,7 @@
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <div class="login-logo">🚘</div>
+                <div class="login-logo"></div>
                 <h1 class="login-title">Driver Portal</h1>
                 <p class="login-subtitle">Sign in to access driver tools</p>
             </div>
@@ -125,14 +125,14 @@
                     <label for="loginPassword">Password</label>
                     <div class="password-wrap">
                         <input type="password" id="loginPassword" placeholder="Your password" required>
-                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)"></button>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" id="loginBtn">🚘 Sign In as Driver</button>
+                <button type="submit" class="btn btn-primary" id="loginBtn"> Sign In as Driver</button>
             </form>
             <div class="quick-login">
-                <p class="quick-login-title">⚡ Demo Account</p>
-                <button class="quick-btn" onclick="quickLogin('driver.kandy@busreservation.lk')">🚘 Quick Login as Driver</button>
+                <p class="quick-login-title"> Demo Account</p>
+                <button class="quick-btn" onclick="quickLogin('driver.kandy@busreservation.lk')"> Quick Login as Driver</button>
             </div>
             <div class="back-link">
                 <a href="/admin.html">← Back to Main Portal</a>
@@ -151,24 +151,24 @@
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const icons = { success: '', error: '', info: '' };
             toast.className = `toast toast-${type}`;
-            toast.textContent = `${icons[type] || 'ℹ️'} ${message}`;
+            toast.textContent = message;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4500);
         }
 
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
-            if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-            else { input.type = 'password'; btn.textContent = '👁️'; }
+            if (input.type === 'password') { input.type = 'text'; btn.textContent = ''; }
+            else { input.type = 'password'; btn.textContent = ''; }
         }
 
         async function handleLogin(event) {
             event.preventDefault();
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Signing in...';
+            btn.textContent = ' Signing in...';
             try {
                 const res = await fetch(`${API}/login`, {
                     method: 'POST',
@@ -183,7 +183,7 @@
                     if (json.data.user.role !== 'DRIVER') {
                         showToast('This login page is for drivers only. Please use the appropriate login page.', 'error');
                         btn.disabled = false;
-                        btn.textContent = '🚘 Sign In as Driver';
+                        btn.textContent = ' Sign In as Driver';
                         return;
                     }
                     setToken(json.data.accessToken);
@@ -199,7 +199,7 @@
                 showToast('Connection error. Is the server running?', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🚘 Sign In as Driver';
+                btn.textContent = ' Sign In as Driver';
             }
         }
 

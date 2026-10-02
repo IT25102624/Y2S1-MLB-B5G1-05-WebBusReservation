@@ -96,23 +96,46 @@
     </style>
 </head>
 <body>
-    <nav class="top-nav">
-        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
-        <div class="nav-links">
-            <a href="search.html">Book a Trip</a>
-            <a href="schedule.html">Timetable</a>
-            <a href="luggage.html">Luggage</a>
-            <a href="feedback.html" class="active">Feedback</a>
-            <a href="notifications.html">Alerts</a>
-            <a href="customer-care.html">🛡️ Customer Care</a>
-            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
-            <button id="logoutBtn" class="hidden">Sign Out</button>
+      <header class="top-nav">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
         </div>
-    </nav>
+        <div id="navAuthAction"></div>
+      </div>
+    </div>
+  </header>
 
     <main class="container">
         <div style="margin-bottom: 20px;">
-            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">⭐ Passenger Feedback &amp; Journey Reviews</h1>
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;"> Passenger Feedback &amp; Journey Reviews</h1>
             <p style="color:var(--gray-600); font-size:0.95rem;">Share your travel experience, rate your bus journey, explore community feedback, or submit service inquiries.</p>
         </div>
 
@@ -120,8 +143,8 @@
 
         <!-- Sub-Part Tabs -->
         <div class="tab-bar">
-            <button id="tabBtnSubmit" class="tab-btn active" onclick="switchTab('submit')">✍️ Submit Experience &amp; Reviews</button>
-            <button id="tabBtnDatabase" class="tab-btn" onclick="switchTab('database')">📋 Customer Reviews Database (<span id="tabCountReviews">0</span>)</button>
+            <button id="tabBtnSubmit" class="tab-btn active" onclick="switchTab('submit')">Submit Experience &amp; Reviews</button>
+            <button id="tabBtnDatabase" class="tab-btn" onclick="switchTab('database')">Customer Reviews Database (<span id="tabCountReviews">0</span>)</button>
         </div>
 
         <!-- TAB 1: SUBMIT EXPERIENCE & SATISFACTION METRICS -->
@@ -138,9 +161,9 @@
                     <label>
                         Category
                         <select id="type" required>
-                            <option value="feedback">🌟 General Journey Feedback &amp; Praise</option>
-                            <option value="complain">⚠️ Service Complaint / Operational Issue</option>
-                            <option value="inquiry">💬 Route or Schedule Inquiry</option>
+                            <option value="feedback">General Journey Feedback &amp; Praise</option>
+                            <option value="complain">Service Complaint / Operational Issue</option>
+                            <option value="inquiry">Route or Schedule Inquiry</option>
                         </select>
                     </label>
 
@@ -148,11 +171,11 @@
                         Star Rating (1 - 5)
                         <select id="rating">
                             <option value="">No rating (Inquiry / Non-rated)</option>
-                            <option value="5">★★★★★ 5 - Exceptional Experience</option>
-                            <option value="4">★★★★☆ 4 - Good &amp; Punctual</option>
-                            <option value="3">★★★☆☆ 3 - Satisfactory / Average</option>
-                            <option value="2">★★☆☆☆ 2 - Needs Improvement</option>
-                            <option value="1">★☆☆☆☆ 1 - Poor / Unsatisfactory</option>
+                            <option value="5">5 Stars - Exceptional Experience</option>
+                            <option value="4">4 Stars - Good &amp; Punctual</option>
+                            <option value="3">3 Stars - Satisfactory / Average</option>
+                            <option value="2">2 Stars - Needs Improvement</option>
+                            <option value="1">1 Star - Poor / Unsatisfactory</option>
                         </select>
                     </label>
 
@@ -176,7 +199,7 @@
                 <div class="rating-hero">
                     <div class="rating-number" id="avgRatingDisplay">4.8</div>
                     <div>
-                        <div style="color:#f59e0b; font-size:1.25rem;">★★★★★</div>
+                        <div style="color:#f59e0b; font-size:1.25rem;">5.0 Rating</div>
                         <span style="font-size:0.8rem; color:var(--gray-600);">Verified passenger reviews</span>
                     </div>
                 </div>
@@ -192,13 +215,13 @@
                     </div>
                     <div class="metric-row">
                         <span style="color:var(--gray-600);">Review Database Status:</span>
-                        <strong style="color:var(--primary-dark);">✓ Active &amp; Synced</strong>
+                        <strong style="color:var(--primary-dark);">Active &amp; Synced</strong>
                     </div>
                 </div>
 
                 <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--gray-100);">
                     <a href="customer-care.html" class="button secondary" style="width:100%; text-align:center; font-size:0.85rem; display:block; text-decoration:none;">
-                        🛡️ Open Customer Care Resolution Center
+                        Open Customer Care Resolution Center &rarr;
                     </a>
                 </div>
             </aside>
@@ -212,7 +235,7 @@
                     <button class="filter-chip" onclick="setDbFilter('FEEDBACK', this)">Reviews (<span id="chipReviewsCount">0</span>)</button>
                     <button class="filter-chip" onclick="setDbFilter('COMPLAIN', this)">Complaints (<span id="chipComplaintsCount">0</span>)</button>
                 </div>
-                <button onclick="loadFeedbackData()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">🔄 Refresh Database</button>
+                <button onclick="loadFeedbackData()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">Refresh Database</button>
             </div>
 
             <div id="databaseList" class="form-grid">
@@ -326,7 +349,7 @@
                 const fid = item.feedbackId || item.id;
                 const type = (item.type || 'feedback').toLowerCase();
                 const isComplain = type === 'complain';
-                const stars = item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : '';
+                const stars = item.rating ? `${item.rating} / 5 Rating` : '';
                 const dateStr = item.complainDate ? `${item.complainDate}` : 'Recently';
 
                 return `
@@ -348,20 +371,20 @@
 
                     ${item.reply ? `
                         <div style="background:#ecfdf5; border-left:4px solid var(--primary); padding:10px 14px; border-radius:8px; margin-top:10px; font-size:0.88rem; color:#065f46;">
-                            <strong style="display:block; margin-bottom:2px;">🛡️ Customer Service Resolution:</strong>
+                            <strong style="display:block; margin-bottom:2px;">Customer Service Resolution:</strong>
                             <p style="margin:0;">${escapeHtml(item.reply)}</p>
                         </div>
                     ` : isComplain ? `
                         <div style="background:#fffbeb; border:1px solid #fde68a; padding:8px 12px; border-radius:6px; margin-top:10px; font-size:0.82rem; color:#92400e;">
-                            ⏳ <strong>Under Investigation:</strong> Customer service team is preparing an official response.
+                            <strong>Under Investigation:</strong> Customer service team is preparing an official response.
                         </div>
                     ` : ''}
 
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; pt:8px; border-top:1px solid var(--gray-100);">
                         <small style="color:var(--gray-400);">Ref ID: #${fid}</small>
                         <div class="item-actions" style="margin:0;">
-                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editFeedback(${fid})">✏️ Edit</button>
-                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteFeedback(${fid})">🗑️ Delete</button>
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editFeedback(${fid})">Edit</button>
+                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteFeedback(${fid})">Delete</button>
                         </div>
                     </div>
                 </article>

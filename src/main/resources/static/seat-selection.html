@@ -15,14 +15,6 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--ink-body); line-height: 1.5; padding-bottom: 60px; }
-    header { background: #ffffff; border-bottom: 1px solid var(--border); padding: 14px 24px; position: sticky; top: 0; z-index: 50; }
-    .nav-container { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800; color: #090d16; text-decoration: none; }
-    .logo span { color: var(--brand); }
-    .breadcrumb { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink-light); }
-    .breadcrumb span.active { color: var(--brand); }
-    
-    .main-wrap { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
     .back-btn { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-light); font-size: 13px; font-weight: 700; text-decoration: none; margin-bottom: 20px; }
     .back-btn:hover { color: var(--brand); }
     
@@ -179,20 +171,56 @@
     }
     .qr-preview-box img { width: 180px; height: 180px; border-radius: 8px; }
   </style>
+  <link rel="stylesheet" href="css/srilanka-travel.css">
 </head>
 <body>
-  <header>
-    <div class="nav-container">
+    <header class="top-nav">
+    <div class="nav-wrap">
       <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
-      <div class="breadcrumb">
-        <span id="bc1" class="active">1. Select Seats</span> &rarr;
-        <span id="bc2">2. Secure Payment</span> &rarr;
-        <span id="bc3">3. Boarding Pass</span>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
+        </div>
+        <div id="navAuthAction"></div>
       </div>
     </div>
   </header>
 
-  <main class="main-wrap">
+  <main class="main-wrap" style="max-width:1240px; margin:28px auto; padding:0 24px;">
+    <!-- Booking Process Indicator -->
+    <div class="breadcrumb-bar" style="display:flex; align-items:center; gap:12px; margin-bottom:20px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px 20px;">
+      <span class="active" id="bc1" style="font-weight:700; color:var(--brand-dark);">1. Select Seats</span>
+      <span style="color:#cbd5e1;">&rsaquo;</span>
+      <span id="bc2" style="font-weight:600; color:#64748b;">2. Payment</span>
+      <span style="color:#cbd5e1;">&rsaquo;</span>
+      <span id="bc3" style="font-weight:600; color:#64748b;">3. Boarding Pass</span>
+    </div>
+
     <a href="search.html" class="back-btn">&#8592; Back to Bus Search</a>
 
     <div class="layout-grid">
@@ -302,6 +330,29 @@
             <span><strong>Add Refund Protection (+LKR 150.00)</strong><br><small style="color:#64748b;">Enables refund claims under CatchBusLK policy (processed in 7 business days).</small></span>
           </label>
 
+          <!-- Integrated Baggage Tag Option -->
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:14px; padding:14px; margin-bottom:16px;">
+            <label class="check-box-label" style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; margin-bottom:0;">
+              <input type="checkbox" id="addLuggageCheckbox" onchange="toggleLuggageSection()">
+              <span>
+                <strong style="color:var(--ink-body); font-size:13px;">Declare &amp; Tag Luggage (Free Included)</strong><br>
+                <small style="color:#64748b;">Generate an integrated single QR pass covering both passenger seat boarding &amp; baggage hold tracking.</small>
+              </span>
+            </label>
+
+            <div id="luggageCollapse" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed #cbd5e1;">
+              <div class="form-group" style="margin-bottom:10px;">
+                <label style="font-size:11px;">Number of Bags (Quantity)</label>
+                <input type="number" id="luggageQuantity" min="1" max="10" value="1" style="font-size:13px; padding:8px 10px;">
+              </div>
+              <div class="form-group" style="margin-bottom:6px;">
+                <label style="font-size:11px;">Baggage Description &amp; Visual Identifiers</label>
+                <input type="text" id="luggageDescription" placeholder="e.g. Maroon American Tourister trolley, black backpack" style="font-size:13px; padding:8px 10px;">
+              </div>
+              <small style="color:var(--brand-dark); font-size:11px; font-weight:700;"> A unique Luggage Tag ID will be generated and merged into your boarding pass QR.</small>
+            </div>
+          </div>
+
           <button type="button" class="submit-btn" id="toPaymentBtn" onclick="goToPaymentStep()">Continue to Payment &#8594;</button>
         </div>
 
@@ -395,7 +446,7 @@
   <!-- STEP 3: Ticket Confirmation Modal -->
   <div id="ticketModal" class="ticket-modal-overlay">
     <div class="ticket-modal-content">
-      <div style="font-size:36px; margin-bottom:8px;">✅</div>
+      <div style="font-size:36px; margin-bottom:8px;"></div>
       <h2 style="font-family:'Space Grotesk'; font-size:24px; font-weight:800; color:var(--brand-dark); margin-bottom:4px;">Booking &amp; Payment Confirmed!</h2>
       <p style="color:var(--ink-light); font-size:13px; margin-bottom:16px;">Your digital QR boarding pass is active and registered in the transit network.</p>
 
@@ -409,10 +460,10 @@
 
       <div style="display:flex; flex-direction:column; gap:10px;">
         <a id="downloadQrLink" class="submit-btn" style="text-decoration:none; text-align:center;" href="#" download="boarding-pass-qr.png">
-          📥 Download QR Boarding Pass
+          Download QR Boarding Pass
         </a>
         <a href="admin.html?tab=profile" class="secondary-btn" style="text-decoration:none; text-align:center;">
-          👤 View My Tickets in Account Portal
+          View My Tickets in Account Portal
         </a>
         <a href="index.html" class="back-btn" style="justify-content:center; margin-top:6px;">Return to Home</a>
       </div>
@@ -458,15 +509,18 @@
     }
 
     // 10-Minute Hold Countdown Timer
-    setInterval(() => {
+    let holdTimerInterval = setInterval(() => {
+      const timerEl = document.getElementById('timerDisplay');
       if (secondsLeft > 0) {
         secondsLeft--;
         const m = Math.floor(secondsLeft / 60);
         const s = String(secondsLeft % 60).padStart(2, '0');
-        document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        if (timerEl) timerEl.innerText = `${m}:${s}`;
       } else {
-        document.getElementById('timerDisplay').innerText = '00:00';
-        document.getElementById('timerDisplay').style.color = '#94a3b8';
+        if (timerEl) {
+          timerEl.innerText = '00:00';
+          timerEl.style.color = '#94a3b8';
+        }
       }
     }, 1000);
 
@@ -632,8 +686,8 @@
 
       document.getElementById('passengerSection').style.display = 'none';
       document.getElementById('paymentSection').style.display = 'block';
-      document.getElementById('bc1').classList.remove('active');
-      document.getElementById('bc2').classList.add('active');
+      document.getElementById('bc1')?.classList.remove('active');
+      document.getElementById('bc2')?.classList.add('active');
 
       if (currentUser && document.getElementById('cardholder').value.trim() === '') {
         document.getElementById('cardholder').value = name;
@@ -645,8 +699,8 @@
     function backToPassengerStep() {
       document.getElementById('paymentSection').style.display = 'none';
       document.getElementById('passengerSection').style.display = 'block';
-      document.getElementById('bc2').classList.remove('active');
-      document.getElementById('bc1').classList.add('active');
+      document.getElementById('bc2')?.classList.remove('active');
+      document.getElementById('bc1')?.classList.add('active');
     }
 
     // Card Input and Live Preview
@@ -802,6 +856,40 @@
         }
 
         confirmedTicket = j.data;
+
+        // Auto-register luggage if baggage checkbox was selected
+        const hasLuggage = document.getElementById('addLuggageCheckbox')?.checked;
+        if (hasLuggage) {
+          try {
+            const qty = Number(document.getElementById('luggageQuantity')?.value || 1);
+            const desc = (document.getElementById('luggageDescription')?.value || '').trim() || 'Standard travel luggage';
+            const lugRes = await fetch('/api/v1/luggage', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bookingId: confirmedTicket.bookingId,
+                bagQuantity: qty,
+                description: desc,
+                status: 'TAGGED',
+                userId: (currentUser && (currentUser.id || currentUser.userId)) || 2
+              })
+            });
+            if (lugRes.ok) {
+              const savedLug = await lugRes.json();
+              confirmedTicket.luggage = [savedLug];
+
+              if (window.showLiveNotificationToast) {
+                showLiveNotificationToast(
+                  'NEW LUGGAGE BOOKED',
+                  `Luggage tag ${savedLug.tagNumber || 'LUG-TAG'} successfully registered for ${savedLug.bagQuantity} bag(s). Merged into E-Ticket #${confirmedTicket.bookingId}.`
+                );
+              }
+            }
+          } catch (lugErr) {
+            console.warn('Auto luggage booking warning:', lugErr);
+          }
+        }
+
         showTicketConfirmation(confirmedTicket);
       } catch (err) {
         errBox.innerText = err.message || 'Payment authorization failed. Please check your card details.';
@@ -812,32 +900,97 @@
       }
     }
 
-    function showTicketConfirmation(t) {
-      document.getElementById('bc2').classList.remove('active');
-      document.getElementById('bc3').classList.add('active');
+    function toggleLuggageSection() {
+      const checked = document.getElementById('addLuggageCheckbox')?.checked;
+      const el = document.getElementById('luggageCollapse');
+      if (el) el.style.display = checked ? 'block' : 'none';
+    }
 
-      const token = encodeURIComponent(t.ticketToken);
-      document.getElementById('qrImage').src = `${API}/payments/tickets/${token}/qr.png`;
-      document.getElementById('downloadQrLink').href = `${API}/payments/tickets/${token}/qr.png?download=true`;
+    function showTicketConfirmation(t) {
+      if (holdTimerInterval) clearInterval(holdTimerInterval);
+      const timerEl = document.getElementById('timerDisplay');
+      if (timerEl) {
+        timerEl.innerText = 'Confirmed';
+        timerEl.style.color = '#10b981';
+      }
+
+      document.getElementById('bc2')?.classList.remove('active');
+      document.getElementById('bc3')?.classList.add('active');
+
+      const token = encodeURIComponent(t.ticketToken || '');
+      const qrImg = document.getElementById('qrImage');
+      if (qrImg) qrImg.src = `${API}/payments/tickets/${token}/qr.png`;
+      const dlLink = document.getElementById('downloadQrLink');
+      if (dlLink) {
+        dlLink.href = `${API}/payments/tickets/${token}/qr.png?download=true`;
+        dlLink.setAttribute('download', `catchbus-pass-${t.bookingId}.png`);
+      }
+
+      const lug = (t.luggage && t.luggage.length > 0) ? t.luggage[0] : null;
+
+      // Save to localStorage for immediate passenger profile and offline view
+      try {
+        const savedBooking = {
+          reference: 'CB' + String(t.bookingId).padStart(8, '0'),
+          bookingId: t.bookingId,
+          ticketToken: t.ticketToken,
+          from: t.sourceCity || fromCity,
+          to: t.destinationCity || toCity,
+          date: t.departureTime ? String(t.departureTime).slice(0, 10) : travelDate,
+          time: t.departureTime ? String(t.departureTime).slice(11, 16) : depTime,
+          busType: busType,
+          operator: t.operatorName || operator,
+          seats: t.seats || selectedSeats,
+          total: t.totalAmount,
+          status: 'CONFIRMED',
+          luggage: t.luggage || []
+        };
+        localStorage.setItem('catchbuslk-last-booking', JSON.stringify(savedBooking));
+      } catch (e) {}
 
       document.getElementById('ticketDetailsBox').innerHTML = `
         <div><strong>Booking ID:</strong> #${t.bookingId}</div>
         <div><strong>Transaction Ref:</strong> ${t.transactionReference || 'N/A'}</div>
-        <div><strong>Passenger:</strong> ${t.passengerName}</div>
-        <div><strong>Corridor:</strong> ${t.sourceCity} → ${t.destinationCity}</div>
-        <div><strong>Bus &amp; Operator:</strong> ${t.busNumber} · ${t.operatorName}</div>
+        <div><strong>Passenger:</strong> ${escapeHtml(t.passengerName)}</div>
+        <div><strong>Corridor:</strong> ${t.sourceCity} &rarr; ${t.destinationCity}</div>
+        <div><strong>Bus &amp; Operator:</strong> ${t.busNumber} &middot; ${t.operatorName}</div>
         <div><strong>Reserved Seats:</strong> ${(t.seats || []).join(', ')}</div>
         <div><strong>Boarding Halt:</strong> ${t.boardingPoint}</div>
         <div><strong>Departure Time:</strong> ${new Date(t.departureTime).toLocaleString()}</div>
         <div><strong>Amount Paid:</strong> LKR ${Number(t.totalAmount).toLocaleString(undefined, {minimumFractionDigits:2})}</div>
-        <div><strong>Refund Protection:</strong> ${t.refundFeePaid ? '✅ Active (Eligible)' : '❌ Not purchased'}</div>
+        <div><strong>Refund Protection:</strong> ${t.refundFeePaid ? 'Active (Eligible)' : ' Not purchased'}</div>
+        ${lug ? `
+          <div style="margin-top:12px; padding:12px 14px; background:#ecfdf5; border:1.5px solid #a7f3d0; border-radius:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="color:#065f46; font-size:13px;">Trackable Baggage Tag: ${lug.tagNumber || lug.tagReference || 'LUG-TAG'}</strong>
+              <span style="background:#10b981; color:#fff; font-size:10px; font-weight:800; padding:2px 8px; border-radius:9999px;">${lug.status || 'TAGGED'}</span>
+            </div>
+            <div style="color:#047857; font-size:12px; margin-top:4px;">
+              <strong>Pieces:</strong> ${lug.bagQuantity || lug.bagCount || 1} Bag(s) &middot; <em>${escapeHtml(lug.description || 'Standard travel luggage')}</em>
+            </div>
+            <div style="color:#065f46; font-size:11px; margin-top:5px; font-weight:700;">
+              Unified Digital QR: Present this single pass for bus boarding and luggage hold check-in.
+            </div>
+          </div>
+        ` : `
+          <div style="margin-top:10px; font-size:12px; color:#64748b;">
+             <strong>Baggage:</strong> Standard Carry-on only (No hold luggage declared)
+          </div>
+        `}
       `;
 
       document.getElementById('ticketModal').style.display = 'grid';
     }
 
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
     // Initialize
     loadTripSeatAvailability();
   </script>
+  <script src="js/app.js"></script>
 </body>
 </html>

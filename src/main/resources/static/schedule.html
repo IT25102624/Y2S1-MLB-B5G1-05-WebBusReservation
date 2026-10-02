@@ -27,8 +27,8 @@
     h1, h2, h3, h4, .logo, .badge-code, .stat-value { font-family: 'Space Grotesk', sans-serif; }
 
     /* Navbar */
-    header { background: #ffffff; border-bottom: 1px solid var(--border); padding: 14px 28px; position: sticky; top: 0; z-index: 50; }
-    .nav-wrap { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    header { background: #ffffff; border-bottom: 1px solid var(--border); height: 68px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; }
+    .nav-wrap { max-width: 1240px; margin: 0 auto; width: 100%; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; }
     .logo { font-size: 24px; font-weight: 800; color: #090d16; text-decoration: none; display: flex; align-items: center; gap: 4px; }
     .logo span { color: var(--primary); }
     .nav-links { display: flex; align-items: center; gap: 18px; }
@@ -91,28 +91,43 @@
 
     footer { background: #090d16; color: #94a3b8; padding: 40px 20px; margin-top: 80px; font-size: 13px; text-align: center; }
   </style>
+  <link rel="stylesheet" href="css/srilanka-travel.css">
 </head>
 <body>
-  <header>
+  <header class="top-nav">
     <div class="nav-wrap">
       <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
       <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="schedule.html" class="active">Timetable</a>
-        <a href="search.html">Book a Trip</a>
-        <a href="luggage.html">Luggage</a>
-        <a href="feedback.html">Feedback</a>
-        <a href="customer-care.html">Customer Care</a>
-        <a href="direct-booking.html">Direct Booking</a>
-        <!-- Auth Guest items -->
-        <a href="admin.html?tab=signin" id="navSignInLink" style="font-weight:700; color:var(--primary);">Sign In</a>
-        <!-- Authenticated items -->
-        <a href="search.html?mode=operator" id="navOperatorLink" style="display:none;">🛠️ Operator Mode</a>
-        <a href="admin.html?tab=portal" id="navAdminPortalLink" style="display:none;">🛡️ Admin Portal</a>
-        <a href="admin.html?tab=profile" id="navUserChip" class="user-chip" style="display:none;">
-          <span>👤</span> <span id="navUserName">My Account</span>
-        </a>
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule" class="active">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
       </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
+        </div>
+        <div id="navAuthAction"></div>
+      </div>
     </div>
   </header>
 
@@ -129,16 +144,16 @@
   <div class="controls-wrap">
     <div class="controls-card">
       <div class="search-input-wrap">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
         <input type="text" id="corridorSearchInput" placeholder="Filter corridor by city name (e.g. Kandy, Galle, Jaffna, Badulla, Trincomalee)..." oninput="filterCorridors()">
       </div>
       <div class="pills-group">
         <span style="font-size:12px; font-weight:800; color:var(--ink-muted); text-transform:uppercase;">Corridor Network:</span>
         <button class="filter-pill active" onclick="setCategory('ALL', this)">All Corridors</button>
-        <button class="filter-pill" onclick="setCategory('EXPRESSWAY', this)">⚡ Expressway (E01/E02)</button>
-        <button class="filter-pill" onclick="setCategory('CENTRAL', this)">⛰️ Central &amp; Hill Country</button>
-        <button class="filter-pill" onclick="setCategory('NORTH_EAST', this)">🌊 Northern &amp; Eastern</button>
-        <button class="filter-pill" onclick="setCategory('CULTURAL', this)">🏛️ Cultural Triangle</button>
+        <button class="filter-pill" onclick="setCategory('EXPRESSWAY', this)">Expressway (E01/E02)</button>
+        <button class="filter-pill" onclick="setCategory('CENTRAL', this)">Central &amp; Hill Country</button>
+        <button class="filter-pill" onclick="setCategory('NORTH_EAST', this)">Northern &amp; Eastern</button>
+        <button class="filter-pill" onclick="setCategory('CULTURAL', this)">Cultural Triangle</button>
       </div>
     </div>
   </div>
@@ -150,13 +165,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE EX 1-1 / 02</span>
-          <h2 class="corridor-name">Colombo (Makumbura) <span>➔</span> Galle / Matara</h2>
+          <h2 class="corridor-name">Colombo (Makumbura) <span>&rarr;</span> Galle / Matara</h2>
           <p class="corridor-route-tag">Southern Expressway (E01) &bull; High-Speed Highway Transit</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 126 km</div>
-          <div class="stat-pill">⏱️ 1h 45m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">⚡ Every 15-20 Mins</div>
+          <div class="stat-pill">126 km</div>
+          <div class="stat-pill">1h 45m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">Every 15-20 Mins</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Daily 05:00 - 21:30)</div>
@@ -192,7 +207,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">Highway Star Liner &bull; SLTB Express</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Galle" class="book-btn">Book Colombo ➔ Galle &rarr;</a>
+        <a href="search.html?from=Colombo&to=Galle" class="book-btn">Book Colombo to Galle &rarr;</a>
       </div>
     </article>
 
@@ -201,13 +216,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE 01 / EX 01</span>
-          <h2 class="corridor-name">Colombo (Bastian Mw) <span>➔</span> Kandy (Goods Shed)</h2>
+          <h2 class="corridor-name">Colombo (Bastian Mw) <span>&rarr;</span> Kandy (Goods Shed)</h2>
           <p class="corridor-route-tag">Central Expressway &amp; Kandy Road (A1) &bull; National High-Frequency Corridor</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 115 km</div>
-          <div class="stat-pill">⏱️ 2h 45m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">⚡ Every 20-30 Mins</div>
+          <div class="stat-pill">115 km</div>
+          <div class="stat-pill">2h 45m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">Every 20-30 Mins</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Daily 04:30 - 22:00)</div>
@@ -243,7 +258,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">SLTB Intercity &bull; Superline Travels</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Kandy" class="book-btn">Book Colombo ➔ Kandy &rarr;</a>
+        <a href="search.html?from=Colombo&to=Kandy" class="book-btn">Book Colombo to Kandy &rarr;</a>
       </div>
     </article>
 
@@ -252,13 +267,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE 87 / 57</span>
-          <h2 class="corridor-name">Colombo (Fort / Bastian Mw) <span>➔</span> Jaffna (Central Station)</h2>
+          <h2 class="corridor-name">Colombo (Fort / Bastian Mw) <span>&rarr;</span> Jaffna (Central Station)</h2>
           <p class="corridor-route-tag">A9 Northern Highway &bull; Day Superline &amp; Overnight Sleeper Coaches</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 396 km</div>
-          <div class="stat-pill">⏱️ 7h 30m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">🌙 6 Express Trips/Day</div>
+          <div class="stat-pill">396 km</div>
+          <div class="stat-pill">7h 30m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">6 Express Trips/Day</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Day &amp; Night Superlines)</div>
@@ -285,7 +300,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">Northern Superline &bull; SLTB Northern Express</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Jaffna" class="book-btn">Book Colombo ➔ Jaffna &rarr;</a>
+        <a href="search.html?from=Colombo&to=Jaffna" class="book-btn">Book Colombo to Jaffna &rarr;</a>
       </div>
     </article>
 
@@ -294,13 +309,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE 18 / 99</span>
-          <h2 class="corridor-name">Colombo <span>➔</span> Nuwara Eliya &amp; Badulla</h2>
+          <h2 class="corridor-name">Colombo <span>&rarr;</span> Nuwara Eliya &amp; Badulla</h2>
           <p class="corridor-route-tag">Scenic Highland Corridor via Avissawella &amp; Hatton</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 180 km</div>
-          <div class="stat-pill">⏱️ 4h 30m - 5h 30m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">⛰️ Hourly Coach Services</div>
+          <div class="stat-pill">180 km</div>
+          <div class="stat-pill">4h 30m - 5h 30m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">Hourly Coach Services</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Daily 05:30 - 21:45)</div>
@@ -330,7 +345,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">Highland Luxury Travels &bull; Uva Line</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Nuwara+Eliya" class="book-btn">Book Colombo ➔ Nuwara Eliya &rarr;</a>
+        <a href="search.html?from=Colombo&to=Nuwara+Eliya" class="book-btn">Book Colombo to Nuwara Eliya &rarr;</a>
       </div>
     </article>
 
@@ -339,13 +354,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE 48 / 49</span>
-          <h2 class="corridor-name">Colombo <span>➔</span> Trincomalee &amp; Batticaloa</h2>
+          <h2 class="corridor-name">Colombo <span>&rarr;</span> Trincomalee &amp; Batticaloa</h2>
           <p class="corridor-route-tag">Eastern Corridor via Kurunegala &amp; Habarana &bull; Coastal Express</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 257 km</div>
-          <div class="stat-pill">⏱️ 6h 15m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">🌴 8 Departures Daily</div>
+          <div class="stat-pill">257 km</div>
+          <div class="stat-pill">6h 15m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">8 Departures Daily</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Daily 06:30 - 22:15)</div>
@@ -373,7 +388,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">Eastern Star &bull; SLTB Eastern Fleet</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Trincomalee" class="book-btn">Book Colombo ➔ Trincomalee &rarr;</a>
+        <a href="search.html?from=Colombo&to=Trincomalee" class="book-btn">Book Colombo to Trincomalee &rarr;</a>
       </div>
     </article>
 
@@ -382,13 +397,13 @@
       <div class="card-top">
         <div>
           <span class="badge-code">ROUTE 04 / 57</span>
-          <h2 class="corridor-name">Colombo <span>➔</span> Anuradhapura / Polonnaruwa</h2>
+          <h2 class="corridor-name">Colombo <span>&rarr;</span> Anuradhapura / Polonnaruwa</h2>
           <p class="corridor-route-tag">Sacred City Cultural Corridor via Ambepussa &amp; Kurunegala</p>
         </div>
         <div class="corridor-stats">
-          <div class="stat-pill">📍 205 km</div>
-          <div class="stat-pill">⏱️ 4h 15m</div>
-          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">🏛️ Regular Services</div>
+          <div class="stat-pill">205 km</div>
+          <div class="stat-pill">4h 15m</div>
+          <div class="stat-pill" style="color:var(--primary-dark); background:var(--primary-light);">Regular Services</div>
         </div>
       </div>
       <div class="matrix-title">Scheduled Departures (Daily 05:00 - 21:00)</div>
@@ -418,7 +433,7 @@
             <span class="tier-price" style="font-size:14px; color:#475569;">Rajarata Travels &bull; SLTB North Central</span>
           </div>
         </div>
-        <a href="search.html?from=Colombo&to=Anuradhapura" class="book-btn">Book Colombo ➔ Anuradhapura &rarr;</a>
+        <a href="search.html?from=Colombo&to=Anuradhapura" class="book-btn">Book Colombo to Anuradhapura &rarr;</a>
       </div>
     </article>
   </main>
@@ -496,5 +511,6 @@
       checkAuthState();
     });
   </script>
+  <script src="js/app.js"></script>
 </body>
 </html>

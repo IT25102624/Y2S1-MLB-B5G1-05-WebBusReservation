@@ -60,11 +60,29 @@ public class NotificationService {
                 .orElse(false);
     }
 
+    @Transactional(readOnly = true)
+    public List<NotificationResponse> getAllNotifications() {
+        return notificationRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(NotificationResponse::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public long getGlobalUnreadCount() {
+        return notificationRepository.countByIsReadFalse();
+    }
+
     @Transactional
     public boolean markAllAsRead(Long userId) {
         log.info("Marking all notifications as read for user ID: {}", userId);
-        int updated = notificationRepository.markAllAsReadByUserId(userId);
-        return updated > 0;
+        if (userId != null) {
+            int updated = notificationRepository.markAllAsReadByUserId(userId);
+            return updated > 0;
+        } else {
+            int updated = notificationRepository.markAllNotificationsAsRead();
+            return updated > 0;
+        }
     }
 
     @Transactional

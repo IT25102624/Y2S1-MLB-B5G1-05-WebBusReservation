@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/srilanka-travel.css">
     <style>
         :root {
             --primary: #10b981;
@@ -49,14 +50,18 @@
         .navbar {
             background: #ffffff;
             border-bottom: 1px solid var(--border);
-            padding: 14px 32px;
+            height: 68px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
         }
 
         .navbar-brand {
@@ -599,39 +604,51 @@
 <body>
 
     <!-- Top Navigation Bar -->
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="index.html" class="logo" style="text-decoration:none; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:800; color:#090d16;">Catch<span style="color:var(--primary);">Bus</span>LK</a>
-            <span id="navBrandBadge" style="font-size:0.75rem; background:var(--primary-light); color:var(--primary-dark); padding:3px 10px; border-radius:9999px; font-weight:700; border:1px solid var(--primary-border); letter-spacing:0.5px;">PASSENGER SEARCH</span>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <!-- Nav Links -->
-            <div style="display:flex; gap:6px; align-items:center;">
-                <a href="index.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🏠 Home</a>
-                <a href="schedule.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">📅 Timetable</a>
-                <a href="luggage.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🧳 Luggage</a>
-                <a href="feedback.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">⭐ Feedback</a>
-                <a href="customer-care.html" style="padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🛡️ Customer Care</a>
-                <a href="admin.html?tab=portal" id="navAdminPortalLink" style="display:none; padding:8px 12px; border-radius:8px; font-size:0.85rem; font-weight:600; color:#64748b; text-decoration:none; transition:all 0.2s; align-items:center; gap:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">🛡️ Admin Portal</a>
+    <header class="top-nav">
+        <div class="nav-wrap">
+            <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+            <nav class="nav-links">
+                <a href="search.html" id="navLinkSearch" class="active">Book a Trip</a>
+                <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+                <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+                <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+            </nav>
+            <div class="nav-actions">
+                <div class="notification-area" id="navNotificationArea">
+                    <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+                        </svg>
+                        <span id="notificationBadge" class="notification-badge hidden">0</span>
+                    </button>
+                    <div id="notificationMenu" class="notification-menu hidden">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+                            <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+                            <a href="notifications.html" style="font-size:12px; color:var(--primary); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+                        </div>
+                        <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+                            <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+                            <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="navAuthAction"></div>
             </div>
-
-            <!-- Mode Toggle Switcher (Operator mode strictly for Admins) -->
-            <div class="mode-toggle-group" id="modeToggleGroup" style="display:none;">
-                <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">
-                    🔍 Passenger View
-                </button>
-                <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">
-                    🛠️ Operator Mode
-                </button>
-            </div>
-
-            <!-- User Auth Action Chip / Sign In -->
-            <div id="navAuthAction"></div>
         </div>
-    </nav>
+    </header>
 
     <div class="container">
+        <!-- Mode Toggle Switcher for Admins (Positioned cleanly below header) -->
+        <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:16px;">
+            <div class="mode-toggle-group" id="modeToggleGroup" style="display:none;">
+                <button class="mode-btn active" id="btnModePassenger" onclick="switchMode('passenger')">Passenger Search</button>
+                <button class="mode-btn" id="btnModeOperator" onclick="switchMode('operator')">Operator Console</button>
+            </div>
+        </div>
 
         <!-- =================================================================== -->
         <!-- PASSENGER SEARCH VIEW                                              -->
@@ -688,7 +705,7 @@
 
                     <div class="actions">
                         <button type="button" class="btn btn-outline" id="btnResetSearch">Clear</button>
-                        <button type="submit" class="btn btn-primary">🔍 Find Available Schedules</button>
+                        <button type="submit" class="btn btn-primary">Find Available Schedules</button>
                     </div>
                 </form>
             </div>
@@ -700,13 +717,13 @@
 
             <!-- Quick Filter Pills (Client-side Instant Filters) -->
             <div class="filter-pills" id="passengerFilterPills" style="display: none;">
-                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-right: 4px;">⚡ Quick Filter:</span>
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-right: 4px;">Quick Filter:</span>
                 <button type="button" class="pill-btn active" onclick="applyQuickFilter('ALL', this)">All</button>
-                <button type="button" class="pill-btn" onclick="applyQuickFilter('MORNING', this)">🌅 Morning (04:00 - 12:00)</button>
-                <button type="button" class="pill-btn" onclick="applyQuickFilter('AFTERNOON', this)">☀️ Afternoon (12:00 - 17:00)</button>
-                <button type="button" class="pill-btn" onclick="applyQuickFilter('NIGHT', this)">🌙 Evening / Night</button>
-                <button type="button" class="pill-btn" onclick="applyQuickFilter('AC', this)">❄️ AC</button>
-                <button type="button" class="pill-btn" onclick="applyQuickFilter('LUXURY', this)">💎 Luxury</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('MORNING', this)">Morning (04:00 - 12:00)</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('AFTERNOON', this)">Afternoon (12:00 - 17:00)</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('NIGHT', this)">Evening / Night</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('AC', this)">AC</button>
+                <button type="button" class="pill-btn" onclick="applyQuickFilter('LUXURY', this)">Luxury</button>
             </div>
 
             <div id="resultsContainer" class="trip-list">
@@ -721,13 +738,13 @@
             <!-- Tabs -->
             <div class="admin-tabs">
                 <button class="admin-tab active" id="tabBtnRoutes" onclick="switchAdminTab('routes')">
-                    🛣️ Routes Management
+                    Routes Management
                 </button>
                 <button class="admin-tab" id="tabBtnSchedules" onclick="switchAdminTab('schedules')">
-                    📅 Bus Schedules / Trips
+                    Bus Schedules &amp; Trips
                 </button>
                 <button class="admin-tab" id="tabBtnBuses" onclick="switchAdminTab('buses')">
-                    🚌 Fleet & Buses
+                    Fleet &amp; Buses
                 </button>
             </div>
 
@@ -742,14 +759,14 @@
                             </p>
                         </div>
                         <button class="btn btn-primary" onclick="openCreateRouteModal()">
-                            ➕ Add New Route
+                            + Add New Route
                         </button>
                     </div>
 
                     <!-- Routes Search & Sort Toolbar -->
                     <div class="toolbar">
                         <div class="toolbar-group">
-                            <input type="text" id="routeSearchInput" class="toolbar-input" placeholder="🔍 Search by city name or route ID..." oninput="filterAndSortRoutes()">
+                            <input type="text" id="routeSearchInput" class="toolbar-input" placeholder="Search by city name or route ID..." oninput="filterAndSortRoutes()">
                             <select id="routeSortSelect" class="toolbar-select" onchange="filterAndSortRoutes()">
                                 <option value="idAsc">Sort: Route ID (Ascending)</option>
                                 <option value="idDesc">Sort: Route ID (Descending)</option>
@@ -759,7 +776,7 @@
                                 <option value="durationDesc">Sort: Duration (Longest)</option>
                             </select>
                             <button type="button" class="btn btn-outline btn-sm" onclick="resetRouteFilters()">Reset</button>
-                            <button type="button" class="btn btn-outline btn-sm" onclick="exportRoutesToCSV()">📥 Export CSV</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportRoutesToCSV()">Export CSV</button>
                         </div>
                         <div class="count-badge" id="routeCountBadge">Showing 0 routes</div>
                     </div>
@@ -794,14 +811,14 @@
                             </p>
                         </div>
                         <button class="btn btn-primary" onclick="openCreateTripModal()">
-                            ➕ Schedule New Trip
+                            + Schedule New Trip
                         </button>
                     </div>
 
                     <!-- Schedules Search, Filter & Sort Toolbar -->
                     <div class="toolbar">
                         <div class="toolbar-group">
-                            <input type="text" id="tripSearchInput" class="toolbar-input" placeholder="🔍 Search by route, bus #, operator, or trip ID..." oninput="filterAndSortSchedules()" style="min-width: 280px;">
+                            <input type="text" id="tripSearchInput" class="toolbar-input" placeholder="Search by route, bus #, operator, or trip ID..." oninput="filterAndSortSchedules()" style="min-width: 280px;">
                             <select id="tripStatusFilter" class="toolbar-select" onchange="filterAndSortSchedules()">
                                 <option value="">All Statuses</option>
                                 <option value="SCHEDULED">Scheduled</option>
@@ -827,8 +844,8 @@
                                 <option value="idAsc">Sort: Trip ID (Oldest)</option>
                             </select>
                             <button type="button" class="btn btn-outline btn-sm" onclick="resetTripFilters()">Reset</button>
-                            <button type="button" class="btn btn-outline btn-sm" onclick="exportSchedulesToCSV()">📥 Export CSV</button>
-                            <button type="button" class="btn btn-outline btn-sm" onclick="printSchedulesTimetable()">🖨️ Print</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportSchedulesToCSV()">Export CSV</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="printSchedulesTimetable()">Print</button>
                         </div>
                         <div class="count-badge" id="tripCountBadge">Showing 0 trips</div>
                     </div>
@@ -867,14 +884,14 @@
                             </p>
                         </div>
                         <button class="btn btn-primary" onclick="openCreateBusModal()">
-                            ➕ Add New Bus
+                            + Add New Bus
                         </button>
                     </div>
 
                     <!-- Buses Search, Filter & Sort Toolbar -->
                     <div class="toolbar">
                         <div class="toolbar-group">
-                            <input type="text" id="busSearchInput" class="toolbar-input" placeholder="🔍 Search by plate # or operator..." oninput="filterAndSortBuses()">
+                            <input type="text" id="busSearchInput" class="toolbar-input" placeholder="Search by plate # or operator..." oninput="filterAndSortBuses()">
                             <select id="busFilterTypeSelect" class="toolbar-select" onchange="filterAndSortBuses()">
                                 <option value="">All Bus Types</option>
                                 <option value="AC">AC</option>
@@ -897,7 +914,7 @@
                                 <option value="operatorAsc">Sort: Operator (A-Z)</option>
                             </select>
                             <button type="button" class="btn btn-outline btn-sm" onclick="resetBusFilters()">Reset</button>
-                            <button type="button" class="btn btn-outline btn-sm" onclick="exportBusesToCSV()">📥 Export CSV</button>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="exportBusesToCSV()">Export CSV</button>
                         </div>
                         <div class="count-badge" id="busCountBadge">Showing 0 buses</div>
                     </div>
@@ -985,17 +1002,17 @@
                     <div class="form-group" style="margin-bottom: 14px;">
                         <label for="modalBusType">Bus Tier / Type *</label>
                         <select id="modalBusType" required onchange="onBusTypeSelectChange()">
-                            <option value="AC">❄️ AC Express</option>
-                            <option value="NON_AC">🌬️ Non-AC Standard</option>
-                            <option value="LUXURY">💎 Luxury Cruiser</option>
-                            <option value="SLEEPER">🛏️ Sleeper Berth</option>
-                            <option value="SEMI_LUXURY">⭐ Semi-Luxury</option>
-                            <option value="SUPER_LUXURY">👑 Super Luxury</option>
-                            <option value="DOUBLE_DECKER">🚌 Double Decker</option>
-                            <option value="MINI_BUS">🚐 Mini Bus / Van</option>
-                            <option value="ELECTRIC">⚡ Electric Green</option>
-                            <option value="EXPRESS">🚀 Highway Express</option>
-                            <option value="__CUSTOM__">➕ Enter Custom Bus Type...</option>
+                            <option value="AC">AC Express</option>
+                            <option value="NON_AC">Non-AC Standard</option>
+                            <option value="LUXURY">Luxury Cruiser</option>
+                            <option value="SLEEPER">Sleeper Berth</option>
+                            <option value="SEMI_LUXURY">Semi-Luxury</option>
+                            <option value="SUPER_LUXURY">Super Luxury</option>
+                            <option value="DOUBLE_DECKER">Double Decker</option>
+                            <option value="MINI_BUS">Mini Bus / Van</option>
+                            <option value="ELECTRIC">Electric Bus</option>
+                            <option value="EXPRESS">Highway Express</option>
+                            <option value="__CUSTOM__">+ Enter Custom Bus Type...</option>
                         </select>
                     </div>
                     <div class="form-group" id="customBusTypeGroup" style="display: none; margin-bottom: 14px;">
@@ -1061,7 +1078,7 @@
                     <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border);">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: var(--primary); font-size: 0.92rem;">
                             <input type="checkbox" id="modalTripIsRecurring" onchange="toggleRecurringOptions()" style="width: 17px; height: 17px; cursor: pointer;">
-                            <span>🔄 Create Recurring Schedule (Daily / Multi-Day)</span>
+                            <span>Create Recurring Schedule (Daily / Multi-Day)</span>
                         </label>
                     </div>
 
@@ -1085,7 +1102,7 @@
                             </div>
                         </div>
                         <div id="recurringSummaryText" style="font-size: 0.82rem; color: #047857; font-weight: 600;">
-                            ⚡ Will schedule 7 trips matching this timetable.
+                            Will schedule 7 trips matching this timetable.
                         </div>
                     </div>
                 </div>
@@ -1142,7 +1159,7 @@
     <div class="modal-overlay" id="seatPreviewModal">
         <div class="modal-box" style="max-width: 520px;">
             <div class="modal-header">
-                <h3>💺 Trip Details & Seat Selection</h3>
+                <h3>Trip Details &amp; Seat Selection</h3>
                 <button class="modal-close" onclick="closeModal('seatPreviewModal')">&times;</button>
             </div>
             <div class="modal-body">
@@ -1151,7 +1168,7 @@
                         <span id="previewTripBadge" class="badge badge-ac">AC</span>
                         <span id="previewTripId" style="font-weight: 700; color: var(--primary);">Trip #101</span>
                     </div>
-                    <h3 id="previewRouteTitle" style="font-size: 1.15rem; margin-bottom: 6px; color: var(--text);">Colombo ➔ Kandy</h3>
+                    <h3 id="previewRouteTitle" style="font-size: 1.15rem; margin-bottom: 6px; color: var(--text);">Colombo &rarr; Kandy</h3>
                     <div id="previewBusInfo" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;">Bus: NA-1234 • Super Line Express</div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.88rem; border-top: 1px solid var(--border); padding-top: 12px;">
@@ -1175,13 +1192,13 @@
                 </div>
 
                 <div style="background: #ecfdf5; border-left: 4px solid var(--primary); padding: 12px; border-radius: 4px; font-size: 0.82rem; color: #047857; line-height: 1.4;">
-                    <strong>🤝 Direct Seat Selection Integration:</strong><br>
+                    <strong>Direct Seat Selection Integration:</strong><br>
                     Proceeding will forward parameters (<code>tripId</code>, <code>busId</code>, <code>baseFare</code>) directly to the interactive 2+2 visual seat picker with a 10-minute hold countdown timer.
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('seatPreviewModal')">Back to Search</button>
-                <button type="button" class="btn btn-primary" onclick="proceedToSeatSelection()">Proceed to Seat Selection ➔</button>
+                <button type="button" class="btn btn-primary" onclick="proceedToSeatSelection()">Proceed to Seat Selection &rarr;</button>
             </div>
         </div>
     </div>
@@ -1230,16 +1247,19 @@
             if (navAuthAction) {
                 if (user) {
                     const name = user.fullName || user.name || 'Account';
+                    const parts = name.trim().split(' ');
+                    const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
                     navAuthAction.innerHTML = `
-                        <a href="admin.html?tab=profile" style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#047857; padding:6px 14px; border-radius:9999px; text-decoration:none; font-size:0.84rem; font-weight:700; border:1px solid rgba(16,185,129,0.3);">
-                            👤 ${name}
+                        <a href="admin.html?tab=profile" class="user-chip">
+                            <span class="user-avatar-dot">${initials}</span>
+                            <span>${name.split(' ')[0]}</span>
                         </a>
+                        <button onclick="handleLogout()" class="nav-signout-btn" type="button" style="margin-left:6px;">Sign Out</button>
                     `;
                 } else {
                     navAuthAction.innerHTML = `
-                        <a href="admin.html?tab=signin" style="padding:6px 14px; border-radius:8px; font-size:0.84rem; font-weight:700; color:var(--primary); text-decoration:none; border:1.5px solid var(--primary); transition:all 0.2s;">
-                            Sign In
-                        </a>
+                        <a href="admin.html?tab=signin" class="nav-signin">Sign In</a>
+                        <a href="admin.html?tab=register" class="nav-signup-btn">Sign Up</a>
                     `;
                 }
             }
@@ -1505,7 +1525,7 @@
             badgeElem.className = `badge ${trip.busType === 'AC' ? 'badge-ac' : trip.busType === 'LUXURY' ? 'badge-luxury' : trip.busType === 'SLEEPER' ? 'badge-sleeper' : 'badge-nonac'}`;
 
             document.getElementById('previewTripId').textContent = `Trip #${trip.tripId}`;
-            document.getElementById('previewRouteTitle').textContent = `${trip.sourceCity} ➔ ${trip.destinationCity}`;
+            document.getElementById('previewRouteTitle').innerHTML = `${trip.sourceCity} &rarr; ${trip.destinationCity}`;
             document.getElementById('previewBusInfo').textContent = `Bus: ${trip.busNumber} • ${trip.operatorName} (${trip.busType})`;
 
             const dep = new Date(trip.departureTime);
@@ -1606,8 +1626,8 @@
                     <td>${r.estimatedDurationHours} hrs</td>
                     <td>
                         <div class="table-actions">
-                            <button class="btn btn-outline btn-sm" onclick="openEditRouteModal(${r.routeId})">✏️ Edit</button>
-                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteRoute(${r.routeId}, '${r.sourceCity}', '${r.destinationCity}')">🗑️ Delete</button>
+                            <button class="btn btn-outline btn-sm" onclick="openEditRouteModal(${r.routeId})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDeleteRoute(${r.routeId}, '${r.sourceCity}', '${r.destinationCity}')">Delete</button>
                         </div>
                     </td>
                 </tr>
@@ -1666,7 +1686,7 @@
         });
 
         async function confirmDeleteRoute(routeId, src, dest) {
-            if (!confirm(`Are you sure you want to delete route '${src} ➔ ${dest}' (#${routeId})?`)) return;
+            if (!confirm(`Are you sure you want to delete route '${src} to ${dest}' (#${routeId})?`)) return;
 
             try {
                 const res = await fetch(`${API_BASE}/routes/${routeId}`, { method: 'DELETE' });
@@ -1783,8 +1803,8 @@
                         <td><strong>${b.totalSeats}</strong> seats</td>
                         <td>
                             <div class="table-actions">
-                                <button class="btn btn-outline btn-sm" onclick="openEditBusModal(${b.busId})">✏️ Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteBus(${b.busId}, '${b.busNumber}')">🗑️ Delete</button>
+                                <button class="btn btn-outline btn-sm" onclick="openEditBusModal(${b.busId})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteBus(${b.busId}, '${b.busNumber}')">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -1922,7 +1942,7 @@
         function populateRouteDropdowns(routes) {
             const select = document.getElementById('modalTripRoute');
             select.innerHTML = '<option value="">Choose a route...</option>' +
-                routes.map(r => `<option value="${r.routeId}">${r.sourceCity} ➔ ${r.destinationCity} (${r.estimatedDurationHours}h)</option>`).join('');
+                routes.map(r => `<option value="${r.routeId}">${r.sourceCity} &rarr; ${r.destinationCity} (${r.estimatedDurationHours}h)</option>`).join('');
         }
 
         function populateBusDropdowns(buses) {
@@ -1971,7 +1991,7 @@
             const minutes = pad(arrDate.getMinutes());
 
             arrInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
-            hint.textContent = `⚡ Auto-set (+${durationHours}h duration)`;
+            hint.textContent = `Auto-calculated (+${durationHours}h duration)`;
         }
 
         async function loadSchedulesTable() {
@@ -2053,7 +2073,7 @@
                 return `
                     <tr>
                         <td><strong>#${t.tripId}</strong></td>
-                        <td>${t.sourceCity} ➔ ${t.destinationCity}</td>
+                        <td>${t.sourceCity} &rarr; ${t.destinationCity}</td>
                         <td>
                             <div><strong>${t.busNumber}</strong></div>
                             <span class="badge ${t.busType === 'AC' ? 'badge-ac' : 'badge-luxury'}">${t.busType}</span>
@@ -2065,8 +2085,8 @@
                         <td>${t.bookedSeats} / ${t.totalSeats}</td>
                         <td>
                             <div class="table-actions">
-                                <button class="btn btn-outline btn-sm" onclick="openEditTripModal(${t.tripId})">✏️ Edit</button>
-                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrip(${t.tripId})">🗑️ Delete</button>
+                                <button class="btn btn-outline btn-sm" onclick="openEditTripModal(${t.tripId})">Edit</button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDeleteTrip(${t.tripId})">Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -2088,7 +2108,7 @@
             const days = parseInt(document.getElementById('modalTripRepeatDays').value) || 7;
             const typeLabel = type === 'WEEKDAYS' ? 'on weekdays (Mon-Fri)' : type === 'WEEKENDS' ? 'on weekends (Sat-Sun)' : 'every day';
             document.getElementById('recurringSummaryText').innerHTML =
-                `⚡ Will schedule departures <strong>${typeLabel}</strong> over the next <strong>${days} days</strong>.`;
+                `Will schedule departures <strong>${typeLabel}</strong> over the next <strong>${days} days</strong>.`;
         }
 
         function openCreateTripModal() {
@@ -2258,7 +2278,7 @@
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            toast.innerHTML = (type === 'success' ? '✅ ' : '⚠️ ') + message;
+            toast.textContent = message;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
@@ -2282,5 +2302,6 @@
             switchMode('passenger');
         }
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

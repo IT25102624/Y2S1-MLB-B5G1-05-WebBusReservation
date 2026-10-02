@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/srilanka-travel.css">
     <style>
         :root {
             --primary: #10b981;
@@ -34,16 +35,19 @@
         .navbar {
             background: #ffffff;
             border-bottom: 1px solid var(--border);
-            padding: 14px 32px;
+            height: 68px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
             gap: 12px;
-            flex-wrap: wrap;
         }
         .navbar-brand { display: flex; align-items: center; gap: 12px; }
         .navbar-brand .logo { font-size: 1.6rem; }
@@ -255,28 +259,49 @@
 <body>
     <div id="toastContainer"></div>
 
-    <nav class="navbar">
-        <div class="navbar-brand">
-            <a href="index.html" class="logo" style="text-decoration:none; font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:800; color:#090d16;">Catch<span style="color:var(--primary);">Bus</span>LK</a>
-            <span id="adminNavBadge" style="font-size:0.75rem; background:var(--primary-light); color:var(--primary-dark); padding:3px 10px; border-radius:9999px; font-weight:700; border:1px solid var(--primary-border); letter-spacing:0.5px;">ACCOUNT &amp; SERVICES</span>
+      <header class="top-nav">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
         </div>
-        <div class="nav-links">
-            <a href="index.html" class="nav-link">🏠 Home</a>
-            <a href="schedule.html" class="nav-link">📅 Timetable</a>
-            <a href="search.html" class="nav-link">🔍 Book a Trip</a>
-            <a href="customer-care.html" class="nav-link">🛡️ Customer Care</a>
-            <a href="search.html?mode=operator" id="navOperatorModeLink" class="nav-link" style="display:none;">🛠️ Operator Mode</a>
-            <span id="sessionChip" class="session-chip" style="display:none;"></span>
-            <button id="navLogoutBtn" class="btn btn-outline btn-sm" style="display:none;" onclick="handleLogout()">Sign out</button>
-        </div>
-    </nav>
+        <div id="navAuthAction"></div>
+      </div>
+    </div>
+  </header>
 
     <div class="container">
         <div class="page-tabs" id="pageTabs">
-            <button class="page-tab active" id="tabSignIn" onclick="switchTab('signin')">🔑 Sign In</button>
-            <button class="page-tab" id="tabRegister" onclick="switchTab('register')">📝 Create Account</button>
-            <button class="page-tab" id="tabPortal" onclick="switchTab('portal')" style="display:none;">🛡️ Portal</button>
-            <button class="page-tab" id="tabProfile" onclick="switchTab('profile')" style="display:none;">👤 My Account</button>
+            <button class="page-tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
+            <button class="page-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+            <button class="page-tab" id="tabPortal" onclick="switchTab('portal')" style="display:none;">Portal</button>
+            <button class="page-tab" id="tabProfile" onclick="switchTab('profile')" style="display:none;">My Account</button>
         </div>
 
         <div id="panelSignin" class="tab-panel active">
@@ -295,18 +320,18 @@
                             <label for="loginPassword">Password</label>
                             <div class="password-wrap">
                                 <input type="password" id="loginPassword" placeholder="Your password" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
+                                <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">Show</button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">🔑 Sign In</button>
+                        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Sign In</button>
                     </form>
                     <div class="quick-login-section">
-                        <p class="quick-login-title">⚡ Demo accounts (Password: Password@123)</p>
+                        <p class="quick-login-title">Demo accounts (Password: Password@123)</p>
                         <div class="quick-login-grid">
-                            <button class="quick-btn quick-btn-admin" onclick="quickLogin('admin@busreservation.lk')">🛡️ Admin</button>
-                            <button class="quick-btn quick-btn-conductor" onclick="quickLogin('conductor.kandy@busreservation.lk')">🚌 Conductor</button>
-                            <button class="quick-btn quick-btn-driver" onclick="quickLogin('driver.kandy@busreservation.lk')">🚘 Driver</button>
-                            <button class="quick-btn quick-btn-passenger" onclick="quickLogin('dohan@busreservation.lk')">🧍 Passenger</button>
+                            <button class="quick-btn quick-btn-admin" onclick="quickLogin('admin@busreservation.lk')">Admin</button>
+                            <button class="quick-btn quick-btn-conductor" onclick="quickLogin('conductor.kandy@busreservation.lk')">Conductor</button>
+                            <button class="quick-btn quick-btn-driver" onclick="quickLogin('driver.kandy@busreservation.lk')">Driver</button>
+                            <button class="quick-btn quick-btn-passenger" onclick="quickLogin('dohan@busreservation.lk')">Passenger</button>
                         </div>
                     </div>
                     <p style="margin-top:16px; font-size:0.85rem; color:var(--text-muted); text-align:center;">
@@ -339,19 +364,19 @@
                         <div class="form-group">
                             <label for="regRole">Account Type</label>
                             <select id="regRole">
-                                <option value="PASSENGER">🧍 Passenger</option>
-                                <option value="CONDUCTOR">🚌 Conductor</option>
-                                <option value="DRIVER">🚘 Driver</option>
+                                <option value="PASSENGER">Passenger</option>
+                                <option value="CONDUCTOR">Conductor</option>
+                                <option value="DRIVER">Driver</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="regPassword">Password</label>
                             <div class="password-wrap">
                                 <input type="password" id="regPassword" placeholder="Min. 6 characters" required minlength="6" maxlength="50">
-                                <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)">👁️</button>
+                                <button type="button" class="password-toggle" onclick="togglePassword('regPassword', this)">Show</button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="registerBtn">📝 Create Account</button>
+                        <button type="submit" class="btn btn-primary btn-block" id="registerBtn">Create Account</button>
                     </form>
                 </div>
             </div>
@@ -359,17 +384,17 @@
 
         <div id="panelPortal" class="tab-panel">
             <div id="portalGuest" class="card" style="text-align:center; padding: 40px 28px;">
-                <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--text-muted); margin-bottom:16px;">ACCESS RESTRICTED</div>
                 <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:8px;">Sign in to open the portal</h2>
                 <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Conductors and drivers use this portal after signing in. Admins manage all accounts here.</p>
-                <button class="btn btn-primary" onclick="switchTab('signin')">🔑 Sign In</button>
+                <button class="btn btn-primary" onclick="switchTab('signin')">Sign In</button>
             </div>
 
             <div id="portalPassenger" style="display:none;">
                 <div class="card" style="text-align:center;">
                     <h2 class="section-title">Passenger account</h2>
                     <p class="section-sub" style="margin-top:8px;">You are signed in. Search and book trips from the passenger pages. Staff tools are for conductors, drivers, and admins.</p>
-                    <a href="/search.html" class="btn btn-primary" style="margin-top:16px; text-decoration:none;">🔍 Search trips</a>
+                    <a href="/search.html" class="btn btn-primary" style="margin-top:16px; text-decoration:none;">Search trips</a>
                 </div>
             </div>
 
@@ -380,7 +405,7 @@
                             <h2 class="section-title" id="staffPortalTitle">Staff trip board</h2>
                             <p class="section-sub">Live schedule overview for conductors and drivers.</p>
                         </div>
-                        <button class="btn btn-outline" onclick="loadStaffTrips()">🔄 Refresh</button>
+                        <button class="btn btn-outline" onclick="loadStaffTrips()">Refresh</button>
                     </div>
                     <div class="table-wrap">
                         <table>
@@ -395,7 +420,7 @@
                                 </tr>
                             </thead>
                             <tbody id="staffTripsBody">
-                                <tr><td colspan="6"><div class="empty-state"><div class="icon">⏳</div><p>Loading trips...</p></div></td></tr>
+                                <tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>Loading trips...</p></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -405,35 +430,35 @@
             <div id="portalAdmin" style="display:none;">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon stat-icon-total">👥</div>
+                        <div class="stat-icon stat-icon-total">ALL</div>
                         <div>
                             <div class="stat-value" id="statTotal">—</div>
                             <div class="stat-label">Total Users</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-icon-passenger">🧍</div>
+                        <div class="stat-icon stat-icon-passenger">PAX</div>
                         <div>
                             <div class="stat-value" id="statPassengers">—</div>
                             <div class="stat-label">Passengers</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-icon-conductor">🚌</div>
+                        <div class="stat-icon stat-icon-conductor">CON</div>
                         <div>
                             <div class="stat-value" id="statConductors">—</div>
                             <div class="stat-label">Conductors</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-icon-driver">🚘</div>
+                        <div class="stat-icon stat-icon-driver">DRV</div>
                         <div>
                             <div class="stat-value" id="statDrivers">—</div>
                             <div class="stat-label">Drivers</div>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon stat-icon-admin">🛡️</div>
+                        <div class="stat-icon stat-icon-admin">ADM</div>
                         <div>
                             <div class="stat-value" id="statAdmins">—</div>
                             <div class="stat-label">Admins</div>
@@ -444,29 +469,28 @@
                 <div class="card">
                     <div class="section-header">
                         <div>
-                            <h2 class="section-title">👥 User Management &amp; System Governance</h2>
+                            <h2 class="section-title">User Management &amp; System Governance</h2>
                             <p class="section-sub">Manage platform roles, dispatchers, crew, and commuter accounts.</p>
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none; font-weight:700;">🛠️ Fleet &amp; Dispatch Console ➔</a>
-                            <a href="analytics/dashboard.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:var(--primary); color:var(--primary-dark);">📊 Executive Analytics ➔</a>
-                            <a href="customer-care.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:#d97706; color:#b45309;">🛡️ Customer Care ➔</a>
-                            <a href="ticket-verification.html" class="btn btn-outline" style="text-decoration:none; font-weight:700;">🛂 Verify Pass ➔</a>
-                            <button class="btn btn-outline" onclick="loadData()">🔄 Refresh</button>
-                            <button class="btn btn-primary" onclick="openAddModal()">➕ Add User</button>
+                            <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none; font-weight:700;">Fleet &amp; Dispatch Console &rarr;</a>
+                            <a href="analytics/dashboard.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:var(--primary); color:var(--primary-dark);">Executive Analytics &rarr;</a>
+                            <a href="customer-care.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:#d97706; color:#b45309;">Customer Care &rarr;</a>
+                            <button class="btn btn-outline" onclick="loadData()">Refresh</button>
+                            <button class="btn btn-primary" onclick="openAddModal()">+ Add User</button>
                         </div>
                     </div>
                     <div class="toolbar" style="margin-bottom:20px;">
                         <div class="search-wrap">
-                            <span class="search-icon">🔍</span>
+                            <span class="search-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
                             <input type="text" id="searchInput" placeholder="Search by name, email or phone..." oninput="filterUsers()" />
                         </div>
                         <select class="filter-select" id="roleFilter" onchange="filterUsers()">
                             <option value="">All Roles</option>
-                            <option value="PASSENGER">🧍 Passenger</option>
-                            <option value="CONDUCTOR">🚌 Conductor</option>
-                            <option value="DRIVER">🚘 Driver</option>
-                            <option value="ADMIN">🛡️ Admin</option>
+                            <option value="PASSENGER">Passenger</option>
+                            <option value="CONDUCTOR">Conductor</option>
+                            <option value="DRIVER">Driver</option>
+                            <option value="ADMIN">Admin</option>
                         </select>
                         <span id="userCount" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;"></span>
                     </div>
@@ -483,7 +507,7 @@
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody">
-                                <tr><td colspan="6"><div class="empty-state"><div class="icon">⏳</div><p>Loading users...</p></div></td></tr>
+                                <tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>Loading users...</p></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -491,7 +515,7 @@
 
                 <div class="card">
                     <div class="section-header">
-                        <h2 class="section-title">🆕 Recent Registrations</h2>
+                        <h2 class="section-title"> Recent Registrations</h2>
                     </div>
                     <div id="recentList" class="recent-list">
                         <p style="color:var(--text-muted); font-size:0.88rem;">Loading...</p>
@@ -502,10 +526,10 @@
 
         <div id="panelProfile" class="tab-panel">
             <div id="notLoggedIn" class="card auth-narrow" style="text-align:center; padding: 40px 28px;">
-                <div style="font-size:3rem; margin-bottom:16px;">🔒</div>
+                <div style="font-size:1.5rem; font-weight:800; color:var(--text-muted); margin-bottom:16px;">ACCESS RESTRICTED</div>
                 <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:8px;">Not Signed In</h2>
                 <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Sign in to view your tickets, travel metrics, and account details.</p>
-                <button class="btn btn-primary" onclick="switchTab('signin')">🔑 Sign In</button>
+                <button class="btn btn-primary" onclick="switchTab('signin')">Sign In</button>
             </div>
             <div id="profileContent" style="display:none;">
                 <!-- Profile Header Card -->
@@ -538,34 +562,34 @@
                 <!-- Commuter Travel & Eco Metrics Dashboard -->
                 <div class="section-header" style="margin-bottom:12px;">
                     <div>
-                        <h3 class="section-title">🌱 Travel &amp; Eco Dashboard</h3>
+                        <h3 class="section-title">Travel &amp; Eco Dashboard</h3>
                         <p class="section-sub">Your personal transit footprint and commuter milestones</p>
                     </div>
                 </div>
                 <div class="eco-metrics-grid">
                     <div class="eco-metric-card">
-                        <div class="eco-icon">🛣️</div>
+                        <div class="eco-icon">KM</div>
                         <div>
                             <div class="eco-value" id="metricDistance">0 km</div>
                             <div class="eco-label">Distance Traveled</div>
                         </div>
                     </div>
                     <div class="eco-metric-card">
-                        <div class="eco-icon">⏱️</div>
+                        <div class="eco-icon">HRS</div>
                         <div>
                             <div class="eco-value" id="metricTime">0h 0m</div>
                             <div class="eco-label">Transit Time</div>
                         </div>
                     </div>
                     <div class="eco-metric-card">
-                        <div class="eco-icon">🌿</div>
+                        <div class="eco-icon">CO2</div>
                         <div>
                             <div class="eco-value" id="metricEco">0.0 kg CO₂</div>
                             <div class="eco-label">Carbon Offset</div>
                         </div>
                     </div>
                     <div class="eco-metric-card">
-                        <div class="eco-icon">🎖️</div>
+                        <div class="eco-icon">PTS</div>
                         <div>
                             <div class="eco-value" id="metricTier" style="font-size:1.05rem;">Silver Traveler</div>
                             <div class="eco-label">Commuter Tier</div>
@@ -577,14 +601,14 @@
                 <div class="card" style="margin-bottom:20px;">
                     <div class="section-header">
                         <div>
-                            <h3 class="section-title">🎫 Active Bus Tickets &amp; Boarding Passes</h3>
+                            <h3 class="section-title"> Active Bus Tickets &amp; Boarding Passes</h3>
                             <p class="section-sub">Confirmed trips with verified seat reservations</p>
                         </div>
-                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;">➕ Book Another Trip</a>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Book Another Trip</a>
                     </div>
                     <div id="activeTicketsList">
                         <div class="empty-state" style="padding:28px 16px;">
-                            <div class="icon">⏳</div>
+                            <div class="icon"></div>
                             <p>Loading your tickets...</p>
                         </div>
                     </div>
@@ -594,7 +618,7 @@
                 <div class="card" style="margin-bottom:20px;">
                     <div class="section-header">
                         <div>
-                            <h3 class="section-title">📜 Travel History &amp; Past Journeys</h3>
+                            <h3 class="section-title">Travel History &amp; Past Journeys</h3>
                             <p class="section-sub">Archived and completed journeys</p>
                         </div>
                     </div>
@@ -606,7 +630,7 @@
                 <!-- Account Settings & Security -->
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
                     <div class="card" style="margin-bottom:0;">
-                        <h3 class="section-title" style="margin-bottom:16px;">✏️ Update Profile</h3>
+                        <h3 class="section-title" style="margin-bottom:16px;">Update Profile</h3>
                         <form id="updateProfileForm" onsubmit="handleUpdateProfile(event)">
                             <div class="form-group">
                                 <label for="updateName">Full Name</label>
@@ -616,33 +640,33 @@
                                 <label for="updatePhone">Phone Number</label>
                                 <input type="tel" id="updatePhone" required pattern="^\+?[0-9]{9,15}$">
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" id="updateProfileBtn">💾 Save Changes</button>
+                            <button type="submit" class="btn btn-primary btn-block" id="updateProfileBtn">Save Changes</button>
                         </form>
                     </div>
                     <div class="card" style="margin-bottom:0;">
-                        <h3 class="section-title" style="margin-bottom:16px;">🔐 Change Password</h3>
+                        <h3 class="section-title" style="margin-bottom:16px;"> Change Password</h3>
                         <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
                             <div class="form-group">
                                 <label for="currentPassword">Current Password</label>
                                 <div class="password-wrap">
                                     <input type="password" id="currentPassword" required>
-                                    <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)">👁️</button>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('currentPassword', this)">Show</button>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label for="newPassword">New Password</label>
                                 <div class="password-wrap">
                                     <input type="password" id="newPassword" required minlength="6" maxlength="50">
-                                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)">👁️</button>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('newPassword', this)">Show</button>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary btn-block" id="changePasswordBtn">🔐 Update Password</button>
+                            <button type="submit" class="btn btn-primary btn-block" id="changePasswordBtn">Update Password</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Sign Out Button -->
-                <button class="btn btn-danger btn-block" style="padding:12px;" onclick="handleLogout()">🚪 Sign Out of Account</button>
+                <button class="btn btn-danger btn-block" style="padding:12px;" onclick="handleLogout()">Sign Out of Account</button>
             </div>
         </div>
     </div>
@@ -650,8 +674,8 @@
     <div class="modal-overlay" id="addModal">
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">➕ Create New User</span>
-                <button class="modal-close" onclick="closeAddModal()">✕</button>
+                <span class="modal-title"> Create New User</span>
+                <button class="modal-close" onclick="closeAddModal()">&times;</button>
             </div>
             <form id="addUserForm" onsubmit="handleAddUser(event)">
                 <div class="form-group">
@@ -669,10 +693,10 @@
                 <div class="form-group">
                     <label>Role</label>
                     <select id="addRole">
-                        <option value="PASSENGER">🧍 Passenger</option>
-                        <option value="CONDUCTOR">🚌 Conductor</option>
-                        <option value="DRIVER">🚘 Driver</option>
-                        <option value="ADMIN">🛡️ Admin</option>
+                        <option value="PASSENGER">Passenger</option>
+                        <option value="CONDUCTOR">Conductor</option>
+                        <option value="DRIVER">Driver</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -681,7 +705,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="addUserBtn">➕ Create User</button>
+                    <button type="submit" class="btn btn-primary" id="addUserBtn"> Create User</button>
                 </div>
             </form>
         </div>
@@ -690,8 +714,8 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">✏️ Edit User</span>
-                <button class="modal-close" onclick="closeEditModal()">✕</button>
+                <span class="modal-title">Edit User</span>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
             <form id="editUserForm" onsubmit="handleEditUser(event)">
                 <input type="hidden" id="editUserId">
@@ -706,15 +730,15 @@
                 <div class="form-group">
                     <label>Role</label>
                     <select id="editRole">
-                        <option value="PASSENGER">🧍 Passenger</option>
-                        <option value="CONDUCTOR">🚌 Conductor</option>
-                        <option value="DRIVER">🚘 Driver</option>
-                        <option value="ADMIN">🛡️ Admin</option>
+                        <option value="PASSENGER">Passenger</option>
+                        <option value="CONDUCTOR">Conductor</option>
+                        <option value="DRIVER">Driver</option>
+                        <option value="ADMIN">Admin</option>
                     </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="editUserBtn">💾 Save Changes</button>
+                    <button type="submit" class="btn btn-primary" id="editUserBtn">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -723,37 +747,40 @@
     <div class="modal-overlay" id="deleteModal">
         <div class="modal" style="max-width:400px;">
             <div class="modal-header">
-                <span class="modal-title">🗑️ Confirm Deletion</span>
-                <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+                <span class="modal-title"> Confirm Deletion</span>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
             </div>
             <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:8px;">Are you sure you want to delete this user?</p>
             <p style="font-weight:700; font-size:0.95rem;" id="deleteUserLabel">—</p>
-            <p style="font-size:0.82rem; color:var(--danger); margin-top:10px;">⚠️ This action cannot be undone.</p>
+            <p style="font-size:0.82rem; color:var(--danger); margin-top:10px;">This action cannot be undone.</p>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">🗑️ Delete User</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Delete User</button>
             </div>
         </div>
     </div>
 
     <!-- Digital Boarding Pass Modal -->
     <div class="modal-overlay" id="boardingPassModal">
-        <div class="modal" style="max-width:440px; text-align:center;">
+        <div class="modal" style="max-width:480px; text-align:center;">
             <div class="modal-header">
-                <span class="modal-title">🎟️ Digital Boarding Pass</span>
-                <button class="modal-close" onclick="closeBoardingPassModal()">✕</button>
+                <span class="modal-title">Digital Boarding Pass</span>
+                <button class="modal-close" onclick="closeBoardingPassModal()">&times;</button>
             </div>
-            <div style="background:var(--primary-light); padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--primary-border);">
+            <div style="background:var(--primary-light); padding:14px; border-radius:12px; margin-bottom:12px; border:1px solid var(--primary-border);">
                 <div style="font-size:0.75rem; font-weight:800; color:var(--primary-dark); text-transform:uppercase; letter-spacing:0.5px;">E-Ticket Reference</div>
                 <div style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:800; color:#0f172a;" id="passModalRef">CB00000000</div>
+                <div id="passModalRoute" style="font-size:0.85rem; font-weight:700; color:#334155; margin-top:4px;"></div>
             </div>
-            <div style="margin: 10px auto; display:inline-block; padding:12px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
-                <img id="passModalQr" src="" alt="Ticket QR" style="width:180px; height:180px; display:block;" />
+            <div style="margin: 6px auto; display:inline-block; padding:12px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <img id="passModalQr" src="" alt="Ticket QR" style="width:190px; height:190px; display:block; margin:0 auto;" />
             </div>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">Present this QR code or booking reference to the bus conductor upon boarding.</p>
-            <div class="modal-footer" style="justify-content:center; margin-top:16px;">
+            <div id="passModalLuggage" style="display:none; text-align:left; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:10px 0; font-size:12px; color:#065f46;"></div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:6px;">Present this digital QR pass to the bus conductor upon boarding.</p>
+            <div class="modal-footer" style="justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap;">
+                <a id="passModalDownloadBtn" class="btn btn-primary" href="#" download="catchbus-boarding-pass.png" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">Download QR (PNG)</a>
+                <button class="btn btn-outline" onclick="window.print()">Print Pass</button>
                 <button class="btn btn-outline" onclick="closeBoardingPassModal()">Close</button>
-                <button class="btn btn-primary" onclick="window.print()">🖨️ Print Pass</button>
             </div>
         </div>
     </div>
@@ -793,23 +820,23 @@
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const icons = { success: '', error: '', info: '' };
             toast.className = `toast toast-${type}`;
-            toast.textContent = `${icons[type] || 'ℹ️'} ${message}`;
+            toast.textContent = message;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4500);
         }
         function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
-            if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
-            else { input.type = 'password'; btn.textContent = '👁️'; }
+            if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+            else { input.type = 'password'; btn.textContent = 'Show'; }
         }
         function roleBadge(role) {
             const map = {
-                ADMIN: '<span class="badge badge-admin">🛡️ Admin</span>',
-                CONDUCTOR: '<span class="badge badge-conductor">🚌 Conductor</span>',
-                DRIVER: '<span class="badge badge-driver">🚘 Driver</span>',
-                PASSENGER: '<span class="badge badge-passenger">🧍 Passenger</span>'
+                ADMIN: '<span class="badge badge-admin">Admin</span>',
+                CONDUCTOR: '<span class="badge badge-conductor">Conductor</span>',
+                DRIVER: '<span class="badge badge-driver">Driver</span>',
+                PASSENGER: '<span class="badge badge-passenger">Passenger</span>'
             };
             return map[role] || `<span class="badge">${role}</span>`;
         }
@@ -840,7 +867,7 @@
                 if (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
                     if (tabPortal) {
                         tabPortal.style.display = 'inline-block';
-                        tabPortal.textContent = user.role === 'ADMIN' ? '🛡️ Admin Portal' : '📋 Staff Portal';
+                        tabPortal.textContent = user.role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal';
                     }
                 } else {
                     if (tabPortal) tabPortal.style.display = 'none';
@@ -903,7 +930,7 @@
             event.preventDefault();
             const btn = document.getElementById('loginBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Signing in...';
+            btn.textContent = ' Signing in...';
             try {
                 const res = await fetch(`${API}/login`, {
                     method: 'POST',
@@ -927,7 +954,7 @@
                 showToast('Connection error. Is the server running?', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🔑 Sign In';
+                btn.textContent = 'Sign In';
             }
         }
         async function quickLogin(email) {
@@ -939,7 +966,7 @@
             event.preventDefault();
             const btn = document.getElementById('registerBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Creating account...';
+            btn.textContent = ' Creating account...';
             const payload = {
                 fullName: document.getElementById('regName').value.trim(),
                 email: document.getElementById('regEmail').value.trim(),
@@ -968,7 +995,7 @@
                 showToast('Connection error. Is the server running?', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '📝 Create Account';
+                btn.textContent = 'Create Account';
             }
         }
         function renderPortal() {
@@ -999,12 +1026,12 @@
                 const res = await fetch(`${API}/staff/trips`, { headers: authHeaders() });
                 const json = await res.json();
                 if (!res.ok || !json.success) {
-                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">❌</div><p>${json.message || 'Could not load trips'}</p></div></td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">!</div><p>${json.message || 'Could not load trips'}</p></div></td></tr>`;
                     return;
                 }
                 const trips = json.data || [];
                 if (trips.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">🚌</div><p>No trips scheduled.</p></div></td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>No trips scheduled.</p></div></td></tr>`;
                     return;
                 }
                 tbody.innerHTML = trips.map(t => `
@@ -1017,7 +1044,7 @@
                         <td>${t.bookedPassengerCount ?? 0}</td>
                     </tr>`).join('');
             } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">❌</div><p>Connection error.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">!</div><p>Connection error.</p></div></td></tr>`;
             }
         }
         async function loadProfile() {
@@ -1070,7 +1097,7 @@
             document.getElementById('profileCreatedAt').textContent = user.createdAt
                 ? new Date(user.createdAt).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })
                 : '—';
-            const roleText = { ADMIN: '🛡️ Admin', CONDUCTOR: '🚌 Conductor', DRIVER: '🚘 Driver', PASSENGER: '🧍 Passenger' };
+            const roleText = { ADMIN: 'Admin', CONDUCTOR: 'Conductor', DRIVER: 'Driver', PASSENGER: 'Passenger' };
             const roleClass = { ADMIN: 'badge-admin', CONDUCTOR: 'badge-conductor', DRIVER: 'badge-driver', PASSENGER: 'badge-passenger' };
             const badge = document.getElementById('profileBadge');
             badge.textContent = roleText[user.role] || user.role;
@@ -1083,23 +1110,23 @@
             if (actionsEl) {
                 if (user.role === 'ADMIN') {
                     actionsEl.innerHTML = `
-                        <a href="search.html?mode=operator" class="btn btn-outline btn-sm" style="text-decoration:none;">🛠️ Fleet &amp; Dispatch Console ➔</a>
-                        <button class="btn btn-primary btn-sm" onclick="switchTab('portal')">🛡️ Admin Management Portal</button>
+                        <a href="search.html?mode=operator" class="btn btn-outline btn-sm" style="text-decoration:none;">Fleet &amp; Dispatch Console &rarr;</a>
+                        <button class="btn btn-primary btn-sm" onclick="switchTab('portal')">Admin Management Portal</button>
                     `;
                 } else if (user.role === 'CONDUCTOR') {
                     actionsEl.innerHTML = `
-                        <a href="conductor.html" class="btn btn-primary btn-sm" style="text-decoration:none;">📱 Conductor Boarding Terminal ➔</a>
-                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">📋 Staff Trip Board</button>
+                        <a href="conductor.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Conductor Boarding Terminal &rarr;</a>
+                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">Staff Trip Board</button>
                     `;
                 } else if (user.role === 'DRIVER') {
                     actionsEl.innerHTML = `
-                        <a href="driver.html" class="btn btn-primary btn-sm" style="text-decoration:none;">🧭 Driver Live Telemetry ➔</a>
-                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">📋 Staff Trip Board</button>
+                        <a href="driver.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Driver Live Telemetry &rarr;</a>
+                        <button class="btn btn-outline btn-sm" onclick="switchTab('portal')">Staff Trip Board</button>
                     `;
                 } else {
                     actionsEl.innerHTML = `
-                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;">🔍 Book Bus Seats ➔</a>
-                        <a href="schedule.html" class="btn btn-outline btn-sm" style="text-decoration:none;">📅 View Corridor Timetables ➔</a>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Book Bus Seats &rarr;</a>
+                        <a href="schedule.html" class="btn btn-outline btn-sm" style="text-decoration:none;">View Corridor Timetables &rarr;</a>
                     `;
                 }
             }
@@ -1140,7 +1167,10 @@
             }
         }
 
+        let userBookingsCache = [];
+
         function renderUserTicketsAndMetrics(bookings) {
+            userBookingsCache = bookings || [];
             let totalKm = 0;
             let totalMinutes = 0;
             let activeTickets = [];
@@ -1179,9 +1209,9 @@
                 ecoEl.textContent = `${co2} kg CO₂`;
             }
             if (tierEl) {
-                if (totalKm >= 500) tierEl.textContent = '🌟 Gold Commuter';
-                else if (totalKm >= 200) tierEl.textContent = '🌿 Emerald Commuter';
-                else tierEl.textContent = '🌱 Silver Traveler';
+                if (totalKm >= 500) tierEl.textContent = 'Gold Commuter';
+                else if (totalKm >= 200) tierEl.textContent = 'CO2 Emerald Commuter';
+                else tierEl.textContent = 'Silver Traveler';
             }
 
             // Render Active Tickets
@@ -1189,7 +1219,7 @@
             if (activeTickets.length === 0) {
                 activeCont.innerHTML = `
                     <div class="empty-state" style="padding:24px 16px;">
-                        <div style="font-size:2rem; margin-bottom:8px;">🎫</div>
+                        <div style="font-size:2rem; margin-bottom:8px;"></div>
                         <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">No Active Bookings</div>
                         <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">You have no upcoming journeys right now.</p>
                         <a href="search.html" class="btn btn-primary btn-sm" style="margin-top:14px; text-decoration:none;">Book a Trip Now &rarr;</a>
@@ -1203,6 +1233,8 @@
                     const time = t.time || '08:30';
                     const busType = t.busType || 'Expressway AC';
                     const operator = t.operator || 'CatchBus Express';
+                    const hasLuggage = t.luggage && t.luggage.length > 0;
+                    const lug = hasLuggage ? t.luggage[0] : null;
 
                     return `
                         <div class="ticket-card" style="background:#ffffff; border:1.5px solid var(--primary-border); border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 4px 14px rgba(16,185,129,0.06); display:flex; flex-direction:column; gap:12px;">
@@ -1217,8 +1249,9 @@
                             <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; align-items:center;">
                                 <div>
                                     <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">ROUTE</div>
-                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">${t.from} ➔ ${t.to}</div>
+                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">${t.from} &rarr; ${t.to}</div>
                                     <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${operator} &bull; ${busType}</div>
+                                    ${lug ? `<div style="font-size:0.76rem; color:#059669; font-weight:700; margin-top:3px;">Baggage Tag: ${lug.tagNumber || lug.tagReference || 'LUG-TAG'} (${lug.bagQuantity || lug.bagCount || 1} Bag)</div>` : ''}
                                 </div>
                                 <div>
                                     <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">DEPARTURE</div>
@@ -1234,10 +1267,10 @@
 
                             <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:4px; flex-wrap:wrap; gap:8px;">
                                 <span style="font-size:0.76rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;">
-                                    📱 Present this pass to Conductor upon boarding
+                                    Present this pass to Conductor upon boarding
                                 </span>
                                 <div style="display:flex; gap:8px;">
-                                    <button class="btn btn-outline btn-sm" onclick="showBoardingPassModal('${t.reference}')">🎟️ View Pass &amp; QR</button>
+                                    <button class="btn btn-primary btn-sm" onclick="showBoardingPassModal('${t.reference}')">View Pass &amp; QR</button>
                                     <button class="btn btn-danger btn-sm" onclick="cancelUserBooking('${t.reference}')">Cancel</button>
                                 </div>
                             </div>
@@ -1259,7 +1292,7 @@
                         return `
                             <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border-radius:8px; border:1px solid var(--border); margin-bottom:8px;">
                                 <div>
-                                    <span style="font-weight:700; font-size:0.88rem; color:#1e293b;">${t.from} ➔ ${t.to}</span>
+                                    <span style="font-weight:700; font-size:0.88rem; color:#1e293b;">${t.from} &rarr; ${t.to}</span>
                                     <span style="font-size:0.78rem; color:var(--text-muted); margin-left:8px;">${date} (${t.reference})</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:12px;">
@@ -1295,7 +1328,44 @@
 
         function showBoardingPassModal(ref) {
             document.getElementById('passModalRef').textContent = ref;
-            document.getElementById('passModalQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(ref)}`;
+            const b = userBookingsCache.find(x => x.reference === ref || String(x.bookingId) === String(ref)) || {};
+
+            const routeEl = document.getElementById('passModalRoute');
+            if (routeEl && b.from && b.to) {
+                const seatsStr = Array.isArray(b.seats) ? b.seats.join(', ') : (b.seats || 'Confirmed');
+                routeEl.innerHTML = `${b.from} &rarr; ${b.to} &bull; ${b.date || ''} ${b.time || ''} &bull; Seat(s): ${seatsStr}`;
+            } else if (routeEl) {
+                routeEl.innerHTML = '';
+            }
+
+            const lugEl = document.getElementById('passModalLuggage');
+            if (lugEl) {
+                const lug = (b.luggage && b.luggage.length > 0) ? b.luggage[0] : null;
+                if (lug) {
+                    lugEl.style.display = 'block';
+                    lugEl.innerHTML = `<strong>Baggage Tag:</strong> ${lug.tagNumber || lug.tagReference || 'LUG-TAG'} (${lug.bagQuantity || lug.bagCount || 1} Bag(s) &middot; ${lug.status || 'TAGGED'})<br><span style="font-size:11px; color:#047857;">Integrated into this single digital boarding pass.</span>`;
+                } else {
+                    lugEl.style.display = 'none';
+                }
+            }
+
+            const qrImg = document.getElementById('passModalQr');
+            const dlBtn = document.getElementById('passModalDownloadBtn');
+            const token = b.ticketToken;
+            if (token) {
+                qrImg.src = `/api/v1/payments/tickets/${encodeURIComponent(token)}/qr.png`;
+                if (dlBtn) {
+                    dlBtn.href = `/api/v1/payments/tickets/${encodeURIComponent(token)}/qr.png?download=true`;
+                    dlBtn.setAttribute('download', `catchbus-ticket-${ref}.png`);
+                }
+            } else {
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('catchbus://ticket/' + ref)}`;
+                if (dlBtn) {
+                    dlBtn.href = qrImg.src;
+                    dlBtn.setAttribute('download', `catchbus-ticket-${ref}.png`);
+                }
+            }
+
             document.getElementById('boardingPassModal').classList.add('open');
         }
 
@@ -1306,7 +1376,7 @@
             event.preventDefault();
             const btn = document.getElementById('updateProfileBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Saving...';
+            btn.textContent = ' Saving...';
             const user = getUser();
             const payload = {
                 fullName: document.getElementById('updateName').value.trim(),
@@ -1328,14 +1398,14 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '💾 Save Changes';
+                btn.textContent = 'Save Changes';
             }
         }
         async function handleChangePassword(event) {
             event.preventDefault();
             const btn = document.getElementById('changePasswordBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Updating...';
+            btn.textContent = ' Updating...';
             const user = getUser();
             const payload = {
                 currentPassword: document.getElementById('currentPassword').value,
@@ -1355,7 +1425,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🔐 Update Password';
+                btn.textContent = 'Update Password';
             }
         }
         function handleLogout() {
@@ -1418,7 +1488,7 @@
             const tbody = document.getElementById('usersTableBody');
             document.getElementById('userCount').textContent = `${users.length} user${users.length !== 1 ? 's' : ''} found`;
             if (users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">👤</div><p>No users match your search.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>No users match your search.</p></div></td></tr>`;
                 return;
             }
             tbody.innerHTML = users.map(u => `
@@ -1438,15 +1508,15 @@
                     <td style="color:var(--text-muted); white-space:nowrap;">${formatDate(u.createdAt)}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')">✏️</button>
-                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')">🗑️</button>
+                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')"></button>
+                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')"></button>
                         </div>
                     </td>
                 </tr>`).join('');
         }
         function renderUsersError(msg) {
             document.getElementById('usersTableBody').innerHTML =
-                `<tr><td colspan="6"><div class="empty-state"><div class="icon">❌</div><p>${msg}</p></div></td></tr>`;
+                `<tr><td colspan="6"><div class="empty-state"><div class="icon">!</div><p>${msg}</p></div></td></tr>`;
         }
         function escStr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
         function filterUsers() {
@@ -1469,7 +1539,7 @@
             event.preventDefault();
             const btn = document.getElementById('addUserBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Creating...';
+            btn.textContent = ' Creating...';
             const payload = {
                 fullName: document.getElementById('addName').value.trim(),
                 email: document.getElementById('addEmail').value.trim(),
@@ -1492,7 +1562,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '➕ Create User';
+                btn.textContent = ' Create User';
             }
         }
         function openEditModal(id, name, phone, role) {
@@ -1507,7 +1577,7 @@
             event.preventDefault();
             const btn = document.getElementById('editUserBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Saving...';
+            btn.textContent = ' Saving...';
             const userId = document.getElementById('editUserId').value;
             const payload = {
                 fullName: document.getElementById('editName').value.trim(),
@@ -1528,7 +1598,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '💾 Save Changes';
+                btn.textContent = 'Save Changes';
             }
         }
         function openDeleteModal(id, name, email) {
@@ -1544,7 +1614,7 @@
             if (!deleteTargetId) return;
             const btn = document.getElementById('confirmDeleteBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Deleting...';
+            btn.textContent = ' Deleting...';
             const currentUser = getUser();
             const adminEmail = currentUser ? currentUser.email : '';
             const url = adminEmail
@@ -1564,7 +1634,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🗑️ Delete User';
+                btn.textContent = 'Delete User';
                 deleteTargetId = null;
             }
         }
@@ -1615,5 +1685,6 @@
             applyUrlTab();
         });
     </script>
+  <script src="js/app.js"></script>
 </body>
 </html>

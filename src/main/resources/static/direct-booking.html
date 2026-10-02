@@ -89,7 +89,7 @@
     const time = params.get('time') || '08:00';
     const op = params.get('operator') || 'SLTB Express';
 
-    document.getElementById('routeSummary').value = `${from} ⇄ ${to} | ${date} at ${time} (${op})`;
+    document.getElementById('routeSummary').value = `${from} to ${to} | ${date} at ${time} (${op})`;
 
     function openWhatsApp() {
       const name = document.getElementById('pName').value.trim() || 'Valued Passenger';
@@ -98,7 +98,7 @@
       const text = [
         `Hi CatchBusLK, I would like to make a direct seat booking:`,
         ``,
-        `Route: ${from} ⇄ ${to}`,
+        `Route: ${from} to ${to}`,
         `Date: ${date}`,
         `Departure: ${time} (${op})`,
         `Name: ${name}`,

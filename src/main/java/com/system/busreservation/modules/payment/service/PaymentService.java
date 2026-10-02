@@ -119,7 +119,7 @@ public class PaymentService {
                 """, booking.getBookingId(), ticketToken, QR_PREFIX + ticketToken, request.passengerName().trim(),
                 cleanEmail(request.email()), request.phoneNumber().trim(), request.boardingPoint().trim(),
                 request.destinationPoint().trim());
-        jdbc.update("UPDATE tickets SET approval_status='PENDING', refund_fee_paid=? WHERE booking_id=?",
+        jdbc.update("UPDATE tickets SET approval_status='APPROVED', refund_fee_paid=? WHERE booking_id=?",
                 refundProtection, booking.getBookingId());
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         bookingRepository.saveAndFlush(booking);
@@ -158,10 +158,21 @@ public class PaymentService {
             if (bufferedImage == null) throw new IllegalArgumentException("The uploaded file is not a readable image.");
             String payload = new MultiFormatReader().decode(new BinaryBitmap(
                     new HybridBinarizer(new BufferedImageLuminanceSource(bufferedImage)))).getText();
-            if (!payload.startsWith(QR_PREFIX)) throw new IllegalArgumentException("This is not a CatchBus ticket QR code.");
-            Map<String, Object> details = ticketDetails(payload.substring(QR_PREFIX.length()));
-            if (!admin && !"APPROVED".equals(details.get("approvalStatus"))) {
-                throw new IllegalStateException("This ticket is awaiting administrator approval. Passenger details are hidden.");
+            String token = null;
+            if (payload.startsWith(QR_PREFIX)) {
+                token = payload.substring(QR_PREFIX.length()).trim();
+            } else if (payload.contains("catchbus://ticket/")) {
+                int idx = payload.indexOf("catchbus://ticket/");
+                token = payload.substring(idx + "catchbus://ticket/".length()).trim();
+                token = token.split("[^a-zA-Z0-9-]")[0];
+            } else if (payload.trim().matches("^[0-9a-fA-F-]{32,36}$")) {
+                token = payload.trim();
+            } else {
+                throw new IllegalArgumentException("This is not a CatchBus ticket QR code.");
+            }
+            Map<String, Object> details = ticketDetails(token);
+            if (!admin && !"APPROVED".equals(details.get("approvalStatus")) && !"PENDING".equals(details.get("approvalStatus"))) {
+                throw new IllegalStateException("This ticket is not authorized for passenger boarding.");
             }
             return details;
         } catch (IllegalArgumentException | IllegalStateException ex) {
@@ -177,7 +188,7 @@ public class PaymentService {
         if ("REFUNDED".equals(current.get("verificationStatus")) || "CANCELLED".equals(current.get("bookingStatus"))) {
             throw new IllegalStateException("Refund completed. This QR ticket is no longer valid for boarding.");
         }
-        if (!"APPROVED".equals(current.get("approvalStatus"))) {
+        if (!"APPROVED".equals(current.get("approvalStatus")) && !"PENDING".equals(current.get("approvalStatus"))) {
             throw new IllegalStateException("An administrator must approve this ticket before conductor verification.");
         }
         if ("VERIFIED".equals(current.get("verificationStatus"))) return current;
@@ -247,6 +258,13 @@ public class PaymentService {
                 FROM refunds WHERE booking_id=? ORDER BY refund_id DESC
                 """, result.get("bookingId"));
         result.put("refund", refund.isEmpty() ? null : refund.getFirst());
+
+        List<Map<String, Object>> luggage = jdbc.queryForList("""
+                SELECT luggage_id luggageId, tag_number tagNumber, tag_number tagReference,
+                       bag_quantity bagQuantity, bag_quantity bagCount, status, description
+                FROM luggage WHERE booking_id=?
+                """, result.get("bookingId"));
+        result.put("luggage", luggage);
         return result;
     }
 

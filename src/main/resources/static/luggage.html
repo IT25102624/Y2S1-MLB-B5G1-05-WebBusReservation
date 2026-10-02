@@ -125,23 +125,46 @@
     </style>
 </head>
 <body>
-    <nav class="top-nav">
-        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
-        <div class="nav-links">
-            <a href="search.html">Book a Trip</a>
-            <a href="schedule.html">Timetable</a>
-            <a href="luggage.html" class="active">Luggage</a>
-            <a href="feedback.html">Feedback</a>
-            <a href="notifications.html">Alerts</a>
-            <a href="customer-care.html">🛡️ Customer Care</a>
-            <a href="admin.html?tab=signin" id="loginLink">Sign In</a>
-            <button id="logoutBtn" class="hidden">Sign Out</button>
+      <header class="top-nav">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
         </div>
-    </nav>
+        <div id="navAuthAction"></div>
+      </div>
+    </div>
+  </header>
 
     <main class="container">
         <div style="margin-bottom: 20px;">
-            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🧳 Luggage Registration, QR Tagging &amp; Tracking</h1>
+            <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">Luggage Registration, QR Tagging &amp; Tracking</h1>
             <p style="color:var(--gray-600); font-size:0.95rem;">Generate secure digital baggage tags with scannable QR codes, track cargo checkpoints, and manage baggage manifests.</p>
         </div>
 
@@ -149,9 +172,9 @@
 
         <!-- Sub-Part Tabs -->
         <div class="tab-bar">
-            <button id="tabBtnTag" class="tab-btn active" onclick="switchLuggageTab('tag')">🏷️ Tag Luggage &amp; QR Tag</button>
-            <button id="tabBtnManifest" class="tab-btn" onclick="switchLuggageTab('manifest')">📋 Cargo Manifest (<span id="manifestCount">0</span>)</button>
-            <button id="tabBtnTrack" class="tab-btn" onclick="switchLuggageTab('track')">🛰️ Live Luggage Tracker</button>
+            <button id="tabBtnTag" class="tab-btn active" onclick="switchLuggageTab('tag')">Tag Luggage &amp; QR Tag</button>
+            <button id="tabBtnManifest" class="tab-btn" onclick="switchLuggageTab('manifest')">Cargo Manifest (<span id="manifestCount">0</span>)</button>
+            <button id="tabBtnTrack" class="tab-btn" onclick="switchLuggageTab('track')">Live Luggage Tracker</button>
         </div>
 
         <!-- TAB 1: TAG LUGGAGE & PRINTABLE QR TAG -->
@@ -183,10 +206,10 @@
                     <label>
                         Transit Checkpoint Status
                         <select id="status">
-                            <option value="TAGGED">🏷️ TAGGED — Digital Tag Generated</option>
-                            <option value="CHECKED_IN">📋 CHECKED IN — Terminal Bag Counter</option>
-                            <option value="LOADED">🚌 LOADED — Bus Luggage Hold</option>
-                            <option value="COLLECTED">✅ COLLECTED — Claimed by Passenger</option>
+                            <option value="TAGGED">TAGGED — Digital Tag Generated</option>
+                            <option value="CHECKED_IN">CHECKED IN — Terminal Bag Counter</option>
+                            <option value="LOADED">LOADED — Bus Luggage Hold</option>
+                            <option value="COLLECTED">COLLECTED — Claimed by Passenger</option>
                         </select>
                     </label>
 
@@ -242,14 +265,14 @@
                             </svg>
                         </div>
                         <div style="font-size:0.75rem; color:var(--gray-600); font-weight:700; margin-top:8px;">
-                            📷 Scan with any smartphone camera to verify cargo
+                            Scan with any smartphone camera to verify cargo
                         </div>
                     </div>
 
                     <!-- Print & Modal Actions -->
                     <div class="print-hide" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--gray-200); padding-top:12px;">
-                        <button type="button" class="button secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="showQrModal()">🔍 Preview Data</button>
-                        <button type="button" class="button" style="font-size:0.8rem; padding:6px 16px;" onclick="window.print()">Print Tag 🖨️</button>
+                        <button type="button" class="button secondary" style="font-size:0.8rem; padding:6px 12px;" onclick="showQrModal()">Preview Data</button>
+                        <button type="button" class="button" style="font-size:0.8rem; padding:6px 16px;" onclick="window.print()">Print Tag</button>
                     </div>
                 </div>
             </section>
@@ -259,7 +282,7 @@
         <div id="tabManifestContent" class="hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:12px;">
                 <h2 style="margin:0;">Registered Baggage Manifest</h2>
-                <button onclick="loadLuggage()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">🔄 Refresh Manifest</button>
+                <button onclick="loadLuggage()" class="button secondary" style="font-size:0.82rem; padding:6px 14px;">Refresh Manifest</button>
             </div>
 
             <div id="luggageList" class="form-grid">
@@ -271,7 +294,7 @@
         <div id="tabTrackContent" class="hidden">
             <div style="max-width: 650px; margin: 0 auto;">
                 <div class="panel" style="text-align:center; padding:36px;">
-                    <div style="font-size:2.5rem; margin-bottom:10px;">🛰️</div>
+                    <div style="font-size:2.5rem; margin-bottom:10px;"></div>
                     <h2 style="font-size:1.6rem; font-weight:700; margin-bottom:6px;">Track Baggage by Tag ID</h2>
                     <p style="color:var(--gray-600); font-size:0.9rem; margin-bottom:20px;">
                         Enter any unique Luggage Tag ID (e.g. <code>LUG-20261001-XXXXXX</code>) to inspect live cargo checkpoints and journey progression.
@@ -294,8 +317,8 @@
     <div id="qrDataModal" class="modal-overlay hidden">
         <div class="modal-box">
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gray-200); padding-bottom:12px; margin-bottom:14px;">
-                <h3 style="font-size:1.15rem; font-weight:700; margin:0;">📱 Scannable QR Payload</h3>
-                <button onclick="closeQrModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; font-weight:700;">✕</button>
+                <h3 style="font-size:1.15rem; font-weight:700; margin:0;">Scannable QR Payload</h3>
+                <button onclick="closeQrModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; font-weight:700;">&times;</button>
             </div>
             <div id="modalQrSvg" style="display:flex; justify-content:center; margin-bottom:16px;"></div>
             <pre id="modalQrPayload" style="background:#f8fafc; border:1px solid var(--gray-200); border-radius:8px; padding:14px; font-size:0.8rem; font-family:monospace; white-space:pre-wrap; color:var(--gray-900); line-height:1.5;"></pre>
@@ -358,25 +381,46 @@
         async function loadBookings() {
             const uid = user.id || user.userId || 2;
             try {
-                const response = await fetch(`/api/v1/bookings/user/${uid}`);
+                let response = await fetch(`/api/v1/bookings/user/${uid}`);
+                let bookings = [];
                 if (response.ok) {
-                    const bookings = await response.json();
-                    if (bookings && bookings.length > 0) {
-                        bookingIdSelect.innerHTML = bookings.map(b => `
-                            <option value="${b.bookingId}" data-route="${b.route || 'Express Bus'}" data-name="${b.passengerName || user.fullName || 'Passenger'}">
-                                Booking #${b.bookingId} — ${b.route || 'Express Service'}
-                            </option>
-                        `).join('');
-                    } else {
-                        bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+                    bookings = await response.json();
+                }
+
+                if (!bookings || bookings.length === 0) {
+                    const fallbackRes = await fetch('/api/v1/bookings/user/all');
+                    if (fallbackRes.ok) {
+                        bookings = await fallbackRes.json();
+                    }
+                }
+
+                if (bookings && bookings.length > 0) {
+                    bookingIdSelect.innerHTML = bookings.map(b => `
+                        <option value="${b.bookingId}" data-route="${b.route || 'Express Bus'}" data-name="${b.passengerName || user.fullName || 'Passenger'}">
+                            Booking #${b.bookingId} — ${b.route || 'Express Service'} (${b.passengerName || 'Passenger'})
+                        </option>
+                    `).join('');
+
+                    const first = bookings[0];
+                    if (first.passengerName && !passengerNameInput.value) {
+                        passengerNameInput.value = first.passengerName;
                     }
                 } else {
-                    bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+                    bookingIdSelect.innerHTML = '<option value="" disabled selected>No active bookings found in system</option>';
+                    showMessage('No active bus bookings found. Please book a trip first before tagging baggage.', 'error');
                 }
             } catch (err) {
-                bookingIdSelect.innerHTML = '<option value="1" data-route="Colombo to Kandy Express" data-name="Passenger">Booking #1 — Colombo to Kandy Express</option>';
+                console.error('Error loading bookings:', err);
+                bookingIdSelect.innerHTML = '<option value="" disabled selected>Could not load bookings</option>';
             }
         }
+
+        bookingIdSelect.addEventListener('change', () => {
+            const selectedOpt = bookingIdSelect.options[bookingIdSelect.selectedIndex];
+            if (selectedOpt && selectedOpt.getAttribute('data-name')) {
+                passengerNameInput.value = selectedOpt.getAttribute('data-name');
+            }
+        });
 
         async function loadLuggage() {
             const uid = user.id || user.userId || 2;
@@ -446,9 +490,9 @@
                         </div>
 
                         <div class="item-actions" style="margin:0;">
-                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="previewRecordTag(${lid})">Print QR 🖨️</button>
-                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editLuggageRecord(${lid})">✏️ Edit</button>
-                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteLuggageRecord(${lid})">🗑️ Delete</button>
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="previewRecordTag(${lid})">Print QR</button>
+                            <button class="button secondary" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="editLuggageRecord(${lid})">Edit</button>
+                            <button class="button danger" style="font-size:0.8rem; padding:4px 10px;" type="button" onclick="deleteLuggageRecord(${lid})">Delete</button>
                         </div>
                     </div>
                 </article>
@@ -481,7 +525,14 @@
                 });
 
                 if (!response.ok) {
-                    showMessage(await response.text(), 'error');
+                    let errMsg = 'Failed to save luggage tag.';
+                    try {
+                        const errJson = await response.json();
+                        errMsg = errJson.message || errJson.error || errMsg;
+                    } catch (e) {
+                        errMsg = await response.text();
+                    }
+                    showMessage(errMsg, 'error');
                     return;
                 }
 
@@ -490,7 +541,20 @@
                 savedRecord.routeInfo = routeStr;
 
                 updateTagCardDisplay(savedRecord);
-                showMessage(editingLuggageId ? 'Luggage record updated successfully.' : `Luggage tag generated successfully: ${savedRecord.tagNumber}`);
+                
+                // Screenshot 2 banner message
+                showMessage(editingLuggageId 
+                    ? 'Luggage record updated successfully.' 
+                    : `Success! Unique Luggage Tag ID ${savedRecord.tagNumber} generated. \u00A0\u00A0\u00A0\u00A0  Alert Dispatched`
+                );
+
+                // Screenshot 2 Floating Live Notification Toast
+                if (window.showLiveNotificationToast) {
+                    showLiveNotificationToast(
+                        'NEW LUGGAGE BOOKED',
+                        `Luggage tag ${savedRecord.tagNumber} successfully registered for ${savedRecord.bagQuantity} bag(s).`
+                    );
+                }
 
                 resetLuggageForm();
                 await loadLuggage();

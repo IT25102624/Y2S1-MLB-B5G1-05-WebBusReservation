@@ -176,15 +176,15 @@
 
     <nav class="navbar">
         <div class="navbar-brand">
-            <span class="logo">🛡️</span>
+            <span class="logo"></span>
             <div>
                 <h1>User Management</h1>
                 <span>Admin Portal</span>
             </div>
         </div>
         <div class="nav-links">
-            <a href="/admin.html" class="nav-link">🏠 Main Portal</a>
-            <a href="/search.html" class="nav-link">🔍 Search Trips</a>
+            <a href="/admin.html" class="nav-link"> Main Portal</a>
+            <a href="/search.html" class="nav-link"> Search Trips</a>
             <span id="sessionChip" class="session-chip" style="display:none;"></span>
             <button id="navLogoutBtn" class="btn btn-outline btn-sm" style="display:none;" onclick="handleLogout()">Sign out</button>
         </div>
@@ -193,35 +193,35 @@
     <div class="container">
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon stat-icon-total">👥</div>
+                <div class="stat-icon stat-icon-total"></div>
                 <div>
                     <div class="stat-value" id="statTotal">—</div>
                     <div class="stat-label">Total Users</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-icon-passenger">🧍</div>
+                <div class="stat-icon stat-icon-passenger"></div>
                 <div>
                     <div class="stat-value" id="statPassengers">—</div>
                     <div class="stat-label">Passengers</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-icon-conductor">🚌</div>
+                <div class="stat-icon stat-icon-conductor"></div>
                 <div>
                     <div class="stat-value" id="statConductors">—</div>
                     <div class="stat-label">Conductors</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-icon-driver">🚘</div>
+                <div class="stat-icon stat-icon-driver"></div>
                 <div>
                     <div class="stat-value" id="statDrivers">—</div>
                     <div class="stat-label">Drivers</div>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon stat-icon-admin">🛡️</div>
+                <div class="stat-icon stat-icon-admin"></div>
                 <div>
                     <div class="stat-value" id="statAdmins">—</div>
                     <div class="stat-label">Admins</div>
@@ -231,23 +231,23 @@
 
         <div class="card">
             <div class="section-header">
-                <h2 class="section-title">👥 User Management</h2>
+                <h2 class="section-title"> User Management</h2>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-outline" onclick="loadData()">🔄 Refresh</button>
-                    <button class="btn btn-primary" onclick="openAddModal()">➕ Add User</button>
+                    <button class="btn btn-outline" onclick="loadData()"> Refresh</button>
+                    <button class="btn btn-primary" onclick="openAddModal()"> Add User</button>
                 </div>
             </div>
             <div class="toolbar" style="margin-bottom:20px;">
                 <div class="search-wrap">
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon"></span>
                     <input type="text" id="searchInput" placeholder="Search by name, email or phone..." oninput="filterUsers()" />
                 </div>
                 <select class="filter-select" id="roleFilter" onchange="filterUsers()">
                     <option value="">All Roles</option>
-                    <option value="PASSENGER">🧍 Passenger</option>
-                    <option value="CONDUCTOR">🚌 Conductor</option>
-                    <option value="DRIVER">🚘 Driver</option>
-                    <option value="ADMIN">🛡️ Admin</option>
+                    <option value="PASSENGER"> Passenger</option>
+                    <option value="CONDUCTOR"> Conductor</option>
+                    <option value="DRIVER"> Driver</option>
+                    <option value="ADMIN"> Admin</option>
                 </select>
                 <span id="userCount" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;"></span>
             </div>
@@ -264,7 +264,7 @@
                         </tr>
                     </thead>
                     <tbody id="usersTableBody">
-                        <tr><td colspan="6"><div class="empty-state"><div class="icon">⏳</div><p>Loading users...</p></div></td></tr>
+                        <tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>Loading users...</p></div></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -274,8 +274,8 @@
     <div class="modal-overlay" id="addModal">
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">➕ Create New User</span>
-                <button class="modal-close" onclick="closeAddModal()">✕</button>
+                <span class="modal-title"> Create New User</span>
+                <button class="modal-close" onclick="closeAddModal()">&times;</button>
             </div>
             <form id="addUserForm" onsubmit="handleAddUser(event)">
                 <div class="form-group">
@@ -293,10 +293,10 @@
                 <div class="form-group">
                     <label>Role</label>
                     <select id="addRole">
-                        <option value="PASSENGER">🧍 Passenger</option>
-                        <option value="CONDUCTOR">🚌 Conductor</option>
-                        <option value="DRIVER">🚘 Driver</option>
-                        <option value="ADMIN">🛡️ Admin</option>
+                        <option value="PASSENGER"> Passenger</option>
+                        <option value="CONDUCTOR"> Conductor</option>
+                        <option value="DRIVER"> Driver</option>
+                        <option value="ADMIN"> Admin</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -305,7 +305,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeAddModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="addUserBtn">➕ Create User</button>
+                    <button type="submit" class="btn btn-primary" id="addUserBtn"> Create User</button>
                 </div>
             </form>
         </div>
@@ -314,8 +314,8 @@
     <div class="modal-overlay" id="editModal">
         <div class="modal">
             <div class="modal-header">
-                <span class="modal-title">✏️ Edit User</span>
-                <button class="modal-close" onclick="closeEditModal()">✕</button>
+                <span class="modal-title">Edit User</span>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
             </div>
             <form id="editUserForm" onsubmit="handleEditUser(event)">
                 <input type="hidden" id="editUserId">
@@ -330,15 +330,15 @@
                 <div class="form-group">
                     <label>Role</label>
                     <select id="editRole">
-                        <option value="PASSENGER">🧍 Passenger</option>
-                        <option value="CONDUCTOR">🚌 Conductor</option>
-                        <option value="DRIVER">🚘 Driver</option>
-                        <option value="ADMIN">🛡️ Admin</option>
+                        <option value="PASSENGER"> Passenger</option>
+                        <option value="CONDUCTOR"> Conductor</option>
+                        <option value="DRIVER"> Driver</option>
+                        <option value="ADMIN"> Admin</option>
                     </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="editUserBtn">💾 Save Changes</button>
+                    <button type="submit" class="btn btn-primary" id="editUserBtn"> Save Changes</button>
                 </div>
             </form>
         </div>
@@ -347,15 +347,15 @@
     <div class="modal-overlay" id="deleteModal">
         <div class="modal" style="max-width:400px;">
             <div class="modal-header">
-                <span class="modal-title">🗑️ Confirm Deletion</span>
-                <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+                <span class="modal-title"> Confirm Deletion</span>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
             </div>
             <p style="color:var(--text-muted); font-size:0.92rem; margin-bottom:8px;">Are you sure you want to delete this user?</p>
             <p style="font-weight:700; font-size:0.95rem;" id="deleteUserLabel">—</p>
-            <p style="font-size:0.82rem; color:var(--danger); margin-top:10px;">⚠️ This action cannot be undone.</p>
+            <p style="font-size:0.82rem; color:var(--danger); margin-top:10px;"> This action cannot be undone.</p>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">🗑️ Delete User</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()"> Delete User</button>
             </div>
         </div>
     </div>
@@ -382,18 +382,18 @@
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            const icons = { success: '', error: '', info: '' };
             toast.className = `toast toast-${type}`;
-            toast.textContent = `${icons[type] || 'ℹ️'} ${message}`;
+            toast.textContent = message;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4500);
         }
         function roleBadge(role) {
             const map = {
-                ADMIN: '<span class="badge badge-admin">🛡️ Admin</span>',
-                CONDUCTOR: '<span class="badge badge-conductor">🚌 Conductor</span>',
-                DRIVER: '<span class="badge badge-driver">🚘 Driver</span>',
-                PASSENGER: '<span class="badge badge-passenger">🧍 Passenger</span>'
+                ADMIN: '<span class="badge badge-admin"> Admin</span>',
+                CONDUCTOR: '<span class="badge badge-conductor"> Conductor</span>',
+                DRIVER: '<span class="badge badge-driver"> Driver</span>',
+                PASSENGER: '<span class="badge badge-passenger"> Passenger</span>'
             };
             return map[role] || `<span class="badge">${role}</span>`;
         }
@@ -463,7 +463,7 @@
             const tbody = document.getElementById('usersTableBody');
             document.getElementById('userCount').textContent = `${users.length} user${users.length !== 1 ? 's' : ''} found`;
             if (users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">👤</div><p>No users match your search.</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>No users match your search.</p></div></td></tr>`;
                 return;
             }
             tbody.innerHTML = users.map(u => `
@@ -483,15 +483,15 @@
                     <td style="color:var(--text-muted); white-space:nowrap;">${formatDate(u.createdAt)}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')">✏️</button>
-                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')">🗑️</button>
+                            <button class="btn-icon-sm btn-icon-edit" title="Edit User" onclick="openEditModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.phoneNumber)}', '${u.role}')"></button>
+                            <button class="btn-icon-sm btn-icon-delete" title="Delete User" onclick="openDeleteModal(${u.userId}, '${escStr(u.fullName)}', '${escStr(u.email)}')"></button>
                         </div>
                     </td>
                 </tr>`).join('');
         }
         function renderUsersError(msg) {
             document.getElementById('usersTableBody').innerHTML =
-                `<tr><td colspan="6"><div class="empty-state"><div class="icon">❌</div><p>${msg}</p></div></td></tr>`;
+                `<tr><td colspan="6"><div class="empty-state"><div class="icon"></div><p>${msg}</p></div></td></tr>`;
         }
         function escStr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
         function filterUsers() {
@@ -514,7 +514,7 @@
             event.preventDefault();
             const btn = document.getElementById('addUserBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Creating...';
+            btn.textContent = ' Creating...';
             const payload = {
                 fullName: document.getElementById('addName').value.trim(),
                 email: document.getElementById('addEmail').value.trim(),
@@ -537,7 +537,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '➕ Create User';
+                btn.textContent = ' Create User';
             }
         }
         function openEditModal(id, name, phone, role) {
@@ -552,7 +552,7 @@
             event.preventDefault();
             const btn = document.getElementById('editUserBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Saving...';
+            btn.textContent = ' Saving...';
             const userId = document.getElementById('editUserId').value;
             const payload = {
                 fullName: document.getElementById('editName').value.trim(),
@@ -573,7 +573,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '💾 Save Changes';
+                btn.textContent = ' Save Changes';
             }
         }
         function openDeleteModal(id, name, email) {
@@ -589,7 +589,7 @@
             if (!deleteTargetId) return;
             const btn = document.getElementById('confirmDeleteBtn');
             btn.disabled = true;
-            btn.textContent = '⏳ Deleting...';
+            btn.textContent = ' Deleting...';
             const currentUser = getUser();
             const adminEmail = currentUser ? currentUser.email : '';
             const url = adminEmail
@@ -609,7 +609,7 @@
                 showToast('Connection error.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = '🗑️ Delete User';
+                btn.textContent = ' Delete User';
                 deleteTargetId = null;
             }
         }

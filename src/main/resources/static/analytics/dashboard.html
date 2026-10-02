@@ -10,15 +10,15 @@
 
 <header style="background:#022c22; padding:0 2rem; height:70px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(16,185,129,0.2); position:sticky; top:0; z-index:100;">
     <a href="../index.html" style="font-family:'Space Grotesk',sans-serif; font-size:1.35rem; font-weight:700; color:#fff; text-decoration:none; display:flex; align-items:center; gap:8px;">
-        <span>🚌</span> Catch<span style="color:#10b981;">Bus</span>LK
+        <span></span> Catch<span style="color:#10b981;">Bus</span>LK
     </a>
     <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
         <a href="../search.html" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;">Passenger Search</a>
         <a href="../schedule.html" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;">Timetable</a>
-        <a href="../search.html?mode=operator" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;">🛠️ Fleet &amp; Dispatch</a>
-        <a href="../admin.html?tab=portal" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;">🛡️ Admin Portal</a>
-        <a href="../ticket-verification.html" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;">🛂 Verify QR Pass</a>
-        <a href="../admin.html?tab=profile" style="color:#10b981; font-weight:700; text-decoration:none; font-size:0.9rem; background:rgba(16,185,129,0.15); padding:6px 14px; border-radius:9999px;">👤 Executive Admin</a>
+        <a href="../search.html?mode=operator" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;"> Fleet &amp; Dispatch</a>
+        <a href="../admin.html?tab=portal" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;"> Admin Portal</a>
+        <a href="../ticket-verification.html" style="color:#cbd5e1; text-decoration:none; font-size:0.9rem; font-weight:600;"> Verify QR Pass</a>
+        <a href="../admin.html?tab=profile" style="color:#10b981; font-weight:700; text-decoration:none; font-size:0.9rem; background:rgba(16,185,129,0.15); padding:6px 14px; border-radius:9999px;"> Executive Admin</a>
     </div>
 </header>
 
@@ -270,7 +270,7 @@
 
     function showError(message) {
         const el = document.getElementById("errorMessage");
-        el.textContent = "❌ " + message;
+        el.textContent = " " + message;
         el.style.display = "block";
         el.style.color = "";
         el.style.background = "";
@@ -290,7 +290,7 @@
 
     function showSuccessMessage(message) {
         const el = document.getElementById("errorMessage");
-        el.textContent = "✅ " + message;
+        el.textContent = " " + message;
         el.style.display = "block";
         el.style.color = "#2f7d32";
         el.style.background = "#f4fbf4";
@@ -310,7 +310,7 @@
         input.classList.remove("input-success");
         input.classList.add("input-error");
         const el = document.getElementById(errorId);
-        if (el) el.textContent = "❌ " + message;
+        if (el) el.textContent = " " + message;
     }
 
     function showValidationSuccess(input, errorId) {
@@ -526,7 +526,7 @@
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
             deleteButton.className = "btn delete-btn";
-            deleteButton.textContent = "🗑 Delete";
+            deleteButton.textContent = " Delete";
             deleteButton.addEventListener("click", () => {
                 openDeleteModal(routeId);
             });

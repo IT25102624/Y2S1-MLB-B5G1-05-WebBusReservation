@@ -141,29 +141,52 @@
     </style>
 </head>
 <body>
-    <nav class="top-nav">
-        <a class="brand" href="index.html"><span>🚌</span> Catch<span>Bus</span>LK</a>
-        <div class="nav-links">
-            <a href="search.html">Book a Trip</a>
-            <a href="schedule.html">Timetable</a>
-            <a href="luggage.html">Luggage</a>
-            <a href="feedback.html">Feedback</a>
-            <a href="notifications.html">Alerts</a>
-            <a href="customer-care.html" class="active">🛡️ Customer Care</a>
-            <a href="admin.html">Admin Portal</a>
-            <button id="logoutBtn" class="hidden">Sign Out</button>
+      <header class="top-nav">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+          <div id="notificationMenu" class="notification-menu hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+              <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+            </div>
+            <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+              <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+            </div>
+          </div>
         </div>
-    </nav>
+        <div id="navAuthAction"></div>
+      </div>
+    </div>
+  </header>
 
     <main class="container">
         <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
             <div>
-                <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;">🛡️ Customer Care &amp; Grievance Resolution</h1>
+                <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700;"> Customer Care &amp; Grievance Resolution</h1>
                 <p style="color:var(--gray-600); font-size:0.95rem;">National Transit Support: Oversee passenger feedback, investigate complaints, and dispatch official customer service responses.</p>
             </div>
             <div style="display:flex; gap:10px;">
                 <a href="feedback.html" class="button secondary" style="font-size:0.85rem;">Passenger Feedback View</a>
-                <button onclick="loadAllCareData()" class="button" style="font-size:0.85rem;">🔄 Refresh Records</button>
+                <button onclick="loadAllCareData()" class="button" style="font-size:0.85rem;">Refresh Records</button>
             </div>
         </div>
 
@@ -193,7 +216,7 @@
         <div class="filter-bar">
             <div class="filter-pills">
                 <button class="pill-btn active" data-filter="ALL" onclick="setFilter('ALL', this)">All Records (<span id="countAll">0</span>)</button>
-                <button class="pill-btn" data-filter="NEEDS_REPLY" onclick="setFilter('NEEDS_REPLY', this)">⚠️ Needs Reply (<span id="countNeedsReply">0</span>)</button>
+                <button class="pill-btn" data-filter="NEEDS_REPLY" onclick="setFilter('NEEDS_REPLY', this)"> Needs Reply (<span id="countNeedsReply">0</span>)</button>
                 <button class="pill-btn" data-filter="COMPLAINTS" onclick="setFilter('COMPLAINTS', this)">Complaints (<span id="countComplaints">0</span>)</button>
                 <button class="pill-btn" data-filter="REVIEWS" onclick="setFilter('REVIEWS', this)">Reviews &amp; Praise (<span id="countReviews">0</span>)</button>
             </div>
@@ -312,7 +335,7 @@
                     typeLabel = 'Inquiry';
                 }
 
-                const stars = item.rating ? '★'.repeat(item.rating) + '☆'.repeat(5 - item.rating) : '';
+                const stars = item.rating ? `${item.rating} / 5 Rating` : '';
                 const dateStr = item.complainDate ? `${item.complainDate} ${item.complainTime || ''}` : 'Recent submission';
 
                 return `
@@ -331,7 +354,7 @@
 
                         <div style="display:flex; align-items:center; gap:8px;">
                             ${hasReply ? `
-                                <span class="tag badge-feedback" style="margin:0; font-weight:700;">✓ Resolved with Response</span>
+                                <span class="tag badge-feedback" style="margin:0; font-weight:700;">Resolved with Response</span>
                             ` : isComplain ? `
                                 <span class="tag badge-urgent" style="margin:0; font-weight:700;">● Response Required</span>
                             ` : `
@@ -344,7 +367,7 @@
 
                     ${hasReply ? `
                         <div class="resolution-box">
-                            <strong style="display:block; margin-bottom:4px;">🛡️ National Transit Official Response:</strong>
+                            <strong style="display:block; margin-bottom:4px;">National Transit Official Response:</strong>
                             <p style="margin:0; color:#064e3b; font-weight:500;">${escapeHtml(item.reply)}</p>
                         </div>
                     ` : ''}
@@ -363,12 +386,12 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; pt:8px; border-top:1px solid var(--gray-100);">
                         <div>
                             <button class="button secondary" style="font-size:0.82rem; padding:6px 14px;" onclick="openReplyEditor(${fid})">
-                                ${hasReply ? '✏️ Edit Response' : '💬 Reply to Passenger'}
+                                ${hasReply ? 'Edit Response' : 'Reply to Passenger'}
                             </button>
                         </div>
                         <div>
                             <button class="button danger" style="font-size:0.82rem; padding:6px 14px;" onclick="deleteFeedbackRecord(${fid})">
-                                🗑️ Delete Record
+                                Delete Record
                             </button>
                         </div>
                     </div>

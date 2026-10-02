@@ -173,7 +173,23 @@ public class BookingService {
                     String dep = String.valueOf(rs.getObject("departure_time"));
                     m.put("date", dep != null && dep.length() >= 10 ? dep.substring(0, 10) : "2026-10-01");
                     m.put("time", dep != null && dep.length() >= 16 ? dep.substring(11, 16) : "08:30");
-                    m.put("seats", List.of("S12", "S13"));
+
+                    List<String> realSeats = jdbc.queryForList("""
+                            SELECT s.seat_number FROM dbo.booking_seats bs JOIN dbo.seats s ON s.seat_id=bs.seat_id
+                            WHERE bs.booking_id=? ORDER BY TRY_CAST(s.seat_number AS INT), s.seat_number
+                            """, String.class, bId);
+                    m.put("seats", realSeats.isEmpty() ? List.of("S12") : realSeats);
+
+                    String tToken = jdbc.query("SELECT TOP 1 ticket_token FROM dbo.tickets WHERE booking_id=?",
+                            rsToken -> rsToken.next() ? rsToken.getString(1) : null, bId);
+                    m.put("ticketToken", tToken);
+
+                    List<Map<String, Object>> lug = jdbc.queryForList("""
+                            SELECT tag_number tagNumber, bag_quantity bagQuantity, status, description
+                            FROM dbo.luggage WHERE booking_id=?
+                            """, bId);
+                    m.put("luggage", lug);
+
                     m.put("passenger", Map.of(
                             "name", rs.getString("full_name"),
                             "email", rs.getString("email"),

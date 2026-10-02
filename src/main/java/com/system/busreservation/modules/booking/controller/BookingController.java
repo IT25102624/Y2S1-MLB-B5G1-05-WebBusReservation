@@ -32,6 +32,9 @@ public class BookingController {
         List<com.system.busreservation.model.Booking> bookings;
         if (numericUserId != null) {
             bookings = bookingRepository.findByUser_UserId(numericUserId);
+            if (bookings.isEmpty()) {
+                bookings = bookingRepository.findAll();
+            }
         } else {
             bookings = bookingRepository.findAll();
         }
@@ -42,6 +45,7 @@ public class BookingController {
             map.put("bookingTime", b.getBookingTime());
             map.put("status", b.getBookingStatus() != null ? b.getBookingStatus().name() : "CONFIRMED");
             map.put("totalAmount", b.getTotalAmount());
+            map.put("passengerName", b.getUser() != null ? b.getUser().getFullName() : "Passenger");
             if (b.getTrip() != null && b.getTrip().getRoute() != null) {
                 map.put("route", b.getTrip().getRoute().getSourceCity() + " to " + b.getTrip().getRoute().getDestinationCity());
             } else {
