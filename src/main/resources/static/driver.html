@@ -9,174 +9,654 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --brand: #10b981; --brand-dark: #059669;
-      --amber: #f59e0b; --amber-dark: #d97706; --bg: #090d16;
-      --card-bg: #111827; --border: rgba(255, 255, 255, 0.1);
-      --ink: #f8fafc; --ink-light: #94a3b8;
+      --brand: #10b981;
+      --brand-dark: #059669;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-inner: rgba(15, 23, 42, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-cyan: rgba(16, 185, 129, 0.25);
+      --border-amber: rgba(245, 158, 11, 0.25);
+      --ink: #f8fafc;
+      --ink-muted: #94a3b8;
+      --radius: 20px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 60px; }
-    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 0; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 70px; min-height: 100vh; }
+    
+    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 0; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
     .nav-wrap { max-width: 1240px; margin: 0 auto; width: 100%; padding: 0 24px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
-    .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; }
-    .brand-title span.brand-bus { color: var(--brand); }
-    .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; }
+    .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+    .brand-title span { color: var(--amber); }
+    .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
     .logout-btn:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
 
-    .main-wrap { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
-    .badge { display: inline-block; background: rgba(245, 158, 11, 0.15); color: var(--amber); font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 9999px; letter-spacing: 1px; border: 1px solid var(--border); }
-    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #ffffff; margin-top: 8px; }
+    .main-wrap { max-width: 1140px; margin: 36px auto; padding: 0 20px; }
+    .eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--amber); letter-spacing: 0.25em; display: inline-block; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #ffffff; margin-top: 4px; }
+    .header-sub { color: var(--ink-muted); font-size: 14px; margin-top: 4px; }
 
-    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
-    @media (max-width: 800px) { .grid-layout { grid-template-columns: 1fr; } }
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    @media (max-width: 900px) { .grid-2col { grid-template-columns: 1fr; } }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); position: relative; }
+    .card-cyan { border-color: var(--border-cyan); }
+    .card-amber { border-color: var(--border-amber); }
     .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
-    
-    .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 9999px; margin-top: 10px; }
-    .status-sharing { background: rgba(34, 197, 94, 0.15); color: var(--green); border: 1px solid rgba(34, 197, 94, 0.3); }
-    .status-stopped { background: rgba(255, 255, 255, 0.08); color: var(--ink-light); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .card-sub { color: var(--ink-muted); font-size: 13px; margin-bottom: 18px; }
 
-    .gps-btn { width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 18px; }
-    .gps-start { background: var(--amber); color: #000; }
-    .gps-start:hover { background: var(--amber-dark); }
-    .gps-stop { background: #ef4444; color: #fff; }
+    /* Key-Value Rows */
+    .row-list { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+    .row-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+    .row-label { color: var(--ink-muted); }
+    .row-value { font-weight: 600; color: #e2e8f0; text-align: right; }
 
-    .info-list { margin-top: 20px; font-size: 14px; line-height: 2; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
-    .info-list strong { color: var(--ink-light); }
+    .status-pill { font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 3px 10px; border-radius: 9999px; letter-spacing: 0.5px; }
+    .status-pill.valid { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+
+    /* Map Box */
+    .map-box { margin-top: 16px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; height: 260px; }
+    .map-box iframe { width: 100%; height: 100%; border: 0; }
+
+    /* Form Fields */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 11px 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: var(--card-inner); color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--amber); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+
+    .btn-action { width: 100%; background: var(--amber); color: #090d16; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .btn-action:hover { background: #f59e0b; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .msg-box { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+    .msg-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid var(--brand); }
+    .msg-error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid var(--rose); }
+
+    /* Operations Messages Feed */
+    .msg-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; max-height: 280px; overflow-y: auto; }
+    .msg-card { border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); background: var(--card-inner); }
+    .msg-card.urgent { border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.08); }
+    .msg-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .msg-card-title { font-weight: 700; color: #ffffff; font-size: 14px; }
+    .msg-urgent-pill { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; }
+    .msg-card-body { font-size: 13px; color: #cbd5e1; line-height: 1.4; }
+    .msg-card-footer { font-size: 11px; color: var(--ink-muted); margin-top: 6px; }
+
+    /* GPS Sharing Bar */
+    .gps-sharing-box { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .gps-toggle-btn { background: var(--amber); color: #090d16; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .gps-toggle-btn.active { background: var(--rose); color: #ffffff; }
+    .gps-status-text { font-size: 12px; color: var(--ink-muted); margin-top: 10px; }
   </style>
 </head>
 <body>
   <header>
     <div class="nav-wrap">
-      <div class="brand-title">Catch<span class="brand-bus">Bus</span>LK &middot; Driver Console</div>
+      <a href="index.html" class="brand-title">Catch<span>Bus</span>LK &middot; Driver Console</a>
       <div style="display:flex; align-items:center; gap:16px;">
-        <span style="font-size:13px; color:var(--ink-light);" id="driverLabel">Demo Driver (DRV-001)</span>
-        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token')">Sign out</a>
+        <span style="font-size:13px; color:var(--ink-muted);" id="driverLabel">Demo Driver (DRV-001)</span>
+        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token'); localStorage.removeItem('user_info');">Sign out</a>
       </div>
     </div>
   </header>
 
   <main class="main-wrap">
-    <span class="badge">Live Highway Transit Console</span>
-    <h1>Route Schedule &amp; GPS Broadcaster</h1>
-    <p style="color:var(--ink-light); font-size:14px; margin-top:4px;">Broadcast real-time bus telemetry and track preceding buses along the expressway corridor.</p>
+    <span class="eyebrow">Driver Console</span>
+    <h1>My route &amp; live operations</h1>
+    <p class="header-sub" id="headerSubText">Demo Driver &middot; DRV-001 &middot; Bus CBL-001</p>
 
-    <div class="grid-layout">
-      <!-- Live GPS Broadcasting Card -->
-      <section class="card">
-        <h2 class="card-title">Live GPS Telemetry Sharing</h2>
-        <p style="color:var(--ink-light); font-size:13px;">Broadcasts your bus coordinates so the following bus and passengers can track your transit status.</p>
-
-        <div id="gpsStatusBadge" class="status-pill status-stopped">&#9679; GPS Sharing Offline</div>
-
-        <div class="info-list">
-          <div><strong>Current Coordinates:</strong> <span id="coordsDisplay">7.2906&deg; N, 80.6337&deg; E</span></div>
-          <div><strong>Current Speed:</strong> <span id="speedDisplay">52.4 km/h</span></div>
-          <div><strong>Heading / Bearing:</strong> <span id="headingDisplay">85&deg; (Eastbound Highway)</span></div>
-          <div><strong>Last Broadcast Synced:</strong> <span id="syncDisplay">Just now</span></div>
+    <!-- Top Grid: Assigned Schedule & Previous Bus Live Location -->
+    <div class="grid-2col">
+      <!-- Card 1: Your Assigned Schedule -->
+      <section class="card card-cyan">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+          <div>
+            <h2 class="card-title" style="margin-bottom:2px;">Your assigned schedule</h2>
+            <div class="card-sub" style="margin-bottom:0;">Corridor &amp; departure assignment for your shift.</div>
+          </div>
+          <div style="min-width:220px; flex:1; max-width:320px;">
+            <label for="dutyTripSelect" style="display:block; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px;">Select Duty Shift</label>
+            <select id="dutyTripSelect" onchange="switchDutyTrip(this.value)" style="width:100%; background:var(--card-inner); color:#ffffff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:7px 10px; font-size:12px; font-weight:700; outline:none; cursor:pointer;">
+              <option value="">Loading assigned shifts...</option>
+            </select>
+          </div>
         </div>
 
-        <button type="button" class="gps-btn gps-start" id="toggleGpsBtn" onclick="toggleGps()">Start GPS Sharing</button>
+        <div class="row-list">
+          <div class="row-item">
+            <span class="row-label">Bus</span>
+            <span class="row-value" id="schBusNumber">CBL-001 (CatchBusLK AC)</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Route</span>
+            <span class="row-value" id="schRoute">Colombo &rarr; Kandy</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Departure</span>
+            <span class="row-value" id="schDeparture">Scheduled</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Arrival</span>
+            <span class="row-value" id="schArrival">Scheduled</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Status</span>
+            <span class="row-value" id="schStatus">
+              <span class="status-pill valid">SCHEDULED</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Arrival Milestone & Trip Completion Control -->
+        <div style="margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:700; color:var(--ink-muted); text-transform:uppercase;">Arrival Milestone</span>
+            <span id="tripCompletionBadge" style="font-size:12px; color:var(--amber); font-weight:700;">En Route / Active</span>
+          </div>
+          <button type="button" class="btn-action" id="btnCompleteTrip" onclick="completeCurrentTrip()" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border-radius:12px; font-weight:800; padding:12px 18px; display:inline-flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Mark Trip as Completed / Arrived
+          </button>
+          <p style="font-size:12px; color:var(--ink-muted); text-align:center; margin:0;" id="tripCompletionNote">
+            Confirms terminal arrival, credits highway transit kilometers, and unlocks passenger luggage handover for conductor.
+          </p>
+
+          <!-- Next Shift Prompt Banner -->
+          <div id="nextShiftPrompt" style="display:none; margin-top:6px; padding:12px 14px; background:rgba(16,185,129,0.12); border:1px solid #10b981; border-radius:12px; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:10px; font-weight:800; color:#34d399; text-transform:uppercase; letter-spacing:0.5px;">Next Shift Ready</div>
+              <div id="nextShiftLabel" style="font-size:12px; color:#ffffff; font-weight:700; margin-top:2px;"></div>
+            </div>
+            <button type="button" id="nextShiftBtn" class="btn-action" style="width:auto; padding:7px 14px; font-size:12px; background:#10b981; color:#090d16; font-weight:800;">
+              Switch to Next Shift &rarr;
+            </button>
+          </div>
+        </div>
       </section>
 
-      <!-- Preceding Bus Tracker Card -->
-      <section class="card">
-        <h2 class="card-title">Preceding Bus on Same Route</h2>
-        <p style="color:var(--ink-light); font-size:13px;">The bus running directly ahead of you on this route schedule.</p>
+      <!-- Card 2: Previous Bus Live Location -->
+      <section class="card card-amber">
+        <h2 class="card-title">Previous bus live location</h2>
+        <div class="card-sub">Live position of the vehicle traveling ahead of you along this corridor.</div>
 
-        <div style="background:rgba(0,0,0,0.4); border-radius:18px; padding:18px; margin-top:16px; border:1px solid rgba(255,255,255,0.06);">
-          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--amber);">Active Preceding Bus</div>
-          <div style="font-family:'Space Grotesk'; font-size:24px; font-weight:800; color:#ffffff; margin-top:4px;" id="prevPlateDisplay">CBL-000 &middot; CatchBusLK Express</div>
-          <div style="font-size:13px; color:var(--green); margin-top:4px;">&#9679; In Transit &middot; Departed 1h ahead</div>
+        <div class="row-list">
+          <div class="row-item">
+            <span class="row-label">Bus</span>
+            <span class="row-value" id="prevBusPlate">CBL-000</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Route</span>
+            <span class="row-value" id="prevRoute">Colombo &rarr; Kandy</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Trip departure</span>
+            <span class="row-value" id="prevDeparture">1h ahead</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Last GPS update</span>
+            <span class="row-value" id="prevGpsTime">Awaiting update</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Coordinates</span>
+            <span class="row-value" id="prevCoords">7.2088000, 79.8358000</span>
+          </div>
         </div>
 
-        <div class="info-list">
-          <div><strong>Preceding Bus Location:</strong> <span>7.2088&deg; N, 79.8358&deg; E</span></div>
-          <div><strong>Estimated Gap / Separation:</strong> <span style="color:var(--amber); font-weight:700;">~28 km ahead (35 min gap)</span></div>
-          <div><strong>Route:</strong> <span>Colombo Central &#8594; Kandy Transit</span></div>
+        <div class="map-box">
+          <iframe id="osmMapFrame" title="Preceding bus live map"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=79.8058%2C7.1788%2C79.8658%2C7.2388&layer=mapnik&marker=7.2088%2C79.8358">
+          </iframe>
         </div>
       </section>
     </div>
+
+    <!-- Middle Grid: Report an Issue & Operations Log -->
+    <div class="grid-2col" style="margin-top:24px;">
+      <!-- Card 3: Report an Issue -->
+      <section class="card">
+        <h2 class="card-title">Report an issue</h2>
+        <p class="card-sub">Send mechanical, road blockage, or highway incident reports directly to operations.</p>
+
+        <form id="reportForm" onsubmit="handleSendReport(event)">
+          <div class="form-group">
+            <input type="text" class="form-input" id="issueSubject" placeholder="Subject" required>
+          </div>
+          <div class="form-group">
+            <textarea class="form-input" id="issueMessage" rows="3" placeholder="Describe the issue and what support you need" required></textarea>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#cbd5e1; cursor:pointer;">
+              <input type="checkbox" id="issueUrgent" style="accent-color:var(--rose); width:16px; height:16px;">
+              Mark as urgent
+            </label>
+            <button type="submit" class="btn-action" style="width:auto; padding:10px 22px;" id="sendReportBtn">Send report</button>
+          </div>
+        </form>
+
+        <div class="msg-box msg-success" id="reportStatusBox"></div>
+
+        <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-muted); margin-bottom:10px;">Recent Operations Messages</div>
+          <div class="msg-list" id="operationsMessagesList">
+            <div style="font-size:13px; color:var(--ink-muted); text-align:center; padding:12px;">Loading operations messages...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 4: Live Telemetry Metrics -->
+      <section class="card">
+        <h2 class="card-title">Live Speed &amp; Telemetry Status</h2>
+        <p class="card-sub">Real-time highway metrics tracked during GPS transmission.</p>
+
+        <div class="row-list" style="margin-top:10px;">
+          <div class="row-item">
+            <span class="row-label">Current Coordinates</span>
+            <span class="row-value" id="driverCoords">7.2906&deg; N, 80.6337&deg; E</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Current Highway Speed</span>
+            <span class="row-value" id="driverSpeed" style="color:var(--amber);">52.4 km/h</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Heading / Bearing</span>
+            <span class="row-value" id="driverHeading">85&deg; (Eastbound Highway)</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Last Sync Timestamp</span>
+            <span class="row-value" id="driverSync">Just now</span>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.3); border-radius:14px; padding:16px; margin-top:20px; border:1px solid rgba(255,255,255,0.06); font-size:13px; color:var(--ink-muted);">
+          Telemetry is broadcast at 15-second intervals. Preceding and following buses utilize this stream for corridor separation monitoring.
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Section: Share this Bus GPS -->
+    <section class="card" style="margin-top:24px;">
+      <div class="gps-sharing-box">
+        <div>
+          <h2 class="card-title">Share this bus GPS</h2>
+          <p style="color:var(--ink-muted); font-size:13px; margin-top:2px;">
+            Your current bus location becomes the live location that the following bus can see.
+          </p>
+        </div>
+        <button type="button" class="gps-toggle-btn" id="gpsToggleBtn" onclick="toggleGpsSharing()">
+          Start GPS sharing
+        </button>
+      </div>
+      <div class="gps-status-text" id="gpsStatusMessage">GPS sharing is currently offline.</div>
+    </section>
   </main>
 
   <script>
-    let isSharing = false;
-    let gpsInterval = null;
+    let isGpsSharing = false;
+    let gpsIntervalId = null;
+    let currentAssignedTrip = null;
+    let selectedTripId = null;
+    let myAssignedTrips = [];
+
+    function getDriverUserId() {
+      try {
+        const userInfo = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
+        if (userInfo) {
+          const u = JSON.parse(userInfo);
+          return u.userId || u.id || 12;
+        }
+      } catch (e) {}
+      return 12; // Demo driver default
+    }
 
     function getAuthHeaders() {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
       const headers = { 'Content-Type': 'application/json' };
-      if (token) {
-        headers['Authorization'] = 'Bearer ' + token;
-      }
+      if (token) headers['Authorization'] = 'Bearer ' + token;
       return headers;
     }
 
-    async function loadDashboard() {
+    function formatDate(val) {
+      if (!val) return '—';
       try {
-        const userInfo = localStorage.getItem('user_info');
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? val : d.toLocaleString();
+      } catch (e) {
+        return val;
+      }
+    }
+
+    function populateDutyTripSelect(trips, activeTripId) {
+      const select = document.getElementById('dutyTripSelect');
+      if (!select) return;
+      if (!trips || trips.length === 0) {
+        select.innerHTML = '<option value="">No active shifts assigned</option>';
+        return;
+      }
+      select.innerHTML = trips.map(t => {
+        const isSel = (activeTripId && t.tripId === activeTripId) ? 'selected' : '';
+        const st = String(t.tripStatus || 'SCHEDULED').toUpperCase();
+        const dateStr = formatDate(t.departureTime);
+        return `<option value="${t.tripId}" ${isSel}>Trip #${t.tripId}: ${t.sourceCity} &rarr; ${t.destinationCity} (${st}) &middot; ${dateStr}</option>`;
+      }).join('');
+    }
+
+    function switchDutyTrip(tripId) {
+      if (!tripId) return;
+      selectedTripId = Number(tripId);
+      loadDashboard(selectedTripId);
+    }
+
+    async function loadDashboard(preferredTripId) {
+      const userId = getDriverUserId();
+      try {
+        const userInfo = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
         if (userInfo) {
           const u = JSON.parse(userInfo);
           document.getElementById('driverLabel').innerText = `${u.fullName || 'Demo Driver'} (${u.email || 'DRV-001'})`;
         }
 
-        const res = await fetch('/api/v1/staff/dashboard', { headers: getAuthHeaders() });
-        const data = await res.json();
-        if (data.data?.precedingBus) {
-          const p = data.data.precedingBus;
-          document.getElementById('prevPlateDisplay').innerText = `${p.busNumber} · ${p.operatorName || 'CatchBusLK'}`;
+        const effectiveTripId = preferredTripId || selectedTripId;
+        const tripParam = effectiveTripId ? `&tripId=${effectiveTripId}` : '';
+        const res = await fetch(`/api/v1/staff/dashboard?userId=${userId}${tripParam}`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          const d = json.data;
+
+          const prof = d?.profile;
+          const assigned = d?.assignedTrip;
+          currentAssignedTrip = assigned;
+          myAssignedTrips = d?.myAssignedTrips || [];
+
+          populateDutyTripSelect(myAssignedTrips, assigned?.tripId);
+
+          const fullName = (userInfo && JSON.parse(userInfo).fullName) || 'Demo Driver';
+          const empId = prof?.employeeId || 'DRV-001';
+          const busPlate = assigned?.busNumber || 'CBL-001';
+          document.getElementById('headerSubText').innerText = `${fullName} · ${empId} · Bus ${busPlate}`;
+
+          if (assigned) {
+            document.getElementById('schBusNumber').innerText = `${assigned.busNumber} (${assigned.operatorName || 'CatchBusLK'})`;
+            document.getElementById('schRoute').innerText = `${assigned.sourceCity} → ${assigned.destinationCity}`;
+            document.getElementById('schDeparture').innerText = formatDate(assigned.departureTime);
+            document.getElementById('schArrival').innerText = formatDate(assigned.arrivalTime);
+            
+            const isCompleted = String(assigned.tripStatus).toUpperCase() === 'COMPLETED';
+            const badge = document.getElementById('tripCompletionBadge');
+            const btn = document.getElementById('btnCompleteTrip');
+            const note = document.getElementById('tripCompletionNote');
+            const nextPrompt = document.getElementById('nextShiftPrompt');
+
+            if (isCompleted) {
+              document.getElementById('schStatus').innerHTML = `<span class="status-pill" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid #10b981;">COMPLETED &bull; ARRIVED</span>`;
+              if (badge) {
+                badge.innerText = 'Arrived at Destination';
+                badge.style.color = '#34d399';
+              }
+              if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.85';
+                btn.style.background = 'rgba(16,185,129,0.18)';
+                btn.style.border = '1px solid #10b981';
+                btn.style.color = '#34d399';
+                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Trip Completed &bull; Logged`;
+              }
+              if (note) {
+                note.innerHTML = `<strong style="color:#34d399;">Milestone Verified:</strong> Terminal arrival logged. Transit kilometers credited and luggage hold unlocked for passenger handover.`;
+              }
+
+              // Check if another scheduled shift is coming up
+              const nextUpcoming = myAssignedTrips.find(t => t.tripId !== assigned.tripId && String(t.tripStatus).toUpperCase() !== 'COMPLETED');
+              if (nextUpcoming && nextPrompt) {
+                nextPrompt.style.display = 'flex';
+                document.getElementById('nextShiftLabel').innerText = `Trip #${nextUpcoming.tripId} (${nextUpcoming.sourceCity} → ${nextUpcoming.destinationCity}) at ${formatDate(nextUpcoming.departureTime)}`;
+                document.getElementById('nextShiftBtn').onclick = () => {
+                  switchDutyTrip(nextUpcoming.tripId);
+                };
+              } else if (nextPrompt) {
+                nextPrompt.style.display = 'none';
+              }
+            } else {
+              if (nextPrompt) nextPrompt.style.display = 'none';
+              document.getElementById('schStatus').innerHTML = `<span class="status-pill valid">${assigned.tripStatus || 'SCHEDULED'}</span>`;
+              if (badge) {
+                badge.innerText = 'En Route / Active';
+                badge.style.color = 'var(--amber)';
+              }
+              if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                btn.style.border = 'none';
+                btn.style.color = '#fff';
+                btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Mark Trip as Completed / Arrived`;
+              }
+              if (note) {
+                note.innerText = 'Confirms terminal arrival, credits highway transit kilometers, and unlocks passenger luggage handover for conductor.';
+              }
+            }
+          } else {
+            document.getElementById('schBusNumber').innerText = 'No bus assigned';
+            document.getElementById('schRoute').innerText = 'No active duty assigned';
+            document.getElementById('schDeparture').innerText = '—';
+            document.getElementById('schArrival').innerText = '—';
+            document.getElementById('schStatus').innerHTML = `<span class="status-pill" style="background:rgba(255,255,255,0.08); color:var(--ink-muted);">STANDBY</span>`;
+          }
+
+          if (d?.precedingBus) {
+            const p = d.precedingBus;
+            document.getElementById('prevBusPlate').innerText = `${p.busNumber} (${p.operatorName || 'CatchBusLK'})`;
+            document.getElementById('prevRoute').innerText = `${p.sourceCity} → ${p.destinationCity}`;
+            document.getElementById('prevDeparture').innerText = formatDate(p.departureTime);
+
+            const loc = p.latestLocation;
+            if (loc && loc.latitude && loc.longitude) {
+              const lat = Number(loc.latitude);
+              const lon = Number(loc.longitude);
+              document.getElementById('prevGpsTime').innerText = formatDate(loc.recordedAt);
+              document.getElementById('prevCoords').innerText = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+
+              const bbox = `${(lon - 0.03).toFixed(4)}%2C${(lat - 0.03).toFixed(4)}%2C${(lon + 0.03).toFixed(4)}%2C${(lat + 0.03).toFixed(4)}`;
+              const marker = `${lat.toFixed(6)}%2C${lon.toFixed(6)}`;
+              document.getElementById('osmMapFrame').src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${marker}`;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Driver dashboard fallback active:', err);
+      }
+    }
+
+    async function loadOperationsMessages() {
+      const userId = getDriverUserId();
+      const listEl = document.getElementById('operationsMessagesList');
+      try {
+        const res = await fetch(`/api/v1/staff/messages?userId=${userId}`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          const msgs = json.data || [];
+          if (msgs.length === 0) {
+            listEl.innerHTML = '<div style="font-size:13px; color:var(--ink-muted); text-align:center; padding:12px;">No operations messages yet.</div>';
+            return;
+          }
+
+          listEl.innerHTML = msgs.map(m => `
+            <article class="msg-card ${m.urgent ? 'urgent' : ''}">
+              <div class="msg-card-header">
+                <span class="msg-card-title">${escapeHtml(m.subject)}</span>
+                ${m.urgent ? '<span class="msg-urgent-pill">Urgent</span>' : ''}
+              </div>
+              <p class="msg-card-body">${escapeHtml(m.message)}</p>
+              <div class="msg-card-footer">${escapeHtml(m.senderName || 'Staff')} &middot; ${escapeHtml(m.senderRole || 'STAFF')} &middot; ${formatDate(m.createdAt)}</div>
+            </article>
+          `).join('');
         }
       } catch (e) {
-        console.error('Error loading dashboard:', e);
+        console.warn('Error loading driver messages:', e);
       }
     }
 
-    function toggleGps() {
-      const btn = document.getElementById('toggleGpsBtn');
-      const badge = document.getElementById('gpsStatusBadge');
+    async function handleSendReport(e) {
+      e.preventDefault();
+      const userId = getDriverUserId();
+      const subject = document.getElementById('issueSubject').value.trim();
+      const message = document.getElementById('issueMessage').value.trim();
+      const urgent = document.getElementById('issueUrgent').checked;
+      const statusBox = document.getElementById('reportStatusBox');
+      const sendBtn = document.getElementById('sendReportBtn');
 
-      if (!isSharing) {
-        isSharing = true;
-        btn.innerText = 'Stop GPS Sharing';
-        btn.className = 'gps-btn gps-stop';
-        badge.innerText = '● Broadcasting Live GPS';
-        badge.className = 'status-pill status-sharing';
-
-        gpsInterval = setInterval(broadcastCoordinates, 8000);
-        broadcastCoordinates();
-      } else {
-        isSharing = false;
-        clearInterval(gpsInterval);
-        btn.innerText = 'Start GPS Sharing';
-        btn.className = 'gps-btn gps-start';
-        badge.innerText = '● GPS Sharing Offline';
-        badge.className = 'status-pill status-stopped';
-      }
-    }
-
-    async function broadcastCoordinates() {
-      // Simulate live progression along Kandy highway
-      const lat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(4);
-      const lon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(4);
-      const speed = (50 + Math.random() * 10).toFixed(1);
-
-      document.getElementById('coordsDisplay').innerText = `${lat}° N, ${lon}° E`;
-      document.getElementById('speedDisplay').innerText = `${speed} km/h`;
-      document.getElementById('syncDisplay').innerText = new Date().toLocaleTimeString();
-
+      sendBtn.disabled = true;
       try {
-        await fetch('/api/v1/staff/location', {
+        const res = await fetch(`/api/v1/staff/messages?userId=${userId}`, {
           method: 'POST',
           headers: getAuthHeaders(),
-          body: JSON.stringify({ latitude: parseFloat(lat), longitude: parseFloat(lon), speedKmh: parseFloat(speed), headingDegrees: 85.0 })
+          body: JSON.stringify({ subject, message, urgent })
         });
-      } catch (e) {
-        console.error('Location broadcast error:', e);
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || 'Could not send message.');
+
+        statusBox.innerText = 'Message sent to the operations team.';
+        statusBox.style.display = 'block';
+        document.getElementById('issueSubject').value = '';
+        document.getElementById('issueMessage').value = '';
+        document.getElementById('issueUrgent').checked = false;
+        setTimeout(() => { statusBox.style.display = 'none'; }, 4000);
+        await loadOperationsMessages();
+      } catch (err) {
+        statusBox.className = 'msg-box msg-error';
+        statusBox.innerText = err.message;
+        statusBox.style.display = 'block';
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    function toggleGpsSharing() {
+      const btn = document.getElementById('gpsToggleBtn');
+      const statusEl = document.getElementById('gpsStatusMessage');
+
+      if (!isGpsSharing) {
+        isGpsSharing = true;
+        btn.innerText = 'Stop GPS sharing';
+        btn.classList.add('active');
+        statusEl.innerText = 'Broadcasting live bus telemetry along expressway corridor.';
+        broadcastGps();
+        gpsIntervalId = setInterval(broadcastGps, 15000);
+      } else {
+        isGpsSharing = false;
+        clearInterval(gpsIntervalId);
+        btn.innerText = 'Start GPS sharing';
+        btn.classList.remove('active');
+        statusEl.innerText = 'GPS sharing stopped.';
+      }
+    }
+
+    async function broadcastGps() {
+      const userId = getDriverUserId();
+      const statusEl = document.getElementById('gpsStatusMessage');
+
+      const sendCoords = async (lat, lon, spd, head) => {
+        document.getElementById('driverCoords').innerText = `${lat}° N, ${lon}° E`;
+        document.getElementById('driverSpeed').innerText = `${spd} km/h`;
+        document.getElementById('driverHeading').innerText = `${head}° (Eastbound Highway)`;
+        document.getElementById('driverSync').innerText = new Date().toLocaleTimeString();
+
+        try {
+          const res = await fetch(`/api/v1/staff/location?userId=${userId}`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              latitude: parseFloat(lat),
+              longitude: parseFloat(lon),
+              speedKmh: parseFloat(spd),
+              headingDegrees: parseFloat(head)
+            })
+          });
+          if (res.ok) {
+            statusEl.innerText = `Bus GPS broadcast synced at ${new Date().toLocaleTimeString()} (Lat: ${lat}, Lon: ${lon})`;
+          }
+        } catch (e) {}
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const spd = pos.coords.speed == null ? 54.0 : (pos.coords.speed * 3.6).toFixed(1);
+            const head = pos.coords.heading == null ? 85.0 : pos.coords.heading;
+            sendCoords(pos.coords.latitude.toFixed(6), pos.coords.longitude.toFixed(6), spd, head);
+          },
+          () => {
+            const simLat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(6);
+            const simLon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(6);
+            sendCoords(simLat, simLon, (52 + Math.random() * 8).toFixed(1), 85.0);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        const simLat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(6);
+        const simLon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(6);
+        sendCoords(simLat, simLon, 54.0, 85.0);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
+    async function completeCurrentTrip() {
+      if (!currentAssignedTrip || !currentAssignedTrip.tripId) {
+        alert('No active trip assignment found to complete.');
+        return;
+      }
+      const tripId = currentAssignedTrip.tripId;
+      const src = currentAssignedTrip.sourceCity || 'Origin';
+      const dest = currentAssignedTrip.destinationCity || 'Destination';
+      if (!confirm(`Confirm arrival at ${dest} for Trip #${tripId} (${src} → ${dest})?\n\nThis will:\n1. Mark the trip as COMPLETED in the system\n2. Credit the highway transit mileage to your profile\n3. Notify conductor to begin passenger baggage handover.`)) {
+        return;
+      }
+
+      const btn = document.getElementById('btnCompleteTrip');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Recording arrival...';
+      }
+
+      try {
+        const userId = getDriverUserId();
+        const res = await fetch(`/api/v1/staff/trips/${tripId}/complete?userId=${userId}`, {
+          method: 'POST',
+          headers: getAuthHeaders()
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+          alert(`Trip #${tripId} arrived at ${dest}! Arrival marked as COMPLETED. Mileage has been added to your profile.`);
+          await loadDashboard();
+          await loadOperationsMessages();
+        } else {
+          alert(json.message || 'Failed to complete trip.');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = 'Mark Trip as Completed / Arrived';
+          }
+        }
+      } catch (err) {
+        alert('Connection error while completing trip.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = 'Mark Trip as Completed / Arrived';
+        }
       }
     }
 
     loadDashboard();
+    loadOperationsMessages();
+    setInterval(loadDashboard, 12000);
+    setInterval(loadOperationsMessages, 12000);
   </script>
 </body>
 </html>

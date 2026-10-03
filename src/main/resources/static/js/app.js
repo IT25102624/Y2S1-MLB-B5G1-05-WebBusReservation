@@ -35,7 +35,13 @@ function clearCurrentUser() {
 
 function handleLogout() {
     clearCurrentUser();
-    window.location.reload();
+    window.dispatchEvent(new Event('auth-change'));
+    if (window.location.pathname.includes('admin') || window.location.pathname.includes('customer-care') || window.location.pathname.includes('conductor') || window.location.pathname.includes('driver')) {
+        window.location.href = 'admin.html?tab=signin';
+    } else {
+        setupNav();
+        window.location.reload();
+    }
 }
 
 function requireUser(redirectUrl = 'admin.html?tab=signin') {
@@ -45,7 +51,7 @@ function requireUser(redirectUrl = 'admin.html?tab=signin') {
 
 /**
  * Standardize navigation across all views:
- * Standard 4 links: Book a Trip | Timetable | Feedback | Customer Care
+ * Standard links: Book a Trip | Timetable | Feedback | (Direct Booking for guests, My Tickets for passengers, Customer Care for admins)
  * Right actions: Notification Bell (with badge & dropdown) + Auth status
  */
 function setupNav(activePage) {
@@ -83,16 +89,21 @@ function setupNav(activePage) {
         else if (currentPath.includes('schedule')) activePage = 'schedule.html';
         else if (currentPath.includes('feedback')) activePage = 'feedback.html';
         else if (currentPath.includes('customer-care')) activePage = 'customer-care.html';
+        else if (currentPath.includes('direct-booking')) activePage = 'direct-booking.html';
+        else if (currentPath.includes('tickets')) activePage = 'tickets.html';
         else if (currentPath.includes('notification')) activePage = 'notifications.html';
         else if (currentPath.includes('index') || currentPath.endsWith('/') || currentPath === '') activePage = 'index.html';
     }
 
     const user = getCurrentUser();
     const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
-    const isAuthenticated = Boolean(token || user);
+    const isAuthenticated = Boolean(token && user);
     const isAdmin = Boolean(user && String(user.role).toUpperCase() === 'ADMIN');
 
-    // 4. Standardize nav-links (Customer Care restricted to Admins)
+    // 4. Standardize nav-links:
+    // Guest passengers: Direct Booking link
+    // Registered passengers: My Tickets link
+    // Administrators: Customer Care link
     let navLinks = wrap.querySelector('.nav-links');
     if (!navLinks) {
         navLinks = document.createElement('nav');
@@ -100,11 +111,27 @@ function setupNav(activePage) {
         wrap.appendChild(navLinks);
     }
 
+    let extraLinkHtml = '';
+    const userRole = user ? String(user.role || '').toUpperCase() : '';
+    if (isAdmin) {
+        extraLinkHtml = `<a href="${pfx}customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' ? 'active' : ''}">Customer Care</a>`;
+    } else if (userRole === 'CONDUCTOR') {
+        extraLinkHtml = `<a href="${pfx}conductor.html" id="navLinkConductor" class="${activePage === 'conductor.html' || currentPath.includes('conductor') ? 'active' : ''}">Conductor Console</a>`;
+    } else if (userRole === 'DRIVER') {
+        extraLinkHtml = `<a href="${pfx}driver.html" id="navLinkDriver" class="${activePage === 'driver.html' || currentPath.includes('driver') ? 'active' : ''}">Driver Console</a>`;
+    } else if (isAuthenticated && userRole === 'PASSENGER') {
+        extraLinkHtml = `<a href="${pfx}tickets.html" id="navLinkTickets" class="${activePage === 'tickets.html' || currentPath.includes('tickets') ? 'active' : ''}">My Tickets</a>`;
+    } else if (isAuthenticated) {
+        extraLinkHtml = `<a href="${pfx}admin.html?tab=profile" id="navLinkAccount" class="${activePage === 'profile' || currentPath.includes('admin') ? 'active' : ''}">My Account</a>`;
+    } else {
+        extraLinkHtml = `<a href="${pfx}direct-booking.html" id="navLinkDirect" class="${activePage === 'direct-booking.html' ? 'active' : ''}">Direct Booking</a>`;
+    }
+
     navLinks.innerHTML = `
         <a href="${pfx}search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
         <a href="${pfx}schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
         <a href="${pfx}feedback.html" id="navLinkFeedback" class="${activePage === 'feedback.html' ? 'active' : ''}">Feedback</a>
-        ${isAdmin ? `<a href="${pfx}customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' ? 'active' : ''}">Customer Care</a>` : ''}
+        ${extraLinkHtml}
     `;
 
     // 5. Standardize right actions (Bell + Auth)
@@ -150,9 +177,9 @@ function setupNav(activePage) {
 
         ${isAuthenticated ? `
             ${isAdmin ? `<a href="${pfx}admin.html?tab=portal" class="nav-admin-link">Admin Portal</a>` : ''}
-            <a href="${pfx}admin.html?tab=profile" class="user-chip">
+            <a href="${pfx}admin.html?tab=profile" class="user-chip" title="View Profile & Tickets">
                 <span class="user-avatar-dot">${userInitials}</span>
-                <span>${userName}</span>
+                <span>${escapeHtml(userName)}</span>
             </a>
             <button onclick="handleLogout()" class="nav-signout-btn" type="button">Sign Out</button>
         ` : `
@@ -163,6 +190,19 @@ function setupNav(activePage) {
 
     // 6. Bind Notification Bell events
     wireNotificationBell();
+
+    // 7. Ensure reactivity: re-render nav on auth changes across tabs or in-page
+    if (!window.__authNavListenersAttached) {
+        window.__authNavListenersAttached = true;
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'user_info' || e.key === 'auth_token' || e.key === 'bus_jwt_token' || e.key === 'bus_user') {
+                setupNav();
+            }
+        });
+        window.addEventListener('auth-change', () => {
+            setupNav();
+        });
+    }
 }
 
 /**

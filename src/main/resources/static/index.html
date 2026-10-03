@@ -15,22 +15,6 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
     body { background: var(--bg); color: var(--ink); line-height: 1.5; overflow-x: hidden; }
-    
-    header { background: #ffffff; border-bottom: 1px solid var(--border); height: 68px; position: sticky; top: 0; z-index: 100; display: flex; align-items: center; }
-    .nav-wrap { max-width: 1240px; margin: 0 auto; width: 100%; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 800; color: #090d16; text-decoration: none; display: flex; align-items: center; gap: 4px; }
-    .logo span { color: var(--brand); }
-    .nav-links { display: flex; align-items: center; gap: 18px; }
-    .nav-links a { color: var(--ink-light); text-decoration: none; font-weight: 600; font-size: 14px; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--brand); }
-    .nav-btn { background: var(--brand); color: #ffffff !important; padding: 8px 18px; border-radius: 9999px; font-weight: 700 !important; transition: background 0.2s; text-decoration: none; }
-    .nav-btn:hover { background: var(--brand-dark); }
-    .nav-outline-btn { background: transparent; border: 1.5px solid var(--border); color: var(--ink-light); padding: 7px 16px; border-radius: 9999px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; }
-    .nav-outline-btn:hover { border-color: #ef4444; color: #ef4444; background: #fee2e2; }
-    .user-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--brand-light); color: var(--brand-dark); border: 1px solid rgba(16,185,129,0.3); padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-    .user-chip:hover { background: #d1fae5; }
-    .user-avatar-dot { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; }
-
     /* Hero Section */
     .hero { background: linear-gradient(180deg, #ecfdf5 0%, #f8fafc 100%); padding: 60px 20px 100px; position: relative; }
     .hero-container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
@@ -84,7 +68,7 @@
   <link rel="stylesheet" href="css/srilanka-travel.css">
 </head>
 <body>
-  <header>
+  <header class="top-nav">
     <div class="nav-wrap">
       <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
       <nav class="nav-links">
@@ -104,25 +88,18 @@
           <div id="notificationMenu" class="notification-menu hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
               <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
-              <a href="notifications.html" style="font-size:12px; color:var(--brand); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+              <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
             </div>
             <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
               <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
             </div>
             <div style="display:flex; gap:8px;">
               <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
-              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--brand); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+              <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
             </div>
           </div>
         </div>
-        <a href="admin.html?tab=signin" id="navSignInLink" class="nav-signin">Sign In</a>
-        <a href="admin.html?tab=register" id="navSignUpBtn" class="nav-signup-btn">Sign Up</a>
-        <a href="admin.html?tab=portal" id="navAdminPortalLink" class="nav-admin-link" style="display:none;">Admin Portal</a>
-        <a href="admin.html?tab=profile" id="navUserChip" class="user-chip" style="display:none;">
-          <span class="user-avatar-dot" id="navAvatarInitials">U</span>
-          <span id="navUserName">My Account</span>
-        </a>
-        <button onclick="handleLogout()" id="navSignOutBtn" class="nav-signout-btn" style="display:none;">Sign Out</button>
+        <div id="navAuthAction"></div>
       </div>
     </div>
   </header>
@@ -179,27 +156,29 @@
       <div class="field-group">
         <label>Origin City</label>
         <select id="homeFrom">
+          <option value="Anuradhapura">Anuradhapura</option>
+          <option value="Badulla">Badulla</option>
           <option value="Colombo" selected>Colombo</option>
-          <option value="Kandy">Kandy</option>
           <option value="Galle">Galle</option>
-          <option value="Matara">Matara</option>
           <option value="Jaffna">Jaffna</option>
+          <option value="Kandy">Kandy</option>
+          <option value="Matara">Matara</option>
           <option value="Nuwara Eliya">Nuwara Eliya</option>
           <option value="Trincomalee">Trincomalee</option>
-          <option value="Anuradhapura">Anuradhapura</option>
         </select>
       </div>
       <div class="field-group">
         <label>Destination</label>
         <select id="homeTo">
-          <option value="Kandy" selected>Kandy</option>
+          <option value="Anuradhapura">Anuradhapura</option>
+          <option value="Badulla">Badulla</option>
           <option value="Colombo">Colombo</option>
           <option value="Galle">Galle</option>
-          <option value="Matara">Matara</option>
           <option value="Jaffna">Jaffna</option>
+          <option value="Kandy" selected>Kandy</option>
+          <option value="Matara">Matara</option>
           <option value="Nuwara Eliya">Nuwara Eliya</option>
           <option value="Trincomalee">Trincomalee</option>
-          <option value="Anuradhapura">Anuradhapura</option>
         </select>
       </div>
       <div class="field-group">
@@ -209,6 +188,20 @@
       <button class="search-btn" onclick="goToSearch()">Find Schedules &rarr;</button>
     </div>
   </div>
+
+  <!-- Active Tickets Section for Registered Passengers -->
+  <section id="homeActiveTicketsSection" class="section-wrap" style="display:none; margin-top:-20px; margin-bottom:40px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+      <div>
+        <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--brand); letter-spacing:1px;">MY JOURNEYS</span>
+        <h2 class="section-title" style="margin-top:2px;">Your Active Bus Tickets &amp; Boarding Passes</h2>
+      </div>
+      <a href="admin.html?tab=profile" style="color:var(--brand); font-size:13px; font-weight:700; text-decoration:none;">View All Bookings &rarr;</a>
+    </div>
+    <div id="homeActiveTicketsList" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:18px;">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </section>
 
   <!-- Unified Passenger Services -->
   <section class="section-wrap">
@@ -255,16 +248,6 @@
         </div>
         <div class="portal-link">Crew Sign In &rarr;</div>
       </a>
-
-      <!-- Portal 5: Customer Care & Resolution -->
-      <a href="customer-care.html" class="portal-card">
-        <div>
-          <span class="portal-tag">Support &amp; Resolutions</span>
-          <h3 class="portal-heading">Customer Care Center</h3>
-          <p class="portal-desc">Direct grievance resolution and passenger support portal for reviews, operational feedback, and service inquiries.</p>
-        </div>
-        <div class="portal-link">Customer Care &rarr;</div>
-      </a>
     </div>
   </section>
 
@@ -273,27 +256,27 @@
     <h2 class="section-title">Popular Sri Lankan Routes</h2>
     <div class="dest-grid">
       <a href="search.html?from=Colombo&to=Kandy" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Kandy</span><span style="color:var(--brand);">LKR 850</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Kandy</span><span style="color:var(--brand);">LKR 1,200</span></div>
         <div class="dest-meta"><span>3h 15m &middot; Central Highlands</span><span>32 trips/day</span></div>
       </a>
       <a href="search.html?from=Colombo&to=Galle" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Galle</span><span style="color:var(--brand);">LKR 650</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Galle</span><span style="color:var(--brand);">LKR 750</span></div>
         <div class="dest-meta"><span>2h 30m &middot; Southern Expressway</span><span>40 trips/day</span></div>
       </a>
       <a href="search.html?from=Colombo&to=Matara" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Matara</span><span style="color:var(--brand);">LKR 780</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Matara</span><span style="color:var(--brand);">LKR 800</span></div>
         <div class="dest-meta"><span>3h 40m &middot; Southern Highway</span><span>28 trips/day</span></div>
       </a>
       <a href="search.html?from=Colombo&to=Jaffna" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Jaffna</span><span style="color:var(--brand);">LKR 2,100</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Jaffna</span><span style="color:var(--brand);">LKR 2,600</span></div>
         <div class="dest-meta"><span>7h 45m &middot; Northern Superline</span><span>10 trips/day</span></div>
       </a>
       <a href="search.html?from=Colombo&to=Nuwara+Eliya" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Nuwara Eliya</span><span style="color:var(--brand);">LKR 1,050</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Nuwara Eliya</span><span style="color:var(--brand);">LKR 1,850</span></div>
         <div class="dest-meta"><span>4h 30m &middot; Hill Country</span><span>14 trips/day</span></div>
       </a>
       <a href="search.html?from=Colombo&to=Trincomalee" class="dest-card">
-        <div class="dest-route"><span>Colombo &rarr; Trincomalee</span><span style="color:var(--brand);">LKR 1,600</span></div>
+        <div class="dest-route"><span>Colombo &rarr; Trincomalee</span><span style="color:var(--brand);">LKR 1,750</span></div>
         <div class="dest-meta"><span>6h 30m &middot; Eastern Corridor</span><span>9 trips/day</span></div>
       </a>
     </div>
@@ -316,6 +299,7 @@
     </div>
   </footer>
 
+  <script src="js/app.js"></script>
   <script>
     document.getElementById('homeDate').value = new Date().toISOString().slice(0, 10);
 
@@ -326,61 +310,161 @@
       window.location.href = `search.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&date=${encodeURIComponent(date)}`;
     }
 
-    function checkAuthState() {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
-      const userRaw = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
-      let user = null;
-      try { if (userRaw) user = JSON.parse(userRaw); } catch(e) {}
+    async function loadHomeCities() {
+      const fromSelect = document.getElementById('homeFrom');
+      const toSelect = document.getElementById('homeTo');
+      if (!fromSelect || !toSelect) return;
 
-      const signInLink = document.getElementById('navSignInLink');
-      const signUpBtn = document.getElementById('navSignUpBtn');
-      const userChip = document.getElementById('navUserChip');
-      const userName = document.getElementById('navUserName');
-      const avatarInitials = document.getElementById('navAvatarInitials');
-      const signOutBtn = document.getElementById('navSignOutBtn');
-      const operatorLink = document.getElementById('navOperatorLink');
-      const adminPortalLink = document.getElementById('navAdminPortalLink');
+      try {
+        const res = await fetch('/api/v1/search/cities');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            const sources = json.data.sourceCities || [];
+            const destinations = json.data.destinationCities || [];
 
-      if (token && user) {
-        if (signInLink) signInLink.style.display = 'none';
-        if (signUpBtn) signUpBtn.style.display = 'none';
-        
-        const name = user.fullName || user.name || user.email || 'My Account';
-        if (userName) userName.textContent = name;
-        if (avatarInitials) {
-          const parts = name.trim().split(' ');
-          avatarInitials.textContent = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
+            const currentFrom = fromSelect.value || 'Colombo';
+            const currentTo = toSelect.value || 'Kandy';
+
+            if (sources.length > 0) {
+              fromSelect.innerHTML = sources.map(c => `<option value="${c}" ${c === currentFrom ? 'selected' : ''}>${c}</option>`).join('');
+            }
+            if (destinations.length > 0) {
+              toSelect.innerHTML = destinations.map(c => `<option value="${c}" ${c === currentTo ? 'selected' : ''}>${c}</option>`).join('');
+            }
+          }
         }
-        if (userChip) userChip.style.display = 'inline-flex';
-        if (signOutBtn) signOutBtn.style.display = 'inline-flex';
-
-        if (user.role === 'ADMIN') {
-          if (operatorLink) operatorLink.style.display = 'inline-block';
-          if (adminPortalLink) adminPortalLink.style.display = 'inline-block';
-        } else {
-          if (operatorLink) operatorLink.style.display = 'none';
-          if (adminPortalLink) adminPortalLink.style.display = 'none';
-        }
-      } else {
-        if (signInLink) signInLink.style.display = 'inline-block';
-        if (signUpBtn) signUpBtn.style.display = 'inline-block';
-        if (userChip) userChip.style.display = 'none';
-        if (signOutBtn) signOutBtn.style.display = 'none';
-        if (operatorLink) operatorLink.style.display = 'none';
-        if (adminPortalLink) adminPortalLink.style.display = 'none';
+      } catch (e) {
+        console.warn('Could not load dynamic cities for home search:', e);
       }
     }
 
-    function handleLogout() {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('bus_jwt_token');
-      localStorage.removeItem('user_info');
-      localStorage.removeItem('bus_user');
-      checkAuthState();
+    async function loadHomeActiveTickets() {
+      const section = document.getElementById('homeActiveTicketsSection');
+      const container = document.getElementById('homeActiveTicketsList');
+      if (!section || !container) return;
+
+      const user = getCurrentUser();
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
+
+      if (!user || !token) {
+        section.style.display = 'none';
+        return;
+      }
+
+      try {
+        let bookings = [];
+        const res = await fetch(`/api/v1/bookings?email=${encodeURIComponent(user.email)}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            bookings = json.data;
+          }
+        }
+
+        const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+        if (localBooking && localBooking.reference) {
+          if (!bookings.some(b => b.reference === localBooking.reference)) {
+            bookings.unshift(localBooking);
+          }
+        }
+
+        const activeTickets = bookings.filter(b => 
+          (b.status === 'CONFIRMED' || !b.status || b.status === 'PENDING') &&
+          b.status !== 'BOARDED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && b.status !== 'REFUNDED'
+        );
+
+        const terminalBayMap = {
+          'colombo': 'Bastian Mawatha Private Terminal — Bay 03',
+          'kandy': 'Goods Shed Intercity Bus Stand — Bay 02',
+          'galle': 'Galle Central Bus Station — Bay 04',
+          'matara': 'Matara Central Expressway Terminal — Bay 02',
+          'jaffna': 'Jaffna Central Bus Terminal — Bay 01',
+          'nuwara eliya': 'Nuwara Eliya Main Bus Stand — Bay 03',
+          'trincomalee': 'Trincomalee Central Bus Stand — Bay 02',
+          'anuradhapura': 'Anuradhapura Old Bus Stand — Bay 01',
+          'badulla': 'Badulla Central Bus Terminal — Bay 02'
+        };
+
+        if (activeTickets.length > 0) {
+          section.style.display = 'block';
+          container.innerHTML = activeTickets.map(t => {
+            const seats = Array.isArray(t.seats) ? t.seats.join(', ') : (t.seats || 'S12');
+            const fare = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 1,200.00');
+            const from = t.from || 'Colombo';
+            const to = t.to || 'Kandy';
+            const date = t.date || 'Today';
+            const time = t.time || '08:30';
+            const busType = t.busType || 'Expressway AC';
+            const ref = t.reference || 'CBL-CONFIRMED';
+            const bay = terminalBayMap[(from || '').trim().toLowerCase()] || `${from} Central Terminal — Bay 01`;
+
+            return `
+              <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:18px; padding:20px; box-shadow:0 4px 16px rgba(0,0,0,0.04); display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
+                <div style="position:absolute; top:0; left:0; width:5px; height:100%; background:var(--brand);"></div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <span style="font-size:11px; font-weight:800; color:#059669; background:#ecfdf5; border:1px solid #d1fae5; padding:3px 10px; border-radius:9999px;">CONFIRMED &bull; READY TO BOARD</span>
+                    <span style="font-size:12px; font-weight:700; color:#64748b; font-family:monospace;">${ref}</span>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; font-size:17px; font-weight:800; color:#0f172a; margin-bottom:6px;">
+                    <span>${from}</span>
+                    <span style="color:var(--brand);">&rarr;</span>
+                    <span>${to}</span>
+                  </div>
+                  <div style="font-size:13px; color:#64748b; margin-bottom:10px;">
+                    <span>${date} at ${time}</span> &middot; <span>${busType}</span>
+                  </div>
+                  <div style="font-size:12px; font-weight:600; color:#059669; background:#f0fdf4; border:1px solid #dcfce7; padding:6px 10px; border-radius:8px; margin-bottom:14px;">
+                    <strong>Boarding:</strong> ${bay}
+                  </div>
+                  <div style="display:flex; gap:16px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:12px; padding:10px 14px; margin-bottom:16px;">
+                    <div>
+                      <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Reserved Seat</div>
+                      <div style="font-size:14px; font-weight:800; color:#0f172a;">${seats}</div>
+                    </div>
+                    <div style="border-left:1px solid #e2e8f0; padding-left:16px;">
+                      <div style="font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Fare Paid</div>
+                      <div style="font-size:14px; font-weight:800; color:var(--brand-dark);">${fare}</div>
+                    </div>
+                  </div>
+                </div>
+                <a href="admin.html?tab=tickets" style="display:flex; align-items:center; justify-content:center; gap:6px; background:#0f172a; color:#ffffff; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; text-decoration:none; transition:background 0.2s;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+                  View Digital QR Boarding Pass &rarr;
+                </a>
+              </div>
+            `;
+          }).join('');
+        } else {
+          section.style.display = 'block';
+          container.innerHTML = `
+            <div style="grid-column: 1 / -1; background:#ffffff; border:1px dashed #cbd5e1; border-radius:16px; padding:28px 20px; text-align:center;">
+              <div style="font-size:15px; font-weight:700; color:#0f172a; margin-bottom:4px;">No upcoming journeys</div>
+              <p style="font-size:13px; color:#64748b; margin-bottom:12px;">You don't have any confirmed bus bookings right now. Ready to travel?</p>
+              <a href="#searchWidget" style="color:var(--brand); font-weight:700; font-size:13px; text-decoration:none;">Find Schedules Above &uarr;</a>
+            </div>
+          `;
+        }
+      } catch(e) {
+        section.style.display = 'none';
+      }
     }
 
-    document.addEventListener('DOMContentLoaded', checkAuthState);
+    document.addEventListener('DOMContentLoaded', () => {
+      setupNav('index.html');
+      loadHomeCities();
+      loadHomeActiveTickets();
+    });
+
+    window.addEventListener('auth-change', () => {
+      loadHomeActiveTickets();
+    });
   </script>
-  <script src="js/app.js"></script>
 </body>
 </html>

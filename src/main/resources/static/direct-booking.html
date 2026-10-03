@@ -3,111 +3,1049 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CatchBusLK — 24h Direct WhatsApp Booking</title>
+  <title>Direct WhatsApp Booking &amp; Seat Assistance | CatchBusLK</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/srilanka-travel.css">
   <style>
     :root {
-      --brand: #10b981; --brand-dark: #059669; --amber: #f59e0b;
-      --bg: #090d16; --card-bg: #111827; --border: rgba(255,255,255,0.1);
-      --ink: #f8fafc; --ink-light: #94a3b8;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-dark: #047857;
+      --primary-light: #ecfdf5;
+      --accent-whatsapp: #25d366;
+      --accent-whatsapp-hover: #1ebd56;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --radius: 16px;
+      --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--ink); line-height: 1.6; min-height: 100vh; padding: 40px 20px; }
-    .wrap { max-width: 960px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-    @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
-    .badge { display: inline-block; background: var(--amber); color: #000000; font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 6px; letter-spacing: 1px; }
-    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 800; color: #ffffff; margin-top: 14px; line-height: 1.2; }
-    .lead { color: var(--ink-light); font-size: 15px; margin-top: 12px; }
-    .contact-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; margin-top: 24px; }
-    .contact-item { margin-bottom: 12px; font-size: 14px; }
-    .contact-item strong { color: #ffffff; }
-    
-    .form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 24px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-light); text-transform: uppercase; margin-bottom: 6px; }
-    .form-group input, .form-group textarea {
-      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.4);
-      color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s;
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    h1, h2, h3, .section-title, .modal-title, .logo, .stat-value { font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 60px; }
+
+    .direct-container {
+      max-width: 1140px;
+      margin: 32px auto 0;
+      padding: 0 20px;
     }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--brand); }
+
+    .direct-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .direct-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 11px 14px;
+      font-size: 0.92rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .route-swap-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .route-swap-row { flex-direction: column; align-items: stretch; }
+    }
+
+    .swap-btn {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 10px;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: all 0.2s;
+    }
+    .swap-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-color: rgba(16, 185, 129, 0.4);
+      transform: rotate(180deg);
+    }
+    @media (max-width: 640px) {
+      .swap-btn { margin: -6px auto; transform: rotate(90deg); }
+      .swap-btn:hover { transform: rotate(270deg); }
+    }
+
+    .stepper-wrap {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #ffffff;
+      height: 44px;
+    }
+    .stepper-btn {
+      width: 40px;
+      height: 100%;
+      background: #f8fafc;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stepper-btn:hover {
+      background: #e2e8f0;
+    }
+    .stepper-val {
+      flex: 1;
+      text-align: center;
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+    }
+
+    /* Right Column Sidebar & Live Preview Spotlight Card */
+    .right-sidebar {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+    }
+    @media (max-width: 900px) {
+      .right-sidebar {
+        position: static;
+        margin-top: 12px;
+      }
+    }
+
+    .preview-card {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      border-radius: var(--radius);
+      padding: 26px;
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+      animation: pulse-ring 1.8s infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    }
+
+    .preview-terminal {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .preview-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 20px 0;
+      padding: 16px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .preview-meta-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+
+    .preview-meta-val {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .preview-price-box {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
     .whatsapp-btn {
-      width: 100%; background: #25d366; color: #ffffff; border: none; border-radius: 14px; padding: 14px;
-      font-size: 16px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
-      text-decoration: none; transition: background 0.2s;
+      width: 100%;
+      background: var(--accent-whatsapp);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
     }
-    .whatsapp-btn:hover { background: #1ebd56; }
-    .back-link { display: inline-block; color: var(--ink-light); font-size: 13px; font-weight: 700; text-decoration: none; margin-bottom: 16px; }
-    .back-link:hover { color: #ffffff; }
+    .whatsapp-btn:hover {
+      background: var(--accent-whatsapp-hover);
+      transform: translateY(-1px);
+    }
+
+    .action-btn-outline {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    .action-btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .support-info-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.05);
+      font-size: 0.85rem;
+    }
+    .support-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--text-muted);
+    }
+    .support-item strong {
+      color: var(--text-main);
+    }
+
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div>
-      <a href="schedule.html" class="back-link">&#8592; Back to Timetable</a><br>
-      <span class="badge">Islandwide 24h Assistance</span>
-      <h1>Direct Booking &amp; Seat Assistance</h1>
-      <p class="lead">Skip the seat map! Send your seat request directly to our 24h dispatch desk via WhatsApp. A representative will confirm your booking immediately.</p>
-      
-      <div class="contact-card">
-        <div class="contact-item"><strong>WhatsApp Hotline:</strong> 070 191 9700</div>
-        <div class="contact-item"><strong>Dispatch Desk:</strong> gamanasl@gmail.com</div>
-        <div class="contact-item"><strong>Coverage:</strong> Central Highway &amp; Inter-provincial SLTB / Private Network</div>
+  <div id="toastContainer"></div>
+
+  <!-- Standard CatchBusLK Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+      <nav class="nav-links">
+        <a href="search.html" id="navLinkSearch">Book a Trip</a>
+        <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="direct-booking.html" id="navLinkDirect" class="active">Direct Booking</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="notification-area" id="navNotificationArea">
+          <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+            <span id="notificationBadge" class="notification-badge hidden">0</span>
+          </button>
+        </div>
+        <div id="navAuthAction"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="direct-container">
+    <div style="margin-bottom: 24px;">
+      <a href="schedule.html" style="color:var(--text-muted); font-size:13px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Corridor Timetable
+      </a>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;">
+        <div>
+          <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">
+            ISLANDWIDE 24H EXPRESS ASSISTANCE
+          </span>
+          <h1 style="font-size:2rem; font-weight:800; color:#0f172a; letter-spacing:-0.5px; margin:0;">
+            Direct WhatsApp Booking &amp; Seat Assistance
+          </h1>
+          <p style="font-size:0.95rem; color:var(--text-muted); margin-top:6px; max-width:640px;">
+            Customize your route, select your preferred departure schedule, and dispatch your reservation directly to our 24h transit operators without navigating seat maps.
+          </p>
+        </div>
+        <div>
+          <a href="search.html" class="btn btn-outline" style="text-decoration:none; font-size:0.85rem; padding:8px 16px;">
+            Switch to Seat Map Grid &rarr;
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="form-card">
-      <h3 style="font-family:'Space Grotesk'; font-size:20px; font-weight:800; margin-bottom:16px;">WhatsApp Message Generator</h3>
-      
-      <div class="form-group">
-        <label>Selected Route &amp; Departure</label>
-        <input type="text" id="routeSummary" readonly style="color:var(--brand); font-weight:700;">
+    <div class="direct-grid">
+      <!-- Left Column: Customization Form -->
+      <div class="form-card">
+        <div class="form-header">
+          <h2 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:4px;">Customize Journey &amp; Schedule</h2>
+          <p style="font-size:0.82rem; color:var(--text-muted);">Change origin, destination, travel date, or departure times freely below.</p>
+        </div>
+
+        <form id="directBookingForm" onsubmit="event.preventDefault(); openWhatsApp();">
+          <!-- Route Selection with Swap -->
+          <div class="route-swap-row">
+            <div style="flex:1;">
+              <label class="form-label" for="originCity">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                From (Origin City)
+              </label>
+              <select id="originCity" class="form-select" onchange="onRouteChanged()">
+                <option value="Colombo" selected>Colombo (Bastian Mawatha / Makumbura)</option>
+                <option value="Kandy">Kandy (Goods Shed Intercity)</option>
+                <option value="Galle">Galle (Central Station)</option>
+                <option value="Matara">Matara (Expressway Terminal)</option>
+                <option value="Jaffna">Jaffna (Central Terminal)</option>
+                <option value="Nuwara Eliya">Nuwara Eliya (Main Stand)</option>
+                <option value="Trincomalee">Trincomalee (Central Bus Stand)</option>
+                <option value="Anuradhapura">Anuradhapura (Old Bus Stand)</option>
+                <option value="Badulla">Badulla (Central Bus Terminal)</option>
+              </select>
+            </div>
+
+            <button type="button" class="swap-btn" id="btnSwapRoute" onclick="swapOriginDestination()" title="Swap Origin and Destination" aria-label="Swap Origin and Destination">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 5h18"/><polyline points="7 23 3 19 7 15"/><path d="M21 19H3"/></svg>
+            </button>
+
+            <div style="flex:1;">
+              <label class="form-label" for="destinationCity">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                To (Destination City)
+              </label>
+              <select id="destinationCity" class="form-select" onchange="onRouteChanged()">
+                <option value="Kandy" selected>Kandy (Goods Shed Intercity)</option>
+                <option value="Colombo">Colombo (Bastian Mawatha / Makumbura)</option>
+                <option value="Galle">Galle (Central Station)</option>
+                <option value="Matara">Matara (Expressway Terminal)</option>
+                <option value="Jaffna">Jaffna (Central Terminal)</option>
+                <option value="Nuwara Eliya">Nuwara Eliya (Main Stand)</option>
+                <option value="Trincomalee">Trincomalee (Central Bus Stand)</option>
+                <option value="Anuradhapura">Anuradhapura (Old Bus Stand)</option>
+                <option value="Badulla">Badulla (Central Bus Terminal)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Date & Departure Schedule Row -->
+          <div class="form-row">
+            <div>
+              <label class="form-label" for="travelDate">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Travel Date
+              </label>
+              <input type="date" id="travelDate" class="form-control" onchange="onDateChanged()">
+            </div>
+
+            <div>
+              <label class="form-label" for="departureSchedule">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Available Schedule / Departure Time
+              </label>
+              <select id="departureSchedule" class="form-select" onchange="onScheduleChanged()">
+                <option value="06:30">06:30 AM — Early Morning Expressway</option>
+                <option value="08:00" selected>08:00 AM — Morning Intercity Express</option>
+                <option value="10:30">10:30 AM — Mid-Morning Highway Star</option>
+                <option value="13:30">01:30 PM — Afternoon Superline AC</option>
+                <option value="16:00">04:00 PM — Evening Peak Express</option>
+                <option value="18:30">06:30 PM — Night Mail / Late Highway</option>
+                <option value="CUSTOM">Custom / Other Departure Time...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Custom Time input if chosen -->
+          <div id="customTimeRow" class="form-group" style="display:none;">
+            <label class="form-label" for="customTime">
+              Specify Desired Departure Time
+            </label>
+            <input type="time" id="customTime" class="form-control" value="09:00" onchange="updatePreview()">
+          </div>
+
+          <!-- Coach Class & Passenger Seats Row -->
+          <div class="form-row">
+            <div>
+              <label class="form-label" for="busClass">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                Bus Class &amp; Operator
+              </label>
+              <select id="busClass" class="form-select" onchange="updatePreview()">
+                <option value="CatchBus Luxury AC" selected>Expressway Luxury AC (Direct Highway)</option>
+                <option value="Superline Semi-Luxury">Semi-Luxury Intercity</option>
+                <option value="SLTB Express">SLTB National Express</option>
+                <option value="Any Available">Any Available Transit Coach</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label" for="seatCount">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Number of Seats
+              </label>
+              <div class="stepper-wrap">
+                <button type="button" class="stepper-btn" onclick="adjustSeatCount(-1)">&minus;</button>
+                <input type="number" id="seatCount" class="stepper-val" value="1" min="1" max="10" readonly>
+                <button type="button" class="stepper-btn" onclick="adjustSeatCount(1)">&plus;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seat Preferences -->
+          <div class="form-group">
+            <label class="form-label" for="seatPreference">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+              Seat Preference / Placement
+            </label>
+            <select id="seatPreference" class="form-select" onchange="updatePreview()">
+              <option value="Window Seats Preferred" selected>Window Seats Preferred</option>
+              <option value="Aisle Seats Preferred">Aisle Seats Preferred</option>
+              <option value="Front Rows (Near Driver / Lower Deck)">Front Rows (Near Entrance / Driver)</option>
+              <option value="Seats Together in Same Row">Seats Together in Same Row</option>
+              <option value="No Preference / Any Available">No Preference / Any Available</option>
+            </select>
+          </div>
+
+          <!-- Passenger Contact Details -->
+          <div class="form-row">
+            <div>
+              <label class="form-label" for="pName">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Passenger Full Name
+              </label>
+              <input type="text" id="pName" class="form-control" placeholder="e.g. Dohan Imanjith" required oninput="updatePreview()">
+            </div>
+            <div>
+              <label class="form-label" for="pPhone">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Phone / WhatsApp Number
+              </label>
+              <input type="tel" id="pPhone" class="form-control" placeholder="e.g. +94719876543" required oninput="updatePreview()">
+            </div>
+          </div>
+
+          <!-- Special Request / Luggage Notes -->
+          <div class="form-group">
+            <label class="form-label" for="pNotes">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Special Luggage / Boarding Requests
+            </label>
+            <textarea id="pNotes" class="form-control" rows="2" placeholder="e.g. 1 large suitcase in luggage compartment, boarding at Makumbura interchange" oninput="updatePreview()"></textarea>
+          </div>
+
+          <button type="submit" class="whatsapp-btn" style="display:none;" id="formSubmitHidden">Submit</button>
+        </form>
       </div>
 
-      <div class="form-group">
-        <label>Your Name</label>
-        <input type="text" id="pName" placeholder="e.g. Kasun Fernando" required>
-      </div>
+      <!-- Right Column: Live Booking Preview & WhatsApp Actions -->
+      <div class="right-sidebar">
+        <div class="preview-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span class="preview-badge">
+              <span class="pulse-dot"></span>
+              LIVE DISPATCH PREVIEW
+            </span>
+            <span style="font-size:0.75rem; color:#94a3b8; font-weight:700;">HOTLINE: 070 191 9700</span>
+          </div>
 
-      <div class="form-group">
-        <label>Seat Request / Notes</label>
-        <textarea id="pMessage" rows="3">Can I please reserve seats together for this trip?</textarea>
-      </div>
+          <div style="font-size:0.8rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:700;">REQUESTED ROUTE</div>
+          <h2 style="font-size:1.75rem; font-weight:800; color:#ffffff; margin:4px 0 2px 0;" id="previewRouteTitle">
+            Colombo &rarr; Kandy
+          </h2>
+          <div class="preview-terminal" id="previewTerminal">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="previewTerminalText">Bastian Mawatha Private Terminal — Bay 03</span>
+          </div>
 
-      <button type="button" class="whatsapp-btn" onclick="openWhatsApp()">
-        <span>&#9742;</span> Open WhatsApp Dispatch Chat
-      </button>
+          <div class="preview-meta-grid">
+            <div>
+              <div class="preview-meta-label">Travel Date</div>
+              <div class="preview-meta-val" id="previewDate">Today</div>
+            </div>
+            <div>
+              <div class="preview-meta-label">Departure Schedule</div>
+              <div class="preview-meta-val" id="previewTime" style="color:#38bdf8;">08:00 AM</div>
+            </div>
+            <div>
+              <div class="preview-meta-label">Requested Seats</div>
+              <div class="preview-meta-val" id="previewSeats">1 Passenger</div>
+            </div>
+            <div>
+              <div class="preview-meta-label">Coach Preference</div>
+              <div class="preview-meta-val" id="previewCoach" style="font-size:0.85rem;">Luxury AC</div>
+            </div>
+          </div>
+
+          <div class="preview-price-box">
+            <div>
+              <div style="font-size:0.72rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">ESTIMATED CORRIDOR FARE</div>
+              <div style="font-size:1.35rem; font-weight:800; color:#34d399;" id="previewFare">LKR 1,250.00</div>
+            </div>
+            <span class="badge-pill" id="previewSeatPrefPill">Window Preferred</span>
+          </div>
+
+          <button type="button" class="whatsapp-btn" onclick="openWhatsApp()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+            </svg>
+            Open WhatsApp Dispatch Chat
+          </button>
+
+          <a href="tel:+94701919700" class="action-btn-outline">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call 24/7 Telephone Hotline
+          </a>
+
+          <button type="button" class="action-btn-outline" onclick="copyMessageText()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="btnCopyText">Copy Message to Clipboard</span>
+          </button>
+        </div>
+
+        <div class="support-info-card">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+            <div style="width:28px; height:28px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 style="font-size:0.95rem; font-weight:800; color:#0f172a; margin:0;">CatchBusLK Dispatch Guarantee</h3>
+          </div>
+          <div class="support-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            <span><strong>Instant Turnaround:</strong> Response under 3 minutes</span>
+          </div>
+          <div class="support-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span><strong>Digital QR Issuance:</strong> Received directly on WhatsApp</span>
+          </div>
+          <div class="support-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span><strong>Flexible Payments:</strong> Bank Transfer, Card, or Cash on Board</span>
+          </div>
+          <div class="support-item" style="margin-bottom:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <span><strong>Free Rescheduling:</strong> Change time up to 2 hours before trip</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script src="js/app.js"></script>
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get('from') || 'Colombo';
-    const to = params.get('to') || 'Kandy';
-    const date = params.get('date') || new Date().toISOString().slice(0, 10);
-    const time = params.get('time') || '08:00';
-    const op = params.get('operator') || 'SLTB Express';
+    const TERMINAL_BAYS = {
+      'colombo': 'Bastian Mawatha Private Terminal — Bay 03',
+      'kandy': 'Goods Shed Intercity Bus Stand — Bay 02',
+      'galle': 'Galle Central Bus Station — Bay 04',
+      'matara': 'Matara Central Expressway Terminal — Bay 02',
+      'jaffna': 'Jaffna Central Bus Terminal — Bay 01',
+      'nuwara eliya': 'Nuwara Eliya Main Bus Stand — Bay 03',
+      'trincomalee': 'Trincomalee Central Bus Stand — Bay 02',
+      'anuradhapura': 'Anuradhapura Old Bus Stand — Bay 01',
+      'badulla': 'Badulla Central Bus Terminal — Bay 02'
+    };
 
-    document.getElementById('routeSummary').value = `${from} to ${to} | ${date} at ${time} (${op})`;
+    const ROUTE_BASE_FARES = {
+      'colombo-kandy': 1250,
+      'kandy-colombo': 1250,
+      'colombo-galle': 950,
+      'galle-colombo': 950,
+      'colombo-matara': 800,
+      'matara-colombo': 800,
+      'colombo-jaffna': 2600,
+      'jaffna-colombo': 2600,
+      'colombo-nuwara eliya': 1850,
+      'nuwara eliya-colombo': 1850,
+      'colombo-trincomalee': 1750,
+      'trincomalee-colombo': 1750,
+      'colombo-anuradhapura': 1500,
+      'anuradhapura-colombo': 1500,
+      'colombo-badulla': 1650,
+      'badulla-colombo': 1650,
+      'kandy-galle': 1450,
+      'galle-kandy': 1450,
+      'kandy-nuwara eliya': 850,
+      'nuwara eliya-kandy': 850,
+      'kandy-jaffna': 2400,
+      'jaffna-kandy': 2400,
+      'galle-matara': 450,
+      'matara-galle': 450
+    };
+
+    let activeTripsCache = [];
+
+    function initPageFromParams() {
+      const params = new URLSearchParams(window.location.search);
+      const fromParam = params.get('from') || 'Colombo';
+      const toParam = params.get('to') || 'Kandy';
+      const dateParam = params.get('date') || new Date().toISOString().slice(0, 10);
+      const timeParam = params.get('time') || '08:00';
+      const opParam = params.get('operator') || '';
+      const busTypeParam = params.get('busType') || '';
+      const seatsParam = parseInt(params.get('seats'), 10) || 1;
+
+      // Set date input with today as min
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const dateEl = document.getElementById('travelDate');
+      if (dateEl) {
+        dateEl.min = todayStr;
+        dateEl.value = dateParam < todayStr ? todayStr : dateParam;
+      }
+
+      // Pre-fill user profile if logged in
+      const user = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+      if (user) {
+        if (user.fullName) document.getElementById('pName').value = user.fullName;
+        if (user.phoneNumber || user.phone) document.getElementById('pPhone').value = user.phoneNumber || user.phone;
+      }
+
+      // Set cities
+      const originEl = document.getElementById('originCity');
+      const destEl = document.getElementById('destinationCity');
+      if (originEl && fromParam) setSelectValueCaseInsensitive(originEl, fromParam);
+      if (destEl && toParam) setSelectValueCaseInsensitive(destEl, toParam);
+
+      // Seats
+      if (seatsParam > 1 && seatsParam <= 10) {
+        document.getElementById('seatCount').value = seatsParam;
+      }
+
+      // Bus class preference
+      if (busTypeParam || opParam) {
+        const busClassEl = document.getElementById('busClass');
+        if (busClassEl && (busTypeParam.includes('AC') || opParam.includes('Luxury'))) {
+          busClassEl.value = 'CatchBus Luxury AC';
+        }
+      }
+
+      // Fetch dynamic cities from backend
+      loadDynamicCities().then(() => {
+        onRouteChanged();
+      });
+    }
+
+    function setSelectValueCaseInsensitive(selectEl, value) {
+      if (!selectEl || !value) return;
+      const target = value.trim().toLowerCase();
+      for (let i = 0; i < selectEl.options.length; i++) {
+        if (selectEl.options[i].value.toLowerCase() === target) {
+          selectEl.selectedIndex = i;
+          return;
+        }
+      }
+    }
+
+    async function loadDynamicCities() {
+      try {
+        const res = await fetch('/api/v1/search/cities');
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.success && json.data) {
+          const sources = json.data.sourceCities || [];
+          const dests = json.data.destinationCities || [];
+          if (sources.length > 0) {
+            updateCityDropdownOptions('originCity', sources);
+          }
+          if (dests.length > 0) {
+            updateCityDropdownOptions('destinationCity', dests);
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load dynamic cities, keeping standard hubs', e);
+      }
+    }
+
+    function updateCityDropdownOptions(elementId, cityList) {
+      const select = document.getElementById(elementId);
+      if (!select) return;
+      const currentVal = select.value;
+      const unique = Array.from(new Set(cityList.map(c => c.trim()))).sort();
+      if (!unique.length) return;
+
+      select.innerHTML = unique.map(city => {
+        const sel = city.toLowerCase() === currentVal.toLowerCase() ? 'selected' : '';
+        return `<option value="${city}" ${sel}>${city}</option>`;
+      }).join('');
+    }
+
+    async function onRouteChanged() {
+      const origin = document.getElementById('originCity').value;
+      const dest = document.getElementById('destinationCity').value;
+
+      // Prevent selecting exact same city
+      if (origin.toLowerCase() === dest.toLowerCase()) {
+        const destSelect = document.getElementById('destinationCity');
+        for (let i = 0; i < destSelect.options.length; i++) {
+          if (destSelect.options[i].value.toLowerCase() !== origin.toLowerCase()) {
+            destSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+
+      await fetchAvailableSchedules();
+      updatePreview();
+    }
+
+    function swapOriginDestination() {
+      const originEl = document.getElementById('originCity');
+      const destEl = document.getElementById('destinationCity');
+      const temp = originEl.value;
+      originEl.value = destEl.value;
+      destEl.value = temp;
+      onRouteChanged();
+    }
+
+    async function onDateChanged() {
+      await fetchAvailableSchedules();
+      updatePreview();
+    }
+
+    async function fetchAvailableSchedules() {
+      const from = document.getElementById('originCity').value;
+      const to = document.getElementById('destinationCity').value;
+      const date = document.getElementById('travelDate').value;
+      const scheduleSelect = document.getElementById('departureSchedule');
+      if (!scheduleSelect) return;
+
+      try {
+        const url = `/api/v1/search/trips?sourceCity=${encodeURIComponent(from)}&destinationCity=${encodeURIComponent(to)}&travelDate=${encodeURIComponent(date)}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          const trips = json.data || [];
+          if (Array.isArray(trips) && trips.length > 0) {
+            activeTripsCache = trips;
+            scheduleSelect.innerHTML = trips.map((t, idx) => {
+              const timeStr = t.departureTime ? t.departureTime.slice(11, 16) : '08:00';
+              const op = t.operatorName || 'CatchBus Superline';
+              const bus = t.busType || 'AC';
+              const fare = t.baseFare ? ` • LKR ${t.baseFare.toLocaleString()}` : '';
+              const isFirst = idx === 0 ? 'selected' : '';
+              return `<option value="${timeStr}" data-operator="${op}" data-bustype="${bus}" data-fare="${t.baseFare || 1200}" ${isFirst}>${formatTimeAmPm(timeStr)} — ${op} (${bus}${fare})</option>`;
+            }).join('') + `<option value="CUSTOM">Custom / Other Departure Time...</option>`;
+
+            const customRow = document.getElementById('customTimeRow');
+            if (customRow) customRow.style.display = 'none';
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Trips fetch failed, falling back to timetable schedule matrix', e);
+      }
+
+      // Default timetable slots if no active trip matches on that exact day
+      activeTripsCache = [];
+      scheduleSelect.innerHTML = `
+        <option value="06:30">06:30 AM — Early Morning Expressway</option>
+        <option value="08:00" selected>08:00 AM — Morning Intercity Express</option>
+        <option value="10:30">10:30 AM — Mid-Morning Highway Star</option>
+        <option value="13:30">01:30 PM — Afternoon Superline AC</option>
+        <option value="16:00">04:00 PM — Evening Peak Express</option>
+        <option value="18:30">06:30 PM — Night Mail / Late Highway</option>
+        <option value="CUSTOM">Custom / Other Departure Time...</option>
+      `;
+      const customRow = document.getElementById('customTimeRow');
+      if (customRow) customRow.style.display = 'none';
+    }
+
+    function onScheduleChanged() {
+      const scheduleSelect = document.getElementById('departureSchedule');
+      const customRow = document.getElementById('customTimeRow');
+      if (scheduleSelect.value === 'CUSTOM') {
+        if (customRow) customRow.style.display = 'block';
+      } else {
+        if (customRow) customRow.style.display = 'none';
+      }
+      updatePreview();
+    }
+
+    function adjustSeatCount(delta) {
+      const input = document.getElementById('seatCount');
+      if (!input) return;
+      let val = parseInt(input.value, 10) || 1;
+      val = Math.max(1, Math.min(10, val + delta));
+      input.value = val;
+      updatePreview();
+    }
+
+    function formatTimeAmPm(time24) {
+      if (!time24 || !time24.includes(':')) return time24 || '08:00 AM';
+      const [h, m] = time24.split(':').map(Number);
+      const period = h >= 12 ? 'PM' : 'AM';
+      const formattedH = (h % 12) || 12;
+      return `${String(formattedH).padStart(2, '0')}:${String(m).padStart(2, '0')} ${period}`;
+    }
+
+    function updatePreview() {
+      const origin = document.getElementById('originCity').value;
+      const dest = document.getElementById('destinationCity').value;
+      const date = document.getElementById('travelDate').value;
+      const scheduleSelect = document.getElementById('departureSchedule');
+      const seatCount = parseInt(document.getElementById('seatCount').value, 10) || 1;
+      const seatPref = document.getElementById('seatPreference').value;
+      const coach = document.getElementById('busClass').value;
+
+      let time = scheduleSelect.value;
+      if (time === 'CUSTOM') {
+        time = document.getElementById('customTime').value || '08:00';
+      }
+
+      // Title & terminal
+      const titleEl = document.getElementById('previewRouteTitle');
+      if (titleEl) titleEl.innerHTML = `${escapeHtml(origin)} &rarr; ${escapeHtml(dest)}`;
+
+      const terminalTextEl = document.getElementById('previewTerminalText');
+      const bay = TERMINAL_BAYS[origin.toLowerCase()] || `${origin} Central Transit Terminal — Bay 01`;
+      if (terminalTextEl) terminalTextEl.textContent = bay;
+
+      // Meta values
+      const dateEl = document.getElementById('previewDate');
+      if (dateEl) dateEl.textContent = date || 'Upcoming Date';
+
+      const timeEl = document.getElementById('previewTime');
+      if (timeEl) timeEl.textContent = formatTimeAmPm(time);
+
+      const seatsEl = document.getElementById('previewSeats');
+      if (seatsEl) seatsEl.textContent = `${seatCount} Passenger${seatCount > 1 ? 's' : ''}`;
+
+      const coachEl = document.getElementById('previewCoach');
+      if (coachEl) coachEl.textContent = coach;
+
+      const prefPill = document.getElementById('previewSeatPrefPill');
+      if (prefPill) prefPill.textContent = seatPref;
+
+      // Fare calculation
+      const key = `${origin.toLowerCase()}-${dest.toLowerCase()}`;
+      let baseFare = ROUTE_BASE_FARES[key] || 1250;
+      const selectedOption = scheduleSelect.selectedOptions[0];
+      if (selectedOption && selectedOption.dataset && selectedOption.dataset.fare) {
+        baseFare = parseFloat(selectedOption.dataset.fare) || baseFare;
+      }
+      const totalFare = baseFare * seatCount;
+      const fareEl = document.getElementById('previewFare');
+      if (fareEl) fareEl.textContent = `LKR ${totalFare.toLocaleString()}.00`;
+    }
+
+    function buildDispatchMessage() {
+      const origin = document.getElementById('originCity').value;
+      const dest = document.getElementById('destinationCity').value;
+      const date = document.getElementById('travelDate').value;
+      const scheduleSelect = document.getElementById('departureSchedule');
+      const seatCount = document.getElementById('seatCount').value;
+      const seatPref = document.getElementById('seatPreference').value;
+      const coach = document.getElementById('busClass').value;
+      const name = document.getElementById('pName').value.trim() || 'Valued Passenger';
+      const phone = document.getElementById('pPhone').value.trim() || 'Not specified';
+      const notes = document.getElementById('pNotes').value.trim();
+
+      let time = scheduleSelect.value;
+      if (time === 'CUSTOM') {
+        time = document.getElementById('customTime').value || '08:00';
+      }
+      const formattedTime = formatTimeAmPm(time);
+
+      const bay = TERMINAL_BAYS[origin.toLowerCase()] || `${origin} Central Transit Terminal — Bay 01`;
+
+      const lines = [
+        `*CatchBusLK — Direct Transit Reservation Request*`,
+        ``,
+        `Hello Dispatch Desk, I would like to reserve passenger seats:`,
+        `• *Route:* ${origin} to ${dest}`,
+        `• *Boarding Bay:* ${bay}`,
+        `• *Travel Date:* ${date}`,
+        `• *Departure Time:* ${formattedTime}`,
+        `• *Coach Preference:* ${coach}`,
+        `• *Number of Seats:* ${seatCount} passenger(s)`,
+        `• *Seat Position:* ${seatPref}`,
+        `• *Passenger Name:* ${name}`,
+        `• *Contact Number:* ${phone}`
+      ];
+
+      if (notes) {
+        lines.push(`• *Special Notes / Baggage:* ${notes}`);
+      }
+
+      lines.push(``, `Please verify seat allocation and dispatch my digital boarding pass. Thank you!`);
+      return lines.join('\n');
+    }
 
     function openWhatsApp() {
-      const name = document.getElementById('pName').value.trim() || 'Valued Passenger';
-      const msg = document.getElementById('pMessage').value.trim();
-
-      const text = [
-        `Hi CatchBusLK, I would like to make a direct seat booking:`,
-        ``,
-        `Route: ${from} to ${to}`,
-        `Date: ${date}`,
-        `Departure: ${time} (${op})`,
-        `Name: ${name}`,
-        `Request: ${msg}`
-      ].join('\n');
-
-      const url = `https://wa.me/94701919700?text=${encodeURIComponent(text)}`;
+      const msg = buildDispatchMessage();
+      const url = `https://wa.me/94701919700?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
     }
+
+    async function copyMessageText() {
+      const msg = buildDispatchMessage();
+      const btnText = document.getElementById('btnCopyText');
+      try {
+        await navigator.clipboard.writeText(msg);
+        if (btnText) btnText.textContent = 'Copied to Clipboard!';
+        setTimeout(() => {
+          if (btnText) btnText.textContent = 'Copy Message to Clipboard';
+        }, 2500);
+      } catch (err) {
+        // Fallback for older browsers
+        const ta = document.createElement('textarea');
+        ta.value = msg;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (btnText) btnText.textContent = 'Copied to Clipboard!';
+        setTimeout(() => {
+          if (btnText) btnText.textContent = 'Copy Message to Clipboard';
+        }, 2500);
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof setupNav === 'function') {
+        setupNav('direct-booking.html');
+      }
+      initPageFromParams();
+    });
   </script>
 </body>
 </html>

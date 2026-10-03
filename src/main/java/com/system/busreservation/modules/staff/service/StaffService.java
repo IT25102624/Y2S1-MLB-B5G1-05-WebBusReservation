@@ -22,12 +22,16 @@ public class StaffService {
     private final StaffRepository staffRepository;
 
     public Map<String, Object> getDashboard(long userId) {
+        return getDashboard(userId, null);
+    }
+
+    public Map<String, Object> getDashboard(long userId, Long tripId) {
         Map<String, Object> response = new HashMap<>();
 
         Map<String, Object> profile = staffRepository.findStaffProfile(userId).orElse(Map.of("employeeId", "EMP-" + userId, "active", true));
         response.put("profile", profile);
 
-        var assignmentOpt = staffRepository.findCurrentAssignment(userId);
+        var assignmentOpt = staffRepository.findCurrentAssignment(userId, tripId);
         if (assignmentOpt.isPresent()) {
             Map<String, Object> currentTrip = assignmentOpt.get();
             response.put("assignedTrip", currentTrip);
@@ -44,6 +48,7 @@ public class StaffService {
             response.put("precedingBus", null);
         }
 
+        response.put("myAssignedTrips", staffRepository.findAllAssignedTripsForStaff(userId));
         response.put("messages", staffRepository.listMessages(userId, false));
         return response;
     }
@@ -114,5 +119,34 @@ public class StaffService {
 
     public List<Map<String, Object>> getMessages(long userId, boolean isAdmin) {
         return staffRepository.listMessages(userId, isAdmin);
+    }
+
+    @Transactional
+    public Map<String, Object> completeTrip(long tripId, long userId) {
+        staffRepository.completeTrip(tripId);
+
+        // Automated operational dispatch message
+        String msg = "Trip #" + tripId + " arrival confirmed and marked as COMPLETED by driver. Luggage cargo hold unlocked for passenger baggage handover.";
+        staffRepository.saveMessage(userId, "Trip #" + tripId + " Completed & Arrived", msg, false);
+
+        log.info("Trip {} successfully completed by driver (userId={})", tripId, userId);
+        return Map.of("tripId", tripId, "status", "COMPLETED", "message", msg);
+    }
+
+    public List<Map<String, Object>> getLuggageForTrip(long tripId) {
+        return staffRepository.findLuggageForTrip(tripId);
+    }
+
+    public List<Map<String, Object>> getTripsWithCrew() {
+        return staffRepository.findTripsWithCrew();
+    }
+
+    public List<Map<String, Object>> getCrewMembers() {
+        return staffRepository.findCrewMembers();
+    }
+
+    @Transactional
+    public void assignCrew(long tripId, Long driverUserId, Long conductorUserId, long adminUserId) {
+        staffRepository.assignCrew(tripId, driverUserId, conductorUserId, adminUserId);
     }
 }

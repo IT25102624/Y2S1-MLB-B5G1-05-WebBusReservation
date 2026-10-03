@@ -3,48 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CatchBusLK — Conductor Boarding &amp; QR Verification Console</title>
+  <title>CatchBusLK — Conductor Console &middot; Boarding &amp; Route Overview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --cyan: #10b981; --cyan-dark: #059669; --bg: #090d16;
-      --card-bg: #111827; --border: rgba(16, 185, 129, 0.25);
-      --ink: #f8fafc; --ink-light: #94a3b8; --rose: #ef4444;
-      --radius: 16px;
+      --cyan: #10b981;
+      --cyan-dark: #059669;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --bg: #090d16;
+      --card-bg: rgba(17, 24, 39, 0.75);
+      --card-solid: #111827;
+      --card-inner: rgba(15, 23, 42, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-cyan: rgba(16, 185, 129, 0.25);
+      --border-amber: rgba(245, 158, 11, 0.25);
+      --ink: #f8fafc;
+      --ink-muted: #94a3b8;
+      --radius: 20px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
-    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 60px; min-height: 100vh; }
+    body { background: var(--bg); color: var(--ink); line-height: 1.6; padding-bottom: 70px; min-height: 100vh; }
     
-    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 0; position: sticky; top: 0; z-index: 100; }
+    header { background: #0f172a; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 0; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
     .nav-wrap { max-width: 1240px; margin: 0 auto; width: 100%; padding: 0 24px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
     .brand-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; text-decoration: none; display: flex; align-items: center; gap: 4px; }
     .brand-title span { color: var(--cyan); }
     .logout-btn { background: rgba(255,255,255,0.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.1); border-radius: 9999px; padding: 6px 16px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; transition: all 0.2s; }
     .logout-btn:hover { background: rgba(255,255,255,0.15); color: #ffffff; }
 
-    .main-wrap { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
-    .badge { display: inline-block; background: rgba(16, 185, 129, 0.15); color: var(--cyan); font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 9999px; letter-spacing: 1px; border: 1px solid var(--border); }
-    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 800; color: #ffffff; margin-top: 8px; }
-    
-    .grid-layout { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; margin-top: 24px; }
-    @media (max-width: 860px) { .grid-layout { grid-template-columns: 1fr; } }
+    .main-wrap { max-width: 1140px; margin: 36px auto; padding: 0 20px; }
+    .eyebrow { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--cyan); letter-spacing: 0.25em; display: inline-block; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 800; color: #ffffff; margin-top: 4px; }
+    .header-sub { color: var(--ink-muted); font-size: 14px; margin-top: 4px; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-    .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
-    .card-sub { color: var(--ink-light); font-size: 13px; margin-bottom: 16px; }
+    .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    @media (max-width: 900px) { .grid-2col { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); position: relative; }
+    .card-cyan { border-color: var(--border-cyan); }
+    .card-amber { border-color: var(--border-amber); }
+    .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800; color: #ffffff; margin-bottom: 4px; }
+    .card-sub { color: var(--ink-muted); font-size: 13px; margin-bottom: 18px; }
+
+    /* Key-Value Rows */
+    .row-list { display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+    .row-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+    .row-label { color: var(--ink-muted); }
+    .row-value { font-weight: 600; color: #e2e8f0; text-align: right; }
+
+    /* Map Box */
+    .map-box { margin-top: 16px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; height: 260px; }
+    .map-box iframe { width: 100%; height: 100%; border: 0; }
 
     /* Drag & Drop Upload Zone */
     .drop-zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       border: 2px dashed rgba(16, 185, 129, 0.4); border-radius: 14px;
-      padding: 24px 16px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.25);
-      transition: all 0.2s; margin-bottom: 18px;
+      padding: 22px 16px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.25);
+      transition: all 0.2s; margin-bottom: 16px;
     }
     .drop-zone:hover, .drop-zone.dragover { border-color: var(--cyan); background: rgba(16, 185, 129, 0.08); }
     .drop-zone input { display: none; }
-    
+
     /* Decoded Ticket Preview */
     .ticket-preview {
       background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.1);
@@ -57,36 +80,53 @@
     .status-pill.invalid { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
 
     .ticket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; font-size: 13px; }
-    .t-label { color: var(--ink-light); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .t-label { color: var(--ink-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .t-val { color: #ffffff; font-weight: 600; }
 
     .luggage-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
 
-    /* Form Fields */
+    /* Forms & Inputs */
     .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink-light); margin-bottom: 6px; letter-spacing: 0.5px; }
-    .form-group input { width: 100%; padding: 11px 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.5); color: #ffffff; font-size: 14px; outline: none; }
-    .form-group input:focus { border-color: var(--cyan); }
-    
-    .action-btn { width: 100%; background: var(--cyan); color: #090d16; border: none; border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
-    .action-btn:hover { background: #2dd4bf; }
-    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    
-    .scan-cam-btn { width: 100%; background: rgba(255,255,255,0.06); color: var(--cyan); border: 1px dashed var(--cyan); border-radius: 10px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
-    .scan-cam-btn:hover { background: rgba(16, 185, 129, 0.1); }
+    .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .form-input { width: 100%; padding: 11px 14px; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: var(--card-inner); color: #ffffff; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .form-input:focus { border-color: var(--cyan); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
 
-    .counter-box { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; border: 1px solid rgba(255,255,255,0.06); }
-    .count-val { font-family: 'Space Grotesk', monospace; font-size: 30px; font-weight: 800; color: var(--cyan); }
+    .btn-action { width: 100%; background: var(--cyan); color: #090d16; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-action:hover { background: #2dd4bf; }
+    .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-scan-cam { width: 100%; background: rgba(255,255,255,0.06); color: var(--cyan); border: 1px dashed var(--cyan); border-radius: 12px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.2s; }
+    .btn-scan-cam:hover { background: rgba(16, 185, 129, 0.1); }
+
+    .counter-box { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.06); }
+    .count-val { font-family: 'Space Grotesk', monospace; font-size: 28px; font-weight: 800; color: var(--cyan); }
 
     .msg-box { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
     .msg-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid var(--cyan); }
     .msg-error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid var(--rose); }
 
     .video-preview { width: 100%; height: 200px; background: #000; border-radius: 12px; margin-top: 12px; display: none; object-fit: cover; }
-    .divider { display: flex; align-items: center; text-align: center; margin: 16px 0; color: var(--ink-light); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .divider { display: flex; align-items: center; text-align: center; margin: 16px 0; color: var(--ink-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
     .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.08); }
     .divider:not(:empty)::before { margin-right: .8em; }
     .divider:not(:empty)::after { margin-left: .8em; }
+
+    /* Operations Messages Feed */
+    .msg-list { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; max-height: 280px; overflow-y: auto; }
+    .msg-card { border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.1); background: var(--card-inner); }
+    .msg-card.urgent { border-color: rgba(239, 68, 68, 0.45); background: rgba(239, 68, 68, 0.08); }
+    .msg-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .msg-card-title { font-weight: 700; color: #ffffff; font-size: 14px; }
+    .msg-urgent-pill { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 8px; border-radius: 9999px; }
+    .msg-card-body { font-size: 13px; color: #cbd5e1; line-height: 1.4; }
+    .msg-card-footer { font-size: 11px; color: var(--ink-muted); margin-top: 6px; }
+
+    /* GPS Sharing Bar */
+    .gps-sharing-box { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .gps-toggle-btn { background: var(--cyan); color: #090d16; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+    .gps-toggle-btn.active { background: var(--rose); color: #ffffff; }
+    .gps-status-text { font-size: 12px; color: var(--ink-muted); margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -94,33 +134,42 @@
     <div class="nav-wrap">
       <a href="index.html" class="brand-title">Catch<span>Bus</span>LK &middot; Conductor Console</a>
       <div style="display:flex; align-items:center; gap:16px;">
-        <span style="font-size:13px; color:var(--ink-light);" id="staffLabel">Staff Conductor</span>
-        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token')">Sign out</a>
+        <span style="font-size:13px; color:var(--ink-muted);" id="staffLabel">Demo Conductor (CON-001)</span>
+        <a href="staff-login.html" class="logout-btn" onclick="localStorage.removeItem('auth_token'); localStorage.removeItem('user_info');">Sign out</a>
       </div>
     </div>
   </header>
 
   <main class="main-wrap">
-    <span class="badge">Boarding &amp; Manifest Controller</span>
-    <h1>Passenger Ticket &amp; QR Verification</h1>
-    <p style="color:var(--ink-light); font-size:14px; margin-top:4px;">Upload or scan passenger QR tickets, verify baggage tags, or enter references to confirm passenger boarding.</p>
+    <span class="eyebrow">Conductor Console</span>
+    <h1>Boarding &amp; route overview</h1>
+    <p class="header-sub" id="headerSubText">Demo Conductor &middot; CON-001 &middot; Bus CBL-001</p>
 
-    <div class="grid-layout">
-      <!-- Verification Console Card -->
-      <section class="card">
+    <!-- Top Grid: Digital QR Scanner & Assigned Schedule -->
+    <div class="grid-2col">
+      <!-- Card 1: Passenger Ticket & QR Verification -->
+      <section class="card card-cyan">
+        <div class="counter-box">
+          <div>
+            <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-muted);">Boarded Manifest</div>
+            <div style="font-size:13px; color:#cbd5e1; margin-top:2px;" id="tripStatusLabel">Trip Status: SCHEDULED</div>
+          </div>
+          <div class="count-val" id="boardedCountDisplay">0 / 52</div>
+        </div>
+
         <h2 class="card-title">Digital QR Ticket Scanner</h2>
-        <p class="card-sub">Drag &amp; drop a passenger QR boarding pass image or select a file to decode and verify.</p>
+        <p class="card-sub">Drag &amp; drop a passenger QR boarding pass or enter reference manually.</p>
 
         <!-- Drag & Drop QR Image Upload -->
         <label class="drop-zone" id="qrDropZone">
           <input type="file" id="qrFileInput" accept="image/png,image/jpeg,image/webp">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="17 8 12 3 7 8"></polyline>
             <line x1="12" y1="3" x2="12" y2="15"></line>
           </svg>
           <strong id="qrFileName" style="color:#ffffff; font-size:13px;">Drop digital ticket QR image here, or Browse</strong>
-          <span style="color:var(--ink-light); font-size:11px; margin-top:4px;">PNG, JPG, or WebP boarding passes</span>
+          <span style="color:var(--ink-muted); font-size:11px; margin-top:4px;">PNG, JPG, or WebP boarding passes</span>
         </label>
 
         <!-- Messages -->
@@ -132,7 +181,7 @@
           <div class="ticket-header">
             <div>
               <strong style="color:#ffffff; font-size:15px;" id="tpPassengerName">Passenger Name</strong>
-              <div style="font-size:12px; color:var(--ink-light);" id="tpBookingRef">Booking #</div>
+              <div style="font-size:12px; color:var(--ink-muted);" id="tpBookingRef">Booking #</div>
             </div>
             <span class="status-pill valid" id="tpStatusPill">VALID PASS</span>
           </div>
@@ -162,7 +211,7 @@
             </div>
           </div>
 
-          <button type="button" class="action-btn" id="confirmBoardBtn" style="margin-top:14px;" onclick="confirmDecodedBoarding()">
+          <button type="button" class="btn-action" id="confirmBoardBtn" style="margin-top:14px;" onclick="confirmDecodedBoarding()">
             Confirm Passenger Boarded
           </button>
         </div>
@@ -173,46 +222,233 @@
         <form id="boardForm" onsubmit="handleManualBoarding(event)">
           <div class="form-group">
             <label>Passenger Booking Reference</label>
-            <input type="text" id="refInput" placeholder="e.g. CB390192 or 3" required>
+            <input type="text" class="form-input" id="refInput" placeholder="e.g. CB390192 or 3" required>
           </div>
 
           <div class="form-group">
             <label>Remarks / Halting Point (Optional)</label>
-            <input type="text" id="remarksInput" placeholder="e.g. Expressway Entrance Halt">
+            <input type="text" class="form-input" id="remarksInput" placeholder="e.g. Expressway Entrance Halt">
           </div>
 
-          <button type="submit" class="action-btn">Verify Reference &amp; Board</button>
+          <button type="submit" class="btn-action">Verify Reference &amp; Board</button>
         </form>
 
-        <button type="button" class="scan-cam-btn" onclick="toggleCamera()">Scan Passenger QR via Camera</button>
+        <button type="button" class="btn-scan-cam" onclick="toggleCamera()">Scan Passenger QR via Camera</button>
         <video id="cameraPreview" class="video-preview" autoplay playsinline></video>
       </section>
 
-      <!-- Manifest & Trip Info Card -->
-      <section class="card">
-        <h2 class="card-title">Assigned Trip Manifest</h2>
-        <div class="counter-box">
+      <!-- Card 2: Your Assigned Schedule -->
+      <section class="card card-cyan">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
           <div>
-            <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-light);">Boarded Passengers</div>
-            <div style="font-size:13px; color:#cbd5e1; margin-top:2px;" id="tripStatusLabel">Trip Status: SCHEDULED</div>
+            <h2 class="card-title" style="margin-bottom:2px;">Your assigned schedule</h2>
+            <div class="card-sub" style="margin-bottom:0;">Transit corridor and duty shift details.</div>
           </div>
-          <div class="count-val" id="boardedCountDisplay">0 / 52</div>
+          <div style="min-width:220px; flex:1; max-width:320px;">
+            <label for="dutyTripSelect" style="display:block; font-size:10px; font-weight:800; text-transform:uppercase; color:var(--ink-muted); margin-bottom:4px;">Select Duty Shift</label>
+            <select id="dutyTripSelect" onchange="switchDutyTrip(this.value)" style="width:100%; background:var(--card-inner); color:#ffffff; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:7px 10px; font-size:12px; font-weight:700; outline:none; cursor:pointer;">
+              <option value="">Loading assigned shifts...</option>
+            </select>
+          </div>
         </div>
 
-        <div style="margin-top:20px; font-size:13px; line-height:2.2; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
-          <div><strong style="color:var(--ink-light);">Assigned Bus:</strong> <span id="busNumberDisplay" style="color:#ffffff; font-weight:700;">CBL-001 (CatchBusLK AC)</span></div>
-          <div><strong style="color:var(--ink-light);">Assigned Route:</strong> <span id="routeDisplay" style="color:#ffffff; font-weight:700;">Colombo &rarr; Kandy (3.5h)</span></div>
-          <div><strong style="color:var(--ink-light);">Scheduled Departure:</strong> <span id="depDisplay" style="color:#ffffff; font-weight:700;">Today &middot; 08:30 AM</span></div>
-          <div><strong style="color:var(--ink-light);">Preceding Bus:</strong> <span id="prevBusDisplay" style="color:var(--cyan); font-weight:700;">CBL-000 (Active on Route)</span></div>
+        <div class="row-list" id="scheduleRows">
+          <div class="row-item">
+            <span class="row-label">Bus</span>
+            <span class="row-value" id="schBusNumber">CBL-001 (CatchBusLK AC)</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Route</span>
+            <span class="row-value" id="schRoute">Colombo &rarr; Kandy</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Departure</span>
+            <span class="row-value" id="schDeparture">Scheduled</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Arrival</span>
+            <span class="row-value" id="schArrival">Scheduled</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Status</span>
+            <span class="row-value" id="schStatus">
+              <span class="status-pill valid">SCHEDULED</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Operational Shift Summary Info to balance card height nicely -->
+        <div style="margin-top:24px; padding:16px; background:var(--card-inner); border-radius:14px; border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--cyan); letter-spacing:0.1em; margin-bottom:8px;">Conductor Duty Guidelines</div>
+          <ul style="font-size:12px; color:var(--ink-muted); padding-left:18px; line-height:1.8;">
+            <li>Verify all passenger QR boarding passes before passenger ingress.</li>
+            <li>Ensure linked baggage tags match luggage stowed in the lower hold.</li>
+            <li>Use the Operations issue reporter below for any highway incidents.</li>
+            <li>Keep GPS sharing active while vehicle is in transit.</li>
+          </ul>
         </div>
       </section>
     </div>
+
+    <!-- Second Grid: Previous Bus Live Location & Report an Issue -->
+    <div class="grid-2col" style="margin-top:24px;">
+      <!-- Card 3: Previous Bus Live Location -->
+      <section class="card card-amber">
+        <h2 class="card-title">Previous bus live location</h2>
+        <div class="card-sub">Telemetry and map view of the bus operating directly ahead of you.</div>
+
+        <div class="row-list">
+          <div class="row-item">
+            <span class="row-label">Bus</span>
+            <span class="row-value" id="prevBusPlate">CBL-000</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Route</span>
+            <span class="row-value" id="prevRoute">Colombo &rarr; Kandy</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Trip departure</span>
+            <span class="row-value" id="prevDeparture">1h ahead</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Last GPS update</span>
+            <span class="row-value" id="prevGpsTime">Awaiting update</span>
+          </div>
+          <div class="row-item">
+            <span class="row-label">Coordinates</span>
+            <span class="row-value" id="prevCoords">7.2088000, 79.8358000</span>
+          </div>
+        </div>
+
+        <div class="map-box" id="mapContainer">
+          <iframe id="osmMapFrame" title="Preceding bus live map"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=79.8058%2C7.1788%2C79.8658%2C7.2388&layer=mapnik&marker=7.2088%2C79.8358">
+          </iframe>
+        </div>
+      </section>
+
+      <!-- Card 4: Report an Issue (OperationsMessages) -->
+      <section class="card">
+        <h2 class="card-title">Report an issue</h2>
+        <p class="card-sub">Send route, vehicle, passenger or safety issues directly to operations.</p>
+
+        <form id="reportForm" onsubmit="handleSendReport(event)">
+          <div class="form-group">
+            <input type="text" class="form-input" id="issueSubject" placeholder="Subject" required>
+          </div>
+          <div class="form-group">
+            <textarea class="form-input" id="issueMessage" rows="3" placeholder="Describe the issue and what support you need" required></textarea>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:#cbd5e1; cursor:pointer;">
+              <input type="checkbox" id="issueUrgent" style="accent-color:var(--rose); width:16px; height:16px;">
+              Mark as urgent
+            </label>
+            <button type="submit" class="btn-action" style="width:auto; padding:10px 22px;" id="sendReportBtn">Send report</button>
+          </div>
+        </form>
+
+        <div class="msg-box msg-success" id="reportStatusBox"></div>
+
+        <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+          <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--ink-muted); margin-bottom:10px;">Recent Operations Messages</div>
+          <div class="msg-list" id="operationsMessagesList">
+            <div style="font-size:13px; color:var(--ink-muted); text-align:center; padding:12px;">Loading operations messages...</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Passenger Baggage Handover Station -->
+    <section class="card card-cyan" id="luggageHandoverSection" style="margin-top:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+        <div>
+          <div class="eyebrow" style="margin-bottom:4px;">CARGO HOLD INVENTORY &bull; TERMINAL HANDOVER</div>
+          <h2 class="card-title" style="display:flex; align-items:center; gap:8px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Passenger Baggage Handover Station
+          </h2>
+          <div class="card-sub" style="margin-bottom:0;">
+            Verify baggage claim tags and hand over stowed cargo luggage to arriving passengers at terminal bays.
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span id="handoverTripStatusPill" class="status-pill" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid #f59e0b;">
+            IN TRANSIT &bull; HOLD SECURED
+          </span>
+          <button type="button" class="btn-action" onclick="loadTripLuggage()" style="width:auto; padding:7px 16px; font-size:12px; background:rgba(255,255,255,0.08); color:#cbd5e1; border:1px solid rgba(255,255,255,0.15);">
+            Refresh Bags
+          </button>
+        </div>
+      </div>
+
+      <div id="luggageHandoverNotification" class="msg-box msg-success" style="margin-bottom:16px;"></div>
+
+      <!-- Luggage Items Table -->
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+          <thead>
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.12); color:var(--ink-muted); text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">
+              <th style="padding:10px 12px;">Tag Ref</th>
+              <th style="padding:10px 12px;">Owner / Passenger</th>
+              <th style="padding:10px 12px;">Seat(s)</th>
+              <th style="padding:10px 12px;">Bags &amp; Description</th>
+              <th style="padding:10px 12px;">Cargo Status</th>
+              <th style="padding:10px 12px; text-align:right;">Handover Action</th>
+            </tr>
+          </thead>
+          <tbody id="luggageHandoverTableBody">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:24px; color:var(--ink-muted);">Loading cargo hold luggage...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:16px; padding:12px 16px; background:rgba(0,0,0,0.35); border-radius:12px; border:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:12px; color:var(--ink-muted);">
+        <span>Total bags stowed in hold: <strong id="totalHoldBagsCount" style="color:#ffffff;">0</strong></span>
+        <span>Handed over / Collected: <strong id="collectedBagsCount" style="color:var(--cyan);">0</strong></span>
+        <span>Awaiting passenger collection: <strong id="pendingHandoverCount" style="color:var(--amber);">0</strong></span>
+      </div>
+    </section>
+
+    <!-- Bottom Section: Share this Bus GPS -->
+    <section class="card" style="margin-top:24px;">
+      <div class="gps-sharing-box">
+        <div>
+          <h2 class="card-title">Share this bus GPS</h2>
+          <p style="color:var(--ink-muted); font-size:13px; margin-top:2px;">
+            Your current bus location becomes the live location that the following bus can see.
+          </p>
+        </div>
+        <button type="button" class="gps-toggle-btn" id="gpsToggleBtn" onclick="toggleGpsSharing()">
+          Start GPS sharing
+        </button>
+      </div>
+      <div class="gps-status-text" id="gpsStatusMessage">GPS sharing is currently idle.</div>
+    </section>
   </main>
 
   <script>
     let boardedCount = 0;
     const totalSeats = 52;
     let currentDecodedTicket = null;
+    let isGpsSharing = false;
+    let gpsIntervalId = null;
+    let currentAssignedTrip = null;
+    let selectedTripId = null;
+    let myAssignedTrips = [];
+
+    function getStaffUserId() {
+      try {
+        const userInfo = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
+        if (userInfo) {
+          const u = JSON.parse(userInfo);
+          return u.userId || u.id || 11;
+        }
+      } catch (e) {}
+      return 11; // Demo conductor default
+    }
 
     function getAuthHeaders(isJson = true) {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token');
@@ -222,46 +458,262 @@
       return headers;
     }
 
-    // Initialize Dashboard
-    async function loadDashboard() {
+    function formatDate(val) {
+      if (!val) return '—';
+      try {
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? val : d.toLocaleString();
+      } catch (e) {
+        return val;
+      }
+    }
+
+    function populateDutyTripSelect(trips, activeTripId) {
+      const select = document.getElementById('dutyTripSelect');
+      if (!select) return;
+      if (!trips || trips.length === 0) {
+        select.innerHTML = '<option value="">No active shifts assigned</option>';
+        return;
+      }
+      select.innerHTML = trips.map(t => {
+        const isSel = (activeTripId && t.tripId === activeTripId) ? 'selected' : '';
+        const st = String(t.tripStatus || 'SCHEDULED').toUpperCase();
+        const dateStr = formatDate(t.departureTime);
+        return `<option value="${t.tripId}" ${isSel}>Trip #${t.tripId}: ${t.sourceCity} &rarr; ${t.destinationCity} (${st}) &middot; ${dateStr}</option>`;
+      }).join('');
+    }
+
+    function switchDutyTrip(tripId) {
+      if (!tripId) return;
+      selectedTripId = Number(tripId);
+      loadDashboard(selectedTripId);
+    }
+
+    // Load Staff Dashboard Details
+    async function loadDashboard(preferredTripId) {
+      const userId = getStaffUserId();
       try {
         const userInfo = localStorage.getItem('user_info') || localStorage.getItem('bus_user');
         if (userInfo) {
           const u = JSON.parse(userInfo);
-          const lbl = document.getElementById('staffLabel');
-          if (lbl) lbl.innerText = `${u.fullName || 'Conductor'} (${u.email || 'CON-001'})`;
+          document.getElementById('staffLabel').innerText = `${u.fullName || 'Demo Conductor'} (${u.email || 'CON-001'})`;
         }
 
-        const res = await fetch('/api/v1/staff/dashboard', { headers: getAuthHeaders() });
+        const effectiveTripId = preferredTripId || selectedTripId;
+        const tripParam = effectiveTripId ? `&tripId=${effectiveTripId}` : '';
+        const res = await fetch(`/api/v1/staff/dashboard?userId=${userId}${tripParam}`, { headers: getAuthHeaders() });
         if (res.ok) {
-          const data = await res.json();
-          if (data.data?.assignedTrip) {
-            const trip = data.data.assignedTrip;
-            document.getElementById('busNumberDisplay').innerText = `${trip.busNumber} (${trip.operatorName || 'CatchBusLK'})`;
-            document.getElementById('routeDisplay').innerText = `${trip.sourceCity} → ${trip.destinationCity}`;
-            document.getElementById('tripStatusLabel').innerText = `Trip Status: ${trip.tripStatus || 'IN_TRANSIT'}`;
+          const json = await res.json();
+          const d = json.data;
+
+          // Profile & Header Subtitle
+          const prof = d?.profile;
+          const assigned = d?.assignedTrip;
+          currentAssignedTrip = assigned;
+          myAssignedTrips = d?.myAssignedTrips || [];
+
+          populateDutyTripSelect(myAssignedTrips, assigned?.tripId);
+
+          const fullName = (userInfo && JSON.parse(userInfo).fullName) || 'Demo Conductor';
+          const empId = prof?.employeeId || 'CON-001';
+          const busPlate = assigned?.busNumber || 'CBL-001';
+          document.getElementById('headerSubText').innerText = `${fullName} · ${empId} · Bus ${busPlate}`;
+
+          // Assigned Schedule
+          if (assigned) {
+            document.getElementById('schBusNumber').innerText = `${assigned.busNumber} (${assigned.operatorName || 'CatchBusLK'})`;
+            document.getElementById('schRoute').innerText = `${assigned.sourceCity} → ${assigned.destinationCity}`;
+            document.getElementById('schDeparture').innerText = formatDate(assigned.departureTime);
+            document.getElementById('schArrival').innerText = formatDate(assigned.arrivalTime);
+            
+            const isCompleted = String(assigned.tripStatus).toUpperCase() === 'COMPLETED';
+            if (isCompleted) {
+              document.getElementById('schStatus').innerHTML = `<span class="status-pill" style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid #10b981;">COMPLETED &bull; ARRIVED</span>`;
+              document.getElementById('tripStatusLabel').innerText = `Trip Status: COMPLETED (Arrived at Platform)`;
+            } else {
+              document.getElementById('schStatus').innerHTML = `<span class="status-pill valid">${assigned.tripStatus || 'SCHEDULED'}</span>`;
+              document.getElementById('tripStatusLabel').innerText = `Trip Status: ${assigned.tripStatus || 'SCHEDULED'}`;
+            }
+            await loadTripLuggage();
+          } else {
+            document.getElementById('schBusNumber').innerText = 'No bus assigned';
+            document.getElementById('schRoute').innerText = 'No active duty assigned';
+            document.getElementById('schDeparture').innerText = '—';
+            document.getElementById('schArrival').innerText = '—';
+            document.getElementById('schStatus').innerHTML = `<span class="status-pill" style="background:rgba(255,255,255,0.08); color:var(--ink-muted);">STANDBY</span>`;
+            document.getElementById('tripStatusLabel').innerText = 'Trip Status: STANDBY';
+            await loadTripLuggage();
           }
-          if (data.data?.precedingBus) {
-            const p = data.data.precedingBus;
-            document.getElementById('prevBusDisplay').innerText = `${p.busNumber} (Active on Route)`;
+
+          // Preceding Bus
+          if (d?.precedingBus) {
+            const p = d.precedingBus;
+            document.getElementById('prevBusPlate').innerText = `${p.busNumber} (${p.operatorName || 'CatchBusLK'})`;
+            document.getElementById('prevRoute').innerText = `${p.sourceCity} → ${p.destinationCity}`;
+            document.getElementById('prevDeparture').innerText = formatDate(p.departureTime);
+
+            const loc = p.latestLocation;
+            if (loc && loc.latitude && loc.longitude) {
+              const lat = Number(loc.latitude);
+              const lon = Number(loc.longitude);
+              document.getElementById('prevGpsTime').innerText = formatDate(loc.recordedAt);
+              document.getElementById('prevCoords').innerText = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+
+              // Update OpenStreetMap iframe bbox & marker
+              const bbox = `${(lon - 0.03).toFixed(4)}%2C${(lat - 0.03).toFixed(4)}%2C${(lon + 0.03).toFixed(4)}%2C${(lat + 0.03).toFixed(4)}`;
+              const marker = `${lat.toFixed(6)}%2C${lon.toFixed(6)}`;
+              document.getElementById('osmMapFrame').src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${marker}`;
+            }
           }
         }
-      } catch (e) {
-        console.warn('Dashboard summary fallback active:', e);
+      } catch (err) {
+        console.warn('Dashboard load fallback active:', err);
       }
     }
 
-    // Drag and Drop QR file handling
+    // Load Operations Messages
+    async function loadOperationsMessages() {
+      const userId = getStaffUserId();
+      const listEl = document.getElementById('operationsMessagesList');
+      try {
+        const res = await fetch(`/api/v1/staff/messages?userId=${userId}`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          const msgs = json.data || [];
+          if (msgs.length === 0) {
+            listEl.innerHTML = '<div style="font-size:13px; color:var(--ink-muted); text-align:center; padding:12px;">No operations messages yet.</div>';
+            return;
+          }
+
+          listEl.innerHTML = msgs.map(m => `
+            <article class="msg-card ${m.urgent ? 'urgent' : ''}">
+              <div class="msg-card-header">
+                <span class="msg-card-title">${escapeHtml(m.subject)}</span>
+                ${m.urgent ? '<span class="msg-urgent-pill">Urgent</span>' : ''}
+              </div>
+              <p class="msg-card-body">${escapeHtml(m.message)}</p>
+              <div class="msg-card-footer">${escapeHtml(m.senderName || 'Staff')} &middot; ${escapeHtml(m.senderRole || 'STAFF')} &middot; ${formatDate(m.createdAt)}</div>
+            </article>
+          `).join('');
+        }
+      } catch (e) {
+        console.warn('Error loading operations messages:', e);
+      }
+    }
+
+    // Send Report Form
+    async function handleSendReport(e) {
+      e.preventDefault();
+      const userId = getStaffUserId();
+      const subject = document.getElementById('issueSubject').value.trim();
+      const message = document.getElementById('issueMessage').value.trim();
+      const urgent = document.getElementById('issueUrgent').checked;
+      const statusBox = document.getElementById('reportStatusBox');
+      const sendBtn = document.getElementById('sendReportBtn');
+
+      sendBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/v1/staff/messages?userId=${userId}`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ subject, message, urgent })
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || 'Could not send message.');
+
+        statusBox.innerText = 'Message sent to the operations team.';
+        statusBox.style.display = 'block';
+        document.getElementById('issueSubject').value = '';
+        document.getElementById('issueMessage').value = '';
+        document.getElementById('issueUrgent').checked = false;
+        setTimeout(() => { statusBox.style.display = 'none'; }, 4000);
+        await loadOperationsMessages();
+      } catch (err) {
+        statusBox.className = 'msg-box msg-error';
+        statusBox.innerText = err.message;
+        statusBox.style.display = 'block';
+      } finally {
+        sendBtn.disabled = false;
+      }
+    }
+
+    // GPS Telemetry Sharing
+    function toggleGpsSharing() {
+      const btn = document.getElementById('gpsToggleBtn');
+      const statusEl = document.getElementById('gpsStatusMessage');
+
+      if (!isGpsSharing) {
+        isGpsSharing = true;
+        btn.innerText = 'Stop GPS sharing';
+        btn.classList.add('active');
+        statusEl.innerText = 'Reading GPS… broadcasting live telemetry to following buses.';
+        broadcastGps();
+        gpsIntervalId = setInterval(broadcastGps, 15000);
+      } else {
+        isGpsSharing = false;
+        clearInterval(gpsIntervalId);
+        btn.innerText = 'Start GPS sharing';
+        btn.classList.remove('active');
+        statusEl.innerText = 'GPS sharing stopped.';
+      }
+    }
+
+    async function broadcastGps() {
+      const statusEl = document.getElementById('gpsStatusMessage');
+      const userId = getStaffUserId();
+
+      const sendCoords = async (lat, lon, spd, head) => {
+        try {
+          const res = await fetch(`/api/v1/staff/location?userId=${userId}`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              latitude: parseFloat(lat),
+              longitude: parseFloat(lon),
+              speedKmh: parseFloat(spd),
+              headingDegrees: parseFloat(head)
+            })
+          });
+          if (res.ok) {
+            statusEl.innerText = `Bus GPS updated at ${new Date().toLocaleTimeString()} (Lat: ${lat}, Lon: ${lon})`;
+          } else {
+            const data = await res.json();
+            statusEl.innerText = data.message || 'Could not send bus location.';
+          }
+        } catch (e) {
+          statusEl.innerText = 'Could not send bus location: network error.';
+        }
+      };
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const spd = pos.coords.speed == null ? 48.0 : (pos.coords.speed * 3.6).toFixed(1);
+            const head = pos.coords.heading == null ? 85.0 : pos.coords.heading;
+            sendCoords(pos.coords.latitude.toFixed(6), pos.coords.longitude.toFixed(6), spd, head);
+          },
+          () => {
+            // Simulated progression along Colombo-Kandy highway if device permission is denied
+            const simLat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(6);
+            const simLon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(6);
+            sendCoords(simLat, simLon, (50 + Math.random() * 10).toFixed(1), 85.0);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        const simLat = (7.2906 + (Math.random() - 0.5) * 0.005).toFixed(6);
+        const simLon = (80.6337 + (Math.random() - 0.5) * 0.005).toFixed(6);
+        sendCoords(simLat, simLon, 52.0, 85.0);
+      }
+    }
+
+    // QR Drag and Drop & File Upload
     const dropZone = document.getElementById('qrDropZone');
     const fileInput = document.getElementById('qrFileInput');
     const fileNameDisplay = document.getElementById('qrFileName');
 
     dropZone.onclick = () => fileInput.click();
-
-    dropZone.ondragover = (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    };
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
     dropZone.ondragleave = () => dropZone.classList.remove('dragover');
     dropZone.ondrop = (e) => {
       e.preventDefault();
@@ -292,9 +744,7 @@
           body: form
         });
         const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.message || 'Failed to decode ticket QR code.');
-        }
+        if (!res.ok) throw new Error(json.message || 'Failed to decode ticket QR code.');
 
         currentDecodedTicket = json.data;
         renderDecodedTicket(json.data);
@@ -311,7 +761,7 @@
       document.getElementById('tpPassengerName').textContent = t.passengerName || 'Passenger';
       document.getElementById('tpBookingRef').textContent = `Ref: #${t.bookingId} (${t.transactionReference || 'PASS'})`;
       document.getElementById('tpRoute').textContent = `${t.sourceCity} → ${t.destinationCity}`;
-      document.getElementById('tpDeparture').textContent = t.departureTime ? new Date(t.departureTime).toLocaleString() : 'Scheduled';
+      document.getElementById('tpDeparture').textContent = t.departureTime ? formatDate(t.departureTime) : 'Scheduled';
       document.getElementById('tpSeats').textContent = Array.isArray(t.seats) ? t.seats.join(', ') : (t.seats || '1');
       document.getElementById('tpBus').textContent = `${t.busNumber || 'Bus'} · ${t.operatorName || 'Standard'}`;
 
@@ -333,7 +783,7 @@
         document.getElementById('confirmBoardBtn').style.display = 'block';
       }
 
-      // Render Luggage info if present (Tag, Amount/Quantity, Description, Status)
+      // Render Luggage info if present
       const lugVal = document.getElementById('tpLuggageVal');
       if (t.luggage && t.luggage.length > 0) {
         lugVal.innerHTML = t.luggage.map(l => {
@@ -348,13 +798,13 @@
                 <span style="font-weight:700; color:#38bdf8; font-size:12px;">Amount: ${qty} ${qty > 1 ? 'Bags' : 'Bag'}${st}</span>
               </div>
               <div style="font-size:12px; color:#cbd5e1;">
-                <span style="color:var(--ink-light); font-weight:600;">Description:</span> ${desc}
+                <span style="color:var(--ink-muted); font-weight:600;">Description:</span> ${desc}
               </div>
             </div>
           `;
         }).join('');
       } else {
-        lugVal.innerHTML = '<span style="color:var(--ink-light); font-size:12px;">Standard Hand Luggage Only (No hold luggage)</span>';
+        lugVal.innerHTML = '<span style="color:var(--ink-muted); font-size:12px;">Standard Hand Luggage Only (No hold luggage)</span>';
       }
 
       showSuccess(`QR ticket for ${t.passengerName} decoded successfully!`);
@@ -382,9 +832,7 @@
           body: JSON.stringify({ bookingReference: reference, remarks: remarks || 'Boarded' })
         });
         const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.message || 'Boarding confirmation failed.');
-        }
+        if (!res.ok) throw new Error(json.message || 'Boarding confirmation failed.');
 
         boardedCount = json.data?.boardedCount || (boardedCount + 1);
         document.getElementById('boardedCountDisplay').innerText = `${boardedCount} / ${totalSeats}`;
@@ -425,6 +873,13 @@
       }
     }
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    }
+
     function showSuccess(msg) {
       const s = document.getElementById('successBox');
       s.innerText = msg;
@@ -442,7 +897,161 @@
       document.getElementById('errorBox').style.display = 'none';
     }
 
+    function escStr(s) { return (s || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+    async function loadTripLuggage() {
+      const tbody = document.getElementById('luggageHandoverTableBody');
+      const tripStatusPill = document.getElementById('handoverTripStatusPill');
+      
+      if (!currentAssignedTrip || !currentAssignedTrip.tripId) {
+        if (tripStatusPill) {
+          tripStatusPill.className = 'status-pill';
+          tripStatusPill.style.background = 'rgba(255,255,255,0.08)';
+          tripStatusPill.style.color = 'var(--ink-muted)';
+          tripStatusPill.style.border = '1px solid rgba(255,255,255,0.12)';
+          tripStatusPill.innerHTML = 'NO DUTY SELECTED';
+        }
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--ink-muted);">No active trip assignment selected. Select a duty shift above.</td></tr>`;
+        }
+        const totalEl = document.getElementById('totalHoldBagsCount');
+        if (totalEl) totalEl.textContent = '0';
+        const colEl = document.getElementById('collectedBagsCount');
+        if (colEl) colEl.textContent = '0';
+        const penEl = document.getElementById('pendingHandoverCount');
+        if (penEl) penEl.textContent = '0';
+        return;
+      }
+
+      const tripId = currentAssignedTrip.tripId;
+      const isTripCompleted = String(currentAssignedTrip.tripStatus).toUpperCase() === 'COMPLETED';
+
+      if (tripStatusPill) {
+        if (isTripCompleted) {
+          tripStatusPill.className = 'status-pill valid';
+          tripStatusPill.style.background = 'rgba(16,185,129,0.2)';
+          tripStatusPill.style.color = '#34d399';
+          tripStatusPill.style.border = '1px solid #10b981';
+          tripStatusPill.innerHTML = 'TRIP ARRIVED &bull; READY FOR HANDOVER';
+        } else {
+          tripStatusPill.className = 'status-pill';
+          tripStatusPill.style.background = 'rgba(245,158,11,0.2)';
+          tripStatusPill.style.color = '#fbbf24';
+          tripStatusPill.style.border = '1px solid #f59e0b';
+          tripStatusPill.innerHTML = 'IN TRANSIT &bull; HOLD SECURED';
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/v1/staff/trips/${tripId}/luggage`, { headers: getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          const items = json.data || [];
+          renderLuggageHandoverTable(items, isTripCompleted);
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--ink-muted);">Could not retrieve luggage hold records.</td></tr>`;
+        }
+      } catch (err) {
+        console.warn('Error fetching luggage manifest:', err);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--ink-muted);">Connection error loading luggage hold.</td></tr>`;
+      }
+    }
+
+    function renderLuggageHandoverTable(items, isTripCompleted) {
+      const tbody = document.getElementById('luggageHandoverTableBody');
+      if (!tbody) return;
+
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--ink-muted);">No cargo hold luggage registered for this trip assignment.</td></tr>`;
+        document.getElementById('totalHoldBagsCount').textContent = '0';
+        document.getElementById('collectedBagsCount').textContent = '0';
+        document.getElementById('pendingHandoverCount').textContent = '0';
+        return;
+      }
+
+      let totalHold = 0;
+      let collected = 0;
+      let pending = 0;
+
+      tbody.innerHTML = items.map(l => {
+        const qty = l.bagQuantity || 1;
+        totalHold += qty;
+        const isCollected = (l.status === 'COLLECTED');
+        if (isCollected) collected += qty;
+        else pending += qty;
+
+        const tag = l.tagNumber || 'LUG-TAG';
+        const name = escapeHtml(l.passengerName || 'Passenger');
+        const phone = escapeHtml(l.passengerPhone || '—');
+        const seats = escapeHtml(l.seatsFormatted || 'Standard');
+        const desc = escapeHtml(l.description || 'Luggage Hold Item');
+        const lugId = l.luggageId;
+
+        const statusPill = isCollected 
+          ? `<span class="status-pill valid">COLLECTED</span>`
+          : `<span class="status-pill" style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid #f59e0b;">${l.status || 'LOADED'}</span>`;
+
+        const actionCell = isCollected
+          ? `<span style="color:#34d399; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Handed Over</span>`
+          : `<button type="button" class="btn-action" onclick="handoverLuggageToPassenger(${lugId}, '${escStr(tag)}', '${escStr(name)}')" style="width:auto; padding:6px 14px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; background:var(--cyan); color:#090d16;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Handover to Owner
+            </button>`;
+
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+            <td style="padding:12px; font-family:'Space Grotesk',monospace; font-weight:700; color:#38bdf8;">${tag}</td>
+            <td style="padding:12px;">
+              <div style="font-weight:700; color:#f8fafc;">${name}</div>
+              <div style="font-size:11px; color:var(--ink-muted);">${phone}</div>
+            </td>
+            <td style="padding:12px; font-weight:700; color:var(--cyan);">${seats}</td>
+            <td style="padding:12px;">
+              <span style="font-weight:700; color:#ffffff;">${qty} bag${qty > 1 ? 's' : ''}</span>
+              <div style="font-size:11px; color:var(--ink-muted);">${desc}</div>
+            </td>
+            <td style="padding:12px;">${statusPill}</td>
+            <td style="padding:12px; text-align:right;">${actionCell}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('totalHoldBagsCount').textContent = totalHold;
+      document.getElementById('collectedBagsCount').textContent = collected;
+      document.getElementById('pendingHandoverCount').textContent = pending;
+    }
+
+    async function handoverLuggageToPassenger(luggageId, tagNumber, passengerName) {
+      if (!confirm(`Confirm baggage handover for tag ${tagNumber} to ${passengerName}?`)) return;
+
+      const notifBox = document.getElementById('luggageHandoverNotification');
+      try {
+        const res = await fetch(`/api/v1/luggage/${luggageId}/status`, {
+          method: 'PUT',
+          headers: getAuthHeaders(true),
+          body: JSON.stringify({ status: 'COLLECTED' })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          if (notifBox) {
+            notifBox.innerHTML = `<strong>Handover Confirmed:</strong> Baggage <strong>${tagNumber}</strong> successfully handed over to <strong>${passengerName}</strong>. Cargo tracking status set to COLLECTED.`;
+            notifBox.style.display = 'block';
+            setTimeout(() => { notifBox.style.display = 'none'; }, 5000);
+          }
+          await loadTripLuggage();
+        } else {
+          alert('Failed to update luggage status: ' + (json.message || 'Error'));
+        }
+      } catch (err) {
+        alert('Network error while completing luggage handover.');
+      }
+    }
+
+    // Init & periodic refresh
     loadDashboard();
+    loadOperationsMessages();
+    setInterval(loadDashboard, 12000);
+    setInterval(loadOperationsMessages, 12000);
   </script>
 </body>
 </html>

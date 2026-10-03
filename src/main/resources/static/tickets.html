@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tickets &amp; Active Boarding Passes | CatchBusLK</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --primary-dark: #047857;
+            --primary-light: #ecfdf5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --radius: 16px;
+            --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        h1, h2, h3, .section-title, .modal-title, .logo, .stat-value { font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); min-height: 100vh; padding-bottom: 60px; }
+
+        .container { max-width: 1140px; margin: 32px auto 0; padding: 0 20px; }
+        .card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; border: 1px solid var(--border); margin-bottom: 24px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .section-title { font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+        .section-sub { font-size: 0.88rem; color: var(--text-muted); margin-top: 4px; }
+
+        .btn {
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-success { background: #dcfce7; color: #15803d; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+        .badge-warning { background: #fef3c7; color: #b45309; }
+
+        /* Spotlight Hero */
+        .ticket-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .ticket-hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .ticket-hero-badge {
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 4px 12px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+            animation: pulse-ring 1.8s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+        .ticket-hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ticket-hero-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .ticket-hero-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+            word-break: break-word;
+        }
+        .ticket-hero-countdown {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #34d399;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .ticket-hero-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .seat-badge {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 2px 3px 2px 0;
+        }
+        .seat-badge-light {
+            display: inline-flex;
+            align-items: center;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin: 2px 3px 2px 0;
+        }
+
+        .booking-row-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            transition: all 0.2s;
+        }
+        .booking-row-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #ffffff;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25);
+            max-width: 480px;
+            width: 100%;
+            padding: 28px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .modal-close:hover { color: var(--text-main); }
+    </style>
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <header class="top-nav">
+        <div class="nav-wrap">
+            <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+            <nav class="nav-links">
+                <a href="search.html" id="navLinkSearch">Book a Trip</a>
+                <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+                <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+                <a href="tickets.html" id="navLinkTickets" class="active">My Tickets</a>
+            </nav>
+            <div class="nav-actions">
+                <div class="notification-area" id="navNotificationArea">
+                    <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+                        </svg>
+                        <span id="notificationBadge" class="notification-badge hidden">0</span>
+                    </button>
+                    <div id="notificationMenu" class="notification-menu hidden">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+                            <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+                            <a href="notifications.html" style="font-size:12px; color:var(--primary,#10b981); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+                        </div>
+                        <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+                            <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button id="markAllReadBtn" type="button" style="flex:1; padding:6px 10px; font-size:12px; font-weight:600; border:1px solid #e2e8f0; background:#f8fafc; border-radius:6px; cursor:pointer;">Mark All Read</button>
+                            <a href="notifications.html" style="flex:1; text-align:center; padding:6px 10px; font-size:12px; font-weight:700; background:var(--primary,#10b981); color:#fff; text-decoration:none; border-radius:6px;">View Feed</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="navAuthAction"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Not Logged In State -->
+        <div id="ticketsNotLoggedIn" class="card" style="text-align:center; padding: 48px 28px; max-width: 520px; margin: 40px auto; display:none;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#fee2e2; color:#ef4444; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h2 style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-bottom:8px;">Sign in to view your tickets</h2>
+            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Access your active yet-to-board boarding passes, live terminal countdowns, and baggage receipts.</p>
+            <a href="admin.html?tab=signin" class="btn btn-primary">Sign In to CatchBusLK</a>
+        </div>
+
+        <!-- Main Tickets Content -->
+        <div id="ticketsContent" style="display:none;">
+            <div class="section-header" style="margin-bottom:18px;">
+                <div>
+                    <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">COMMUTER BOARDING PASSES</span>
+                    <h2 class="section-title">My Tickets &amp; Active Journeys</h2>
+                    <p class="section-sub">Real-time boarding terminal bays, departure countdowns, and verified seat reservations</p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-outline btn-sm" onclick="loadTicketsTab()" style="display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        Refresh
+                    </button>
+                    <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Book Another Trip
+                    </a>
+                </div>
+            </div>
+
+            <!-- Earliest Ticket Hero Spotlight -->
+            <div id="earliestTicketHero" style="display:none;"></div>
+
+            <!-- Other Yet-To-Board Tickets List -->
+            <div id="otherYetToBoardContainer" style="display:none; margin-bottom:24px;">
+                <h3 style="font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:12px;">Additional Upcoming Bookings</h3>
+                <div id="otherYetToBoardList"></div>
+            </div>
+
+            <!-- Zero Upcoming Tickets State -->
+            <div id="noUpcomingTickets" class="card" style="text-align:center; padding:48px 24px; display:none;">
+                <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:6px;">No Upcoming Journeys</h3>
+                <p style="font-size:0.88rem; color:var(--text-muted); max-width:440px; margin:0 auto 18px;">You don't have any yet-to-board bus tickets scheduled. All previous trips have been boarded or archived.</p>
+                <a href="search.html" class="btn btn-primary" style="text-decoration:none;">Find Schedules &amp; Book Seats &rarr;</a>
+            </div>
+
+            <!-- Boarded & Past Journeys Collapsible Archive -->
+            <div class="card" style="margin-top:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleArchiveTickets()">
+                    <div>
+                        <h3 style="font-size:0.98rem; font-weight:700; color:#334155; margin:0; display:flex; align-items:center; gap:8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            Past Journeys &amp; Boarded Trips Archive (<span id="archiveTicketsCount">0</span>)
+                        </h3>
+                        <p style="font-size:0.78rem; color:var(--text-muted); margin:3px 0 0 0;">View completed travels and boarded transit records</p>
+                    </div>
+                    <button type="button" class="btn btn-outline btn-sm" id="btnToggleArchive" style="pointer-events:none;">Show History</button>
+                </div>
+                <div id="archiveTicketsWrap" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:14px;">
+                    <div id="ticketsArchiveList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Boarding Pass QR Modal -->
+    <div class="modal-overlay" id="boardingPassModal">
+        <div class="modal" style="text-align:center; max-width:420px;">
+            <button class="modal-close" onclick="closeBoardingPassModal()">&times;</button>
+            <div style="width:48px; height:48px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            </div>
+            <div class="modal-title" style="margin-bottom:4px; font-size:1.15rem;">Digital Boarding Pass</div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">CatchBusLK Express Highway Corridors</p>
+            <div style="background:#f8fafc; border:1px dashed var(--border); border-radius:12px; padding:12px; margin-bottom:16px;">
+                <div style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:800; color:#0f172a;" id="passModalRef">CB00000000</div>
+                <div id="passModalRoute" style="font-size:0.85rem; font-weight:700; color:#334155; margin-top:4px;"></div>
+            </div>
+            <div style="margin: 6px auto; display:inline-block; padding:12px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <img id="passModalQr" src="" alt="Ticket QR" style="width:190px; height:190px; display:block; margin:0 auto;" />
+            </div>
+            <div id="passModalLuggage" style="display:none; text-align:left; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin:10px 0; font-size:12px; color:#065f46;"></div>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin-top:6px;">Present this digital QR pass to the bus conductor upon boarding.</p>
+            <div class="modal-footer" style="justify-content:center; gap:8px; margin-top:14px; flex-wrap:wrap; display:flex;">
+                <a id="passModalDownloadBtn" class="btn btn-primary" href="#" download="catchbus-boarding-pass.png" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">Download QR (PNG)</a>
+                <button class="btn btn-outline" onclick="window.print()">Print Pass</button>
+                <button class="btn btn-outline" onclick="closeBoardingPassModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        function getToken() {
+            return localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token') || '';
+        }
+        function getUser() {
+            if (typeof getCurrentUser === 'function') {
+                const u = getCurrentUser();
+                if (u) return u;
+            }
+            const raw = localStorage.getItem('user_info') || localStorage.getItem('auth_user') || localStorage.getItem('bus_user') || localStorage.getItem('currentUser');
+            try { return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+        }
+        function authHeaders() {
+            const token = getToken();
+            return token ? { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` } : { 'Content-Type': 'application/json' };
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function parseSeats(seats) {
+            if (!seats) return [];
+            if (Array.isArray(seats)) return seats;
+            if (typeof seats === 'string') {
+                try {
+                    if (seats.startsWith('[')) {
+                        const parsed = JSON.parse(seats);
+                        if (Array.isArray(parsed)) return parsed;
+                    }
+                } catch(e) {}
+                return seats.split(',').map(s => s.trim()).filter(Boolean);
+            }
+            return [String(seats)];
+        }
+
+        function formatSeatsHtml(seats, isLight = false) {
+            const list = parseSeats(seats);
+            if (!list.length) return `<span class="${isLight ? 'seat-badge-light' : 'seat-badge'}">S12</span>`;
+            const badgeClass = isLight ? 'seat-badge-light' : 'seat-badge';
+            if (list.length <= 4) {
+                return list.map(s => `<span class="${badgeClass}">${escapeHtml(String(s))}</span>`).join(' ');
+            }
+            const visible = list.slice(0, 3).map(s => `<span class="${badgeClass}">${escapeHtml(String(s))}</span>`).join(' ');
+            const remainingCount = list.length - 3;
+            const fullTitle = list.map(escapeHtml).join(', ');
+            return `${visible} <span class="${badgeClass}" title="${fullTitle}" style="cursor:help;">+${remainingCount} more</span>`;
+        }
+
+        function formatSeatsString(seats) {
+            const list = parseSeats(seats);
+            return list.length ? list.join(', ') : 'S12';
+        }
+
+        let userBookingsCache = [];
+        let activeCountdownInterval = null;
+
+        function getTerminalBay(sourceCity) {
+            const city = (sourceCity || '').trim().toLowerCase();
+            const map = {
+                'colombo': 'Bastian Mawatha Private Terminal — Bay 03',
+                'kandy': 'Goods Shed Intercity Bus Stand — Bay 02',
+                'galle': 'Galle Central Bus Station — Bay 04',
+                'matara': 'Matara Central Expressway Terminal — Bay 02',
+                'jaffna': 'Jaffna Central Bus Terminal — Bay 01',
+                'nuwara eliya': 'Nuwara Eliya Main Bus Stand — Bay 03',
+                'trincomalee': 'Trincomalee Central Bus Stand — Bay 02',
+                'anuradhapura': 'Anuradhapura Old Bus Stand — Bay 01',
+                'badulla': 'Badulla Central Bus Terminal — Bay 02'
+            };
+            return map[city] || `${sourceCity || 'Central'} Intercity Transit Terminal — Bay 01`;
+        }
+
+        function startLiveCountdown(dateStr, timeStr) {
+            if (activeCountdownInterval) {
+                clearInterval(activeCountdownInterval);
+                activeCountdownInterval = null;
+            }
+
+            const clockEl = document.getElementById('heroCountdownClock');
+            if (!clockEl) return;
+
+            let targetTime;
+            try {
+                if (dateStr && dateStr.includes('-')) {
+                    const timeParts = (timeStr || '08:00').split(':');
+                    const [y, m, d] = dateStr.split('-').map(Number);
+                    targetTime = new Date(y, m - 1, d, Number(timeParts[0]) || 8, Number(timeParts[1]) || 0, 0).getTime();
+                } else {
+                    const now = new Date();
+                    const timeParts = (timeStr || '08:00').split(':');
+                    targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Number(timeParts[0]) || 8, Number(timeParts[1]) || 0, 0).getTime();
+                    if (targetTime < now.getTime()) {
+                        targetTime += 24 * 60 * 60 * 1000;
+                    }
+                }
+            } catch(e) {
+                targetTime = Date.now() + 3600000;
+            }
+
+            const updateClock = () => {
+                const now = Date.now();
+                const diff = targetTime - now;
+                if (diff <= 0) {
+                    clockEl.innerHTML = `<span style="color:#34d399; font-weight:800; font-size:1.1rem;">BOARDING ACTIVE &bull; AT PLATFORM</span>`;
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / (1000 * 60)) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+                const pad = n => String(n).padStart(2, '0');
+                if (days > 0) {
+                    clockEl.textContent = `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+                } else {
+                    clockEl.textContent = `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+                }
+            };
+
+            updateClock();
+            activeCountdownInterval = setInterval(updateClock, 1000);
+        }
+
+        async function loadTicketsTab() {
+            const user = getUser();
+            const token = getToken();
+            const notLoggedIn = document.getElementById('ticketsNotLoggedIn');
+            const content = document.getElementById('ticketsContent');
+
+            if (!user || !token) {
+                if (notLoggedIn) notLoggedIn.style.display = 'block';
+                if (content) content.style.display = 'none';
+                return;
+            }
+
+            if (user.role !== 'PASSENGER') {
+                if (notLoggedIn) {
+                    notLoggedIn.style.display = 'block';
+                    notLoggedIn.innerHTML = `
+                        <div style="width:56px; height:56px; border-radius:50%; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <h2 style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-bottom:8px;">Staff Portal Notice</h2>
+                        <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">Staff members (${user.role}) do not hold passenger tickets. Access your assigned schedules via your staff console.</p>
+                        <a href="${user.role === 'DRIVER' ? 'driver.html' : (user.role === 'CONDUCTOR' ? 'conductor.html' : 'admin.html?tab=portal')}" class="btn btn-primary">Open Console &rarr;</a>
+                    `;
+                }
+                if (content) content.style.display = 'none';
+                return;
+            }
+
+            if (notLoggedIn) notLoggedIn.style.display = 'none';
+            if (content) content.style.display = 'block';
+
+            let bookings = [];
+            try {
+                const res = await fetch(`/api/v1/bookings?email=${encodeURIComponent(user.email)}`, {
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        bookings = json.data;
+                    }
+                }
+                const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+                if (localBooking && localBooking.reference && !bookings.some(b => b.reference === localBooking.reference)) {
+                    bookings.unshift(localBooking);
+                }
+            } catch(e) {
+                console.warn('Could not fetch user bookings', e);
+            }
+
+            userBookingsCache = bookings;
+            renderTicketsTabContent(bookings);
+        }
+
+        function renderTicketsTabContent(bookings) {
+            const yetToBoard = bookings.filter(b => 
+                (b.status === 'CONFIRMED' || !b.status || b.status === 'PENDING') &&
+                b.status !== 'BOARDED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && b.status !== 'REFUNDED'
+            );
+
+            const pastOrBoarded = bookings.filter(b => 
+                b.status === 'BOARDED' || b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'REFUNDED'
+            );
+
+            const getSortTime = (t) => {
+                const d = t.date || '2026-10-04';
+                const tm = t.time || '00:00';
+                return new Date(`${d}T${tm}:00`).getTime() || 0;
+            };
+            yetToBoard.sort((a, b) => getSortTime(a) - getSortTime(b));
+
+            const heroCont = document.getElementById('earliestTicketHero');
+            const otherCont = document.getElementById('otherYetToBoardContainer');
+            const otherList = document.getElementById('otherYetToBoardList');
+            const emptyCont = document.getElementById('noUpcomingTickets');
+            const archiveCount = document.getElementById('archiveTicketsCount');
+            const archiveList = document.getElementById('ticketsArchiveList');
+
+            if (archiveCount) archiveCount.textContent = pastOrBoarded.length;
+
+            if (yetToBoard.length === 0) {
+                if (heroCont) heroCont.style.display = 'none';
+                if (otherCont) otherCont.style.display = 'none';
+                if (emptyCont) emptyCont.style.display = 'block';
+                if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+            } else {
+                if (emptyCont) emptyCont.style.display = 'none';
+                
+                const earliest = yetToBoard[0];
+                const fromCity = earliest.from || 'Colombo';
+                const toCity = earliest.to || 'Kandy';
+                const bay = getTerminalBay(fromCity);
+                const seatsHtml = formatSeatsHtml(earliest.seats, false);
+                const seatsString = formatSeatsString(earliest.seats);
+                const fare = typeof earliest.total === 'number' ? `LKR ${earliest.total.toLocaleString()}` : (earliest.total || 'LKR 1,500.00');
+                const date = earliest.date || '2026-10-04';
+                const time = earliest.time || '08:30';
+                const operator = earliest.operator || 'CatchBus Superline';
+                const busType = earliest.busType || 'Expressway AC';
+                const busNum = earliest.busNumber ? ` &bull; ${escapeHtml(earliest.busNumber)}` : '';
+                const lug = (earliest.luggage && earliest.luggage.length > 0) ? earliest.luggage[0] : null;
+
+                heroCont.style.display = 'block';
+                heroCont.innerHTML = `
+                    <div class="ticket-hero">
+                        <div class="ticket-hero-header">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div class="ticket-hero-badge">
+                                    <span class="pulse-dot"></span>
+                                    EARLIEST BOARDING PASS &bull; YET TO BOARD
+                                </div>
+                            </div>
+                            <div style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:800; color:#38bdf8;">
+                                REF: ${escapeHtml(earliest.reference || 'CB000000')}
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+                            <div>
+                                <div style="font-size:0.85rem; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">EXPRESSWAY CORRIDOR</div>
+                                <h2 style="font-size:2rem; font-weight:800; color:#ffffff; margin:4px 0 6px 0; letter-spacing:-0.5px;">
+                                    ${escapeHtml(fromCity)} &rarr; ${escapeHtml(toCity)}
+                                </h2>
+                                <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.08); padding:5px 12px; border-radius:8px; font-size:0.82rem; color:#e2e8f0;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    ${escapeHtml(bay)}
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="ticket-hero-label" style="justify-content:flex-end;">DEPARTURE COUNTDOWN</div>
+                                <div class="ticket-hero-countdown" id="heroCountdownClock">Calculating...</div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-hero-grid">
+                            <div>
+                                <div class="ticket-hero-label">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    Departure Time
+                                </div>
+                                <div class="ticket-hero-val">${escapeHtml(date)} &bull; ${escapeHtml(time)}</div>
+                            </div>
+                            <div>
+                                <div class="ticket-hero-label">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                                    Allocated Seats
+                                </div>
+                                <div class="ticket-hero-val">${seatsHtml}</div>
+                            </div>
+                            <div>
+                                <div class="ticket-hero-label">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                                    Coach &amp; Operator
+                                </div>
+                                <div class="ticket-hero-val" style="font-size:0.95rem;">${escapeHtml(operator)}${busNum}</div>
+                            </div>
+                            <div>
+                                <div class="ticket-hero-label">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                    Stowed Luggage
+                                </div>
+                                <div class="ticket-hero-val" style="font-size:0.95rem;">
+                                    ${lug ? `<span style="color:#34d399;">${escapeHtml(lug.tag || 'Baggage Tagged')} (${escapeHtml(lug.status || 'COLLECTED')})</span>` : '<span style="color:#94a3b8;">No registered bags</span>'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-hero-actions">
+                            <button type="button" class="btn btn-primary" onclick="openBoardingPassModal('${escapeHtml(earliest.reference || 'CB000000')}', '${escapeHtml(fromCity)} &rarr; ${escapeHtml(toCity)}', '${escapeHtml(seatsString)}')" style="font-size:0.9rem; padding:10px 20px; font-weight:700;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                View Digital QR Boarding Pass
+                            </button>
+                            <a href="search.html" class="btn btn-outline" style="border-color:rgba(255,255,255,0.25); color:#ffffff; font-size:0.9rem; padding:10px 18px;">
+                                Find Return Schedule &rarr;
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                startLiveCountdown(date, time);
+
+                // Other upcoming bookings (if any)
+                if (yetToBoard.length > 1) {
+                    if (otherCont) otherCont.style.display = 'block';
+                    if (otherList) {
+                        otherList.innerHTML = yetToBoard.slice(1).map(b => {
+                            const bSeatsHtml = formatSeatsHtml(b.seats, true);
+                            const bSeatsString = formatSeatsString(b.seats);
+                            return `
+                                <div class="booking-row-card">
+                                    <div>
+                                        <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">CONFIRMED BOOKING &bull; YET TO BOARD</div>
+                                        <div style="font-size:1.1rem; font-weight:800; color:#0f172a; margin:2px 0;">
+                                            ${escapeHtml(b.from || 'Colombo')} &rarr; ${escapeHtml(b.to || 'Kandy')}
+                                        </div>
+                                        <div style="font-size:0.82rem; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
+                                            <span>${escapeHtml(b.date || 'Upcoming')} &bull; ${escapeHtml(b.time || '08:00')}</span>
+                                            <span>&bull;</span>
+                                            <span>Seats: ${bSeatsHtml}</span>
+                                        </div>
+                                    </div>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <span class="badge badge-success">Yet to Board</span>
+                                        <button type="button" class="btn btn-outline btn-sm" onclick="openBoardingPassModal('${escapeHtml(b.reference || 'CB000000')}', '${escapeHtml(b.from || 'Colombo')} &rarr; ${escapeHtml(b.to || 'Destination')}', '${escapeHtml(bSeatsString)}')">
+                                             QR Pass
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+                } else {
+                    if (otherCont) otherCont.style.display = 'none';
+                }
+            }
+
+            // Past / Boarded Journeys Archive
+            if (archiveList) {
+                if (pastOrBoarded.length === 0) {
+                    archiveList.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:12px 0;">No completed or boarded journeys recorded yet.</p>`;
+                } else {
+                    archiveList.innerHTML = pastOrBoarded.map(b => {
+                        const bSeatsHtml = formatSeatsHtml(b.seats, true);
+                        const bSeatsString = formatSeatsString(b.seats);
+                        const isCompleted = b.status === 'COMPLETED' || b.status === 'BOARDED';
+                        const badgeClass = isCompleted ? 'badge-info' : 'badge-warning';
+                        const badgeText = b.status || 'BOARDED';
+                        return `
+                            <div class="booking-row-card" style="background:#f8fafc; border-color:#f1f5f9;">
+                                <div>
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        REF: ${escapeHtml(b.reference || 'CB000000')} &bull; ${escapeHtml(b.date || 'Past Date')}
+                                    </div>
+                                    <div style="font-size:1rem; font-weight:700; color:#334155; margin:2px 0;">
+                                        ${escapeHtml(b.from || 'Colombo')} &rarr; ${escapeHtml(b.to || 'Kandy')}
+                                    </div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px;">
+                                        <span>Seats: ${bSeatsHtml}</span>
+                                        <span>&bull;</span>
+                                        <span>${typeof b.total === 'number' ? `LKR ${b.total.toLocaleString()}` : escapeHtml(b.total || 'LKR 1,500.00')}</span>
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <span class="badge ${badgeClass}">${escapeHtml(badgeText)}</span>
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="openBoardingPassModal('${escapeHtml(b.reference || 'CB000000')}', '${escapeHtml(b.from || 'Colombo')} &rarr; ${escapeHtml(b.to || 'Destination')}', '${escapeHtml(bSeatsString)}')">
+                                        View Pass
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        function toggleArchiveTickets() {
+            const wrap = document.getElementById('archiveTicketsWrap');
+            const btn = document.getElementById('btnToggleArchive');
+            if (!wrap) return;
+            if (wrap.style.display === 'none' || wrap.style.display === '') {
+                wrap.style.display = 'block';
+                if (btn) btn.textContent = 'Hide History';
+            } else {
+                wrap.style.display = 'none';
+                if (btn) btn.textContent = 'Show History';
+            }
+        }
+
+        function openBoardingPassModal(ref, route, seats) {
+            document.getElementById('passModalRef').textContent = ref;
+            document.getElementById('passModalRoute').innerHTML = `${route} &bull; Seats: <strong>${seats}</strong>`;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('CATCHBUS:' + ref)}`;
+            const img = document.getElementById('passModalQr');
+            img.src = qrUrl;
+            const dl = document.getElementById('passModalDownloadBtn');
+            if (dl) dl.href = qrUrl;
+            document.getElementById('boardingPassModal').classList.add('active');
+        }
+
+        function closeBoardingPassModal() {
+            document.getElementById('boardingPassModal').classList.remove('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof setupNav === 'function') {
+                setupNav('tickets.html');
+            }
+            loadTicketsTab();
+        });
+    </script>
+</body>
+</html>

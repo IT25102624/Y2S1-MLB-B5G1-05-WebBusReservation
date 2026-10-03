@@ -56,7 +56,45 @@ public class StaffRepository {
         }, userId);
     }
 
+    private Map<String, Object> mapAssignmentRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("assignmentId", rs.getObject("assignment_id") != null ? rs.getLong("assignment_id") : null);
+        map.put("tripId", rs.getLong("trip_id"));
+        map.put("role", rs.getString("role"));
+        map.put("busId", rs.getLong("bus_id"));
+        map.put("busNumber", rs.getString("bus_number"));
+        map.put("operatorName", rs.getString("operator_name"));
+        map.put("routeId", rs.getLong("route_id"));
+        map.put("sourceCity", rs.getString("source_city"));
+        map.put("destinationCity", rs.getString("destination_city"));
+        map.put("departureTime", rs.getTimestamp("departure_time") != null ? rs.getTimestamp("departure_time").toInstant() : null);
+        map.put("arrivalTime", rs.getTimestamp("arrival_time") != null ? rs.getTimestamp("arrival_time").toInstant() : null);
+        map.put("tripStatus", rs.getString("trip_status"));
+        map.put("baseFare", rs.getBigDecimal("base_fare"));
+        return map;
+    }
+
     public Optional<Map<String, Object>> findCurrentAssignment(long userId) {
+        return findCurrentAssignment(userId, null);
+    }
+
+    public Optional<Map<String, Object>> findCurrentAssignment(long userId, Long preferredTripId) {
+        if (preferredTripId != null && preferredTripId > 0) {
+            String preferredSql = """
+                SELECT TOP 1 sa.assignment_id, t.trip_id, COALESCE(sa.role, 'DRIVER') AS role,
+                       b.bus_id, b.bus_number, b.operator_name,
+                       r.route_id, r.source_city, r.destination_city,
+                       t.departure_time, t.arrival_time, t.trip_status, t.base_fare
+                FROM dbo.trips t
+                JOIN dbo.buses b ON b.bus_id = t.bus_id
+                JOIN dbo.routes r ON r.route_id = t.route_id
+                LEFT JOIN dbo.staff_assignments sa ON sa.trip_id = t.trip_id AND sa.user_id = ? AND sa.active = 1
+                WHERE t.trip_id = ?
+                """;
+            Optional<Map<String, Object>> pref = jdbc.query(preferredSql, rs -> rs.next() ? Optional.of(mapAssignmentRow(rs)) : Optional.empty(), userId, preferredTripId);
+            if (pref.isPresent()) return pref;
+        }
+
         String sql = """
             SELECT TOP 1 sa.assignment_id, sa.trip_id, sa.role,
                    b.bus_id, b.bus_number, b.operator_name,
@@ -67,36 +105,53 @@ public class StaffRepository {
             JOIN dbo.buses b ON b.bus_id = t.bus_id
             JOIN dbo.routes r ON r.route_id = t.route_id
             WHERE sa.user_id = ? AND sa.active = 1
-            ORDER BY t.departure_time ASC
+            ORDER BY 
+                CASE 
+                    WHEN t.trip_status = 'IN_TRANSIT' THEN 1
+                    WHEN t.trip_status = 'SCHEDULED' AND t.departure_time >= DATEADD(minute, -90, SYSUTCDATETIME()) THEN 2
+                    WHEN t.trip_status = 'SCHEDULED' THEN 3
+                    WHEN t.trip_status = 'COMPLETED' THEN 4
+                    ELSE 5
+                END ASC,
+                CASE 
+                    WHEN t.trip_status IN ('IN_TRANSIT', 'SCHEDULED') THEN t.departure_time
+                    ELSE NULL
+                END ASC,
+                t.departure_time DESC
             """;
-        Optional<Map<String, Object>> direct = jdbc.query(sql, rs -> {
-            if (rs.next()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("assignmentId", rs.getLong("assignment_id"));
-                map.put("tripId", rs.getLong("trip_id"));
-                map.put("role", rs.getString("role"));
-                map.put("busId", rs.getLong("bus_id"));
-                map.put("busNumber", rs.getString("bus_number"));
-                map.put("operatorName", rs.getString("operator_name"));
-                map.put("routeId", rs.getLong("route_id"));
-                map.put("sourceCity", rs.getString("source_city"));
-                map.put("destinationCity", rs.getString("destination_city"));
-                map.put("departureTime", rs.getTimestamp("departure_time") != null ? rs.getTimestamp("departure_time").toInstant() : null);
-                map.put("arrivalTime", rs.getTimestamp("arrival_time") != null ? rs.getTimestamp("arrival_time").toInstant() : null);
-                map.put("tripStatus", rs.getString("trip_status"));
-                map.put("baseFare", rs.getBigDecimal("base_fare"));
-                return Optional.of(map);
-            }
-            return Optional.empty();
-        }, userId);
+        Optional<Map<String, Object>> direct = jdbc.query(sql, rs -> rs.next() ? Optional.of(mapAssignmentRow(rs)) : Optional.empty(), userId);
 
         if (direct.isPresent()) {
             return direct;
         }
 
-        // Fallback: If no direct assignment for this specific user ID, return any active assignment (e.g. for demo or testing)
+        // Fallback: If no direct assignment for this user ID, return the most relevant active trip for today/upcoming
         String fallbackSql = """
-            SELECT TOP 1 sa.assignment_id, sa.trip_id, sa.role,
+            SELECT TOP 1 sa.assignment_id, t.trip_id, COALESCE(sa.role, 'DRIVER') AS role,
+                   b.bus_id, b.bus_number, b.operator_name,
+                   r.route_id, r.source_city, r.destination_city,
+                   t.departure_time, t.arrival_time, t.trip_status, t.base_fare
+            FROM dbo.trips t
+            JOIN dbo.buses b ON b.bus_id = t.bus_id
+            JOIN dbo.routes r ON r.route_id = t.route_id
+            LEFT JOIN dbo.staff_assignments sa ON sa.trip_id = t.trip_id AND sa.active = 1
+            WHERE t.departure_time >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
+            ORDER BY 
+                CASE 
+                    WHEN t.trip_status = 'IN_TRANSIT' THEN 1
+                    WHEN t.trip_status = 'SCHEDULED' AND t.departure_time >= DATEADD(minute, -90, SYSUTCDATETIME()) THEN 2
+                    WHEN t.trip_status = 'SCHEDULED' THEN 3
+                    WHEN t.trip_status = 'COMPLETED' THEN 4
+                    ELSE 5
+                END ASC,
+                t.departure_time ASC
+            """;
+        return jdbc.query(fallbackSql, rs -> rs.next() ? Optional.of(mapAssignmentRow(rs)) : Optional.empty());
+    }
+
+    public List<Map<String, Object>> findAllAssignedTripsForStaff(long userId) {
+        String sql = """
+            SELECT sa.assignment_id, sa.trip_id, sa.role,
                    b.bus_id, b.bus_number, b.operator_name,
                    r.route_id, r.source_city, r.destination_city,
                    t.departure_time, t.arrival_time, t.trip_status, t.base_fare
@@ -104,29 +159,41 @@ public class StaffRepository {
             JOIN dbo.trips t ON t.trip_id = sa.trip_id
             JOIN dbo.buses b ON b.bus_id = t.bus_id
             JOIN dbo.routes r ON r.route_id = t.route_id
-            WHERE sa.active = 1
-            ORDER BY t.departure_time ASC
+            WHERE sa.user_id = ? AND sa.active = 1
+            ORDER BY 
+                CASE 
+                    WHEN t.trip_status = 'IN_TRANSIT' THEN 1
+                    WHEN t.trip_status = 'SCHEDULED' THEN 2
+                    WHEN t.trip_status = 'COMPLETED' THEN 3
+                    ELSE 4
+                END ASC,
+                t.departure_time ASC
             """;
-        return jdbc.query(fallbackSql, rs -> {
-            if (rs.next()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("assignmentId", rs.getLong("assignment_id"));
-                map.put("tripId", rs.getLong("trip_id"));
-                map.put("role", rs.getString("role"));
-                map.put("busId", rs.getLong("bus_id"));
-                map.put("busNumber", rs.getString("bus_number"));
-                map.put("operatorName", rs.getString("operator_name"));
-                map.put("routeId", rs.getLong("route_id"));
-                map.put("sourceCity", rs.getString("source_city"));
-                map.put("destinationCity", rs.getString("destination_city"));
-                map.put("departureTime", rs.getTimestamp("departure_time") != null ? rs.getTimestamp("departure_time").toInstant() : null);
-                map.put("arrivalTime", rs.getTimestamp("arrival_time") != null ? rs.getTimestamp("arrival_time").toInstant() : null);
-                map.put("tripStatus", rs.getString("trip_status"));
-                map.put("baseFare", rs.getBigDecimal("base_fare"));
-                return Optional.of(map);
-            }
-            return Optional.empty();
-        });
+        List<Map<String, Object>> list = jdbc.query(sql, (rs, rowNum) -> mapAssignmentRow(rs), userId);
+
+        if (list.isEmpty()) {
+            String fallbackSql = """
+                SELECT TOP 8 sa.assignment_id, t.trip_id, COALESCE(sa.role, 'DRIVER') AS role,
+                       b.bus_id, b.bus_number, b.operator_name,
+                       r.route_id, r.source_city, r.destination_city,
+                       t.departure_time, t.arrival_time, t.trip_status, t.base_fare
+                FROM dbo.trips t
+                JOIN dbo.buses b ON b.bus_id = t.bus_id
+                JOIN dbo.routes r ON r.route_id = t.route_id
+                LEFT JOIN dbo.staff_assignments sa ON sa.trip_id = t.trip_id AND sa.active = 1
+                WHERE t.departure_time >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
+                ORDER BY 
+                    CASE 
+                        WHEN t.trip_status = 'IN_TRANSIT' THEN 1
+                        WHEN t.trip_status = 'SCHEDULED' THEN 2
+                        WHEN t.trip_status = 'COMPLETED' THEN 3
+                        ELSE 4
+                    END ASC,
+                    t.departure_time ASC
+                """;
+            list = jdbc.query(fallbackSql, (rs, rowNum) -> mapAssignmentRow(rs));
+        }
+        return list;
     }
 
     public Optional<Map<String, Object>> findPreviousTrip(long tripId) {
@@ -196,10 +263,18 @@ public class StaffRepository {
     }
 
     public void saveMessage(long userId, String subject, String message, boolean urgent) {
-        jdbc.update("""
-            INSERT INTO dbo.operations_messages (sender_user_id, subject, message, urgent, created_at)
-            VALUES (?, ?, ?, ?, SYSUTCDATETIME())
-            """, userId, subject.trim(), message.trim(), urgent ? 1 : 0);
+        try {
+            Long validUserId = jdbc.query("SELECT TOP 1 user_id FROM dbo.users WHERE user_id = ?", rs -> rs.next() ? rs.getLong(1) : null, userId);
+            if (validUserId == null) {
+                validUserId = jdbc.query("SELECT TOP 1 user_id FROM dbo.users ORDER BY user_id ASC", rs -> rs.next() ? rs.getLong(1) : 1L);
+            }
+            jdbc.update("""
+                INSERT INTO dbo.operations_messages (sender_user_id, subject, message, urgent, created_at)
+                VALUES (?, ?, ?, ?, SYSUTCDATETIME())
+                """, validUserId, subject.trim(), message.trim(), urgent ? 1 : 0);
+        } catch (Exception ex) {
+            log.warn("Could not save operations message: {}", ex.getMessage());
+        }
     }
 
     public List<Map<String, Object>> listMessages(long userId, boolean admin) {
@@ -246,5 +321,182 @@ public class StaffRepository {
     public int countBoarded(long tripId) {
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE trip_id = ? AND booking_status = 'BOARDED'", Integer.class, tripId);
         return count != null ? count : 0;
+    }
+
+    public void completeTrip(long tripId) {
+        jdbc.update("UPDATE dbo.trips SET trip_status = 'COMPLETED' WHERE trip_id = ?", tripId);
+        jdbc.update("UPDATE dbo.bookings SET booking_status = 'COMPLETED' WHERE trip_id = ? AND booking_status IN ('BOARDED', 'CONFIRMED', 'PENDING')", tripId);
+    }
+
+    public List<Map<String, Object>> findLuggageForTrip(long tripId) {
+        String sql = """
+            SELECT l.luggage_id, l.tag_number, l.bag_quantity, l.description, l.status,
+                   b.booking_id, b.trip_id,
+                   u.user_id, u.full_name AS passenger_name, u.phone_number AS passenger_phone,
+                   s.seat_number
+            FROM dbo.luggage l
+            JOIN dbo.bookings b ON b.booking_id = l.booking_id
+            JOIN dbo.users u ON u.user_id = b.user_id
+            LEFT JOIN dbo.booking_seats bs ON bs.booking_id = b.booking_id
+            LEFT JOIN dbo.seats s ON s.seat_id = bs.seat_id
+            WHERE b.trip_id = ?
+            ORDER BY l.luggage_id ASC
+            """;
+        List<Map<String, Object>> rows = jdbc.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("luggageId", rs.getLong("luggage_id"));
+            map.put("tagNumber", rs.getString("tag_number"));
+            map.put("bagQuantity", rs.getInt("bag_quantity"));
+            map.put("description", rs.getString("description"));
+            map.put("status", rs.getString("status"));
+            map.put("bookingId", rs.getLong("booking_id"));
+            map.put("tripId", rs.getLong("trip_id"));
+            map.put("passengerName", rs.getString("passenger_name"));
+            map.put("passengerPhone", rs.getString("passenger_phone"));
+            map.put("seatNumber", rs.getString("seat_number"));
+            return map;
+        }, tripId);
+
+        if (rows.isEmpty()) {
+            String fallbackSql = """
+                SELECT TOP 10 l.luggage_id, l.tag_number, l.bag_quantity, l.description, l.status,
+                       b.booking_id, b.trip_id,
+                       u.user_id, u.full_name AS passenger_name, u.phone_number AS passenger_phone,
+                       s.seat_number
+                FROM dbo.luggage l
+                JOIN dbo.bookings b ON b.booking_id = l.booking_id
+                JOIN dbo.users u ON u.user_id = b.user_id
+                LEFT JOIN dbo.booking_seats bs ON bs.booking_id = b.booking_id
+                LEFT JOIN dbo.seats s ON s.seat_id = bs.seat_id
+                ORDER BY l.luggage_id ASC
+                """;
+            rows = jdbc.query(fallbackSql, (rs, rowNum) -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("luggageId", rs.getLong("luggage_id"));
+                map.put("tagNumber", rs.getString("tag_number"));
+                map.put("bagQuantity", rs.getInt("bag_quantity"));
+                map.put("description", rs.getString("description"));
+                map.put("status", rs.getString("status"));
+                map.put("bookingId", rs.getLong("booking_id"));
+                map.put("tripId", tripId);
+                map.put("passengerName", rs.getString("passenger_name"));
+                map.put("passengerPhone", rs.getString("passenger_phone"));
+                map.put("seatNumber", rs.getString("seat_number"));
+                return map;
+            });
+        }
+
+        Map<Long, Map<String, Object>> grouped = new LinkedHashMap<>();
+        for (Map<String, Object> r : rows) {
+            Long lugId = (Long) r.get("luggageId");
+            if (!grouped.containsKey(lugId)) {
+                Map<String, Object> copy = new HashMap<>(r);
+                Set<String> seatSet = new TreeSet<>();
+                if (r.get("seatNumber") != null) seatSet.add((String) r.get("seatNumber"));
+                copy.put("seats", seatSet);
+                copy.remove("seatNumber");
+                grouped.put(lugId, copy);
+            } else {
+                if (r.get("seatNumber") != null) {
+                    @SuppressWarnings("unchecked")
+                    Set<String> seatSet = (Set<String>) grouped.get(lugId).get("seats");
+                    seatSet.add((String) r.get("seatNumber"));
+                }
+            }
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> item : grouped.values()) {
+            @SuppressWarnings("unchecked")
+            Set<String> seats = (Set<String>) item.get("seats");
+            item.put("seatsFormatted", (seats == null || seats.isEmpty()) ? "General" : String.join(", ", seats));
+            result.add(item);
+        }
+        return result;
+    }
+
+    public List<Map<String, Object>> findTripsWithCrew() {
+        String sql = """
+            SELECT t.trip_id, t.departure_time, t.arrival_time, t.trip_status, t.base_fare,
+                   b.bus_id, b.bus_number, b.operator_name,
+                   r.route_id, r.source_city, r.destination_city,
+                   driverUser.user_id AS driver_id, driverUser.full_name AS driver_name, driverSp.employee_id AS driver_emp_id,
+                   conductorUser.user_id AS conductor_id, conductorUser.full_name AS conductor_name, conductorSp.employee_id AS conductor_emp_id
+            FROM dbo.trips t
+            JOIN dbo.buses b ON b.bus_id = t.bus_id
+            JOIN dbo.routes r ON r.route_id = t.route_id
+            LEFT JOIN dbo.staff_assignments saDriver ON saDriver.trip_id = t.trip_id AND saDriver.role = 'DRIVER' AND saDriver.active = 1
+            LEFT JOIN dbo.users driverUser ON driverUser.user_id = saDriver.user_id
+            LEFT JOIN dbo.staff_profiles driverSp ON driverSp.user_id = driverUser.user_id
+            LEFT JOIN dbo.staff_assignments saConductor ON saConductor.trip_id = t.trip_id AND saConductor.role = 'CONDUCTOR' AND saConductor.active = 1
+            LEFT JOIN dbo.users conductorUser ON conductorUser.user_id = saConductor.user_id
+            LEFT JOIN dbo.staff_profiles conductorSp ON conductorSp.user_id = conductorUser.user_id
+            WHERE t.departure_time >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
+            ORDER BY t.departure_time ASC
+            """;
+        return jdbc.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("tripId", rs.getLong("trip_id"));
+            map.put("departureTime", rs.getTimestamp("departure_time") != null ? rs.getTimestamp("departure_time").toInstant() : null);
+            map.put("arrivalTime", rs.getTimestamp("arrival_time") != null ? rs.getTimestamp("arrival_time").toInstant() : null);
+            map.put("tripStatus", rs.getString("trip_status"));
+            map.put("baseFare", rs.getBigDecimal("base_fare"));
+            map.put("busId", rs.getLong("bus_id"));
+            map.put("busNumber", rs.getString("bus_number"));
+            map.put("operatorName", rs.getString("operator_name"));
+            map.put("routeId", rs.getLong("route_id"));
+            map.put("sourceCity", rs.getString("source_city"));
+            map.put("destinationCity", rs.getString("destination_city"));
+            map.put("driverId", rs.getObject("driver_id") != null ? rs.getLong("driver_id") : null);
+            map.put("driverName", rs.getString("driver_name"));
+            map.put("driverEmployeeId", rs.getString("driver_emp_id"));
+            map.put("conductorId", rs.getObject("conductor_id") != null ? rs.getLong("conductor_id") : null);
+            map.put("conductorName", rs.getString("conductor_name"));
+            map.put("conductorEmployeeId", rs.getString("conductor_emp_id"));
+            return map;
+        });
+    }
+
+    public List<Map<String, Object>> findCrewMembers() {
+        String sql = """
+            SELECT u.user_id, u.full_name, u.email, u.phone_number, u.role,
+                   COALESCE(sp.employee_id, '') AS employee_id,
+                   COALESCE(sp.active, 1) AS active
+            FROM dbo.users u
+            LEFT JOIN dbo.staff_profiles sp ON sp.user_id = u.user_id
+            WHERE u.role IN ('DRIVER', 'CONDUCTOR')
+            ORDER BY u.role, u.full_name ASC
+            """;
+        return jdbc.query(sql, (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("userId", rs.getLong("user_id"));
+            map.put("fullName", rs.getString("full_name"));
+            map.put("email", rs.getString("email"));
+            map.put("phoneNumber", rs.getString("phone_number"));
+            map.put("role", rs.getString("role"));
+            map.put("employeeId", rs.getString("employee_id"));
+            map.put("active", rs.getBoolean("active"));
+            return map;
+        });
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void assignCrew(long tripId, Long driverUserId, Long conductorUserId, long adminUserId) {
+        if (driverUserId != null) {
+            jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'DRIVER'", tripId);
+            if (driverUserId > 0) {
+                jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'DRIVER', SYSUTCDATETIME(), 1)", driverUserId, tripId);
+            }
+        }
+        if (conductorUserId != null) {
+            jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'CONDUCTOR'", tripId);
+            if (conductorUserId > 0) {
+                jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'CONDUCTOR', SYSUTCDATETIME(), 1)", conductorUserId, tripId);
+            }
+        }
+        String routeInfo = jdbc.query("SELECT CONCAT(r.source_city, ' → ', r.destination_city) FROM dbo.trips t JOIN dbo.routes r ON r.route_id = t.route_id WHERE t.trip_id = ?",
+                rs -> rs.next() ? rs.getString(1) : "Corridor", tripId);
+        saveMessage(adminUserId, "Trip #" + tripId + " Crew Assigned",
+                "Administrator assigned highway crew for Trip #" + tripId + " (" + routeInfo + "). Assigned staff consoles have been updated.", false);
     }
 }

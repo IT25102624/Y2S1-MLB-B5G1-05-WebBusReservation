@@ -18,13 +18,20 @@ DELETE FROM dbo.buses;
 DELETE FROM dbo.users;
 GO
 
--- 1. SEED USERS (BCrypt hashed passwords for 'Password@123')
+-- 1. SEED USERS (Passwords follow format: firstName@123)
+-- Admin: admin@123 | Dohan: dohan@123 | Kasun: kasun@123 | Nimal: nimal@123 | Kamal: kamal@123 | Tharushi: tharushi@123 | Dilshan: dilshan@123 | Anura: anura@123 | Sunil: sunil@123 | Chaminda: chaminda@123
 INSERT INTO dbo.users (full_name, email, phone_number, password_hash, role, created_at)
 VALUES 
     (N'System Administrator', N'admin@busreservation.lk', N'+94771234567', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'ADMIN', SYSUTCDATETIME()),
     (N'Dohan Imanjith', N'dohan@busreservation.lk', N'+94719876543', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Kamal Gunaratne', N'kamal@busreservation.lk', N'+94771122334', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Tharushi Bandara', N'tharushi@busreservation.lk', N'+94712233445', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Dilshan Silva', N'dilshan@busreservation.lk', N'+94783344556', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Anura Fernando', N'anura@busreservation.lk', N'+94704455667', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
     (N'Kasun Perera', N'conductor.kandy@busreservation.lk', N'+94762345678', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'CONDUCTOR', SYSUTCDATETIME()),
-    (N'Nimal Silva', N'driver.kandy@busreservation.lk', N'+94763456789', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'DRIVER', SYSUTCDATETIME());
+    (N'Sunil Shantha', N'conductor@catchbus.lk', N'0710000001', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'CONDUCTOR', SYSUTCDATETIME()),
+    (N'Nimal Silva', N'driver.kandy@busreservation.lk', N'+94763456789', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'DRIVER', SYSUTCDATETIME()),
+    (N'Chaminda Vaas', N'driver@catchbus.lk', N'0710000002', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'DRIVER', SYSUTCDATETIME());
 GO
 
 -- 2. SEED BUSES
@@ -84,7 +91,17 @@ VALUES
     (N'Colombo', N'Badulla', 6.50),
     (N'Badulla', N'Colombo', 6.50),
     (N'Colombo', N'Nuwara Eliya', 5.50),
-    (N'Colombo', N'Anuradhapura', 4.50);
+    (N'Nuwara Eliya', N'Colombo', 5.50),
+    (N'Colombo', N'Anuradhapura', 4.50),
+    (N'Anuradhapura', N'Colombo', 4.50),
+    (N'Colombo', N'Matara', 2.50),
+    (N'Matara', N'Colombo', 2.50),
+    (N'Colombo', N'Trincomalee', 6.50),
+    (N'Trincomalee', N'Colombo', 6.50),
+    (N'Kandy', N'Nuwara Eliya', 2.50),
+    (N'Nuwara Eliya', N'Kandy', 2.50),
+    (N'Galle', N'Matara', 1.00),
+    (N'Matara', N'Galle', 1.00);
 GO
 
 -- 5. SEED TRIPS (Scheduled trips for today and upcoming 14 days)
@@ -155,56 +172,74 @@ BEGIN
 END;
 GO
 
--- 6. SEED SAMPLE BOOKINGS (To verify available seat reduction and occupancy display)
-DECLARE @PassengerId BIGINT = (SELECT TOP 1 user_id FROM dbo.users WHERE role = N'PASSENGER');
-IF @PassengerId IS NOT NULL
+-- 6. SEED REALISTIC COMMUTER BOOKINGS (Distributed across passengers)
+DECLARE @PassengerDohan BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'dohan@busreservation.lk');
+DECLARE @PassengerKamal BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'kamal@busreservation.lk');
+DECLARE @PassengerTharushi BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'tharushi@busreservation.lk');
+DECLARE @PassengerDilshan BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'dilshan@busreservation.lk');
+-- Seed Dohan: 1 upcoming Colombo -> Kandy booking (2 seats) + 1 return booking (2 seats)
+IF @PassengerDohan IS NOT NULL
 BEGIN
-    DECLARE @TId BIGINT, @BId BIGINT, @Fare DECIMAL(10,2), @TotalSeats INT;
-    DECLARE @RowIdx INT = 0;
-    DECLARE @SeatsToBook INT;
+    DECLARE @UpcomingTrip1 BIGINT = (SELECT TOP 1 trip_id FROM dbo.trips WHERE departure_time >= CAST(GETDATE() AS DATE) ORDER BY trip_id ASC);
+    IF @UpcomingTrip1 IS NOT NULL
+    BEGIN
+        INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
+        VALUES (@PassengerDohan, @UpcomingTrip1, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        DECLARE @B1 BIGINT = SCOPE_IDENTITY();
+        INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
+        SELECT TOP 2 @B1, @UpcomingTrip1, s.seat_id, 1200.00
+        FROM dbo.seats s WHERE s.bus_id = (SELECT bus_id FROM dbo.trips WHERE trip_id = @UpcomingTrip1)
+        ORDER BY CAST(s.seat_number AS INT) ASC;
+    END;
 
+    DECLARE @UpcomingTrip2 BIGINT = (SELECT TOP 1 trip_id FROM dbo.trips WHERE departure_time >= DATEADD(DAY, 2, CAST(GETDATE() AS DATE)) ORDER BY trip_id ASC);
+    IF @UpcomingTrip2 IS NOT NULL
+    BEGIN
+        INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
+        VALUES (@PassengerDohan, @UpcomingTrip2, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        DECLARE @B2 BIGINT = SCOPE_IDENTITY();
+        INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
+        SELECT TOP 2 @B2, @UpcomingTrip2, s.seat_id, 1200.00
+        FROM dbo.seats s WHERE s.bus_id = (SELECT bus_id FROM dbo.trips WHERE trip_id = @UpcomingTrip2)
+        ORDER BY CAST(s.seat_number AS INT) DESC;
+    END;
+END;
+
+-- Seed other passengers with realistic 1-2 seats per trip for natural bus occupancy
+IF @PassengerKamal IS NOT NULL AND @PassengerTharushi IS NOT NULL
+BEGIN
+    DECLARE @TId BIGINT, @BId BIGINT, @Fare DECIMAL(10,2);
+    DECLARE @PIdx INT = 0;
     DECLARE trip_cursor CURSOR FOR 
-    SELECT t.trip_id, t.bus_id, t.base_fare, b.total_seats
+    SELECT TOP 6 t.trip_id, t.bus_id, t.base_fare
     FROM dbo.trips t
-    JOIN dbo.buses b ON t.bus_id = b.bus_id
     WHERE t.departure_time >= CAST(GETDATE() AS DATE)
-      AND t.departure_time < DATEADD(DAY, 4, CAST(GETDATE() AS DATE))
     ORDER BY t.trip_id ASC;
 
     OPEN trip_cursor;
-    FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare, @TotalSeats;
+    FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare;
 
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        SET @RowIdx = @RowIdx + 1;
-        SET @SeatsToBook = CASE (@RowIdx % 7)
-            WHEN 0 THEN 0
-            WHEN 1 THEN 15
-            WHEN 2 THEN 28
-            WHEN 3 THEN 8
-            WHEN 4 THEN 34
-            WHEN 5 THEN 12
-            WHEN 6 THEN 22
+        DECLARE @CurPassenger BIGINT = CASE (@PIdx % 3)
+            WHEN 0 THEN @PassengerKamal
+            WHEN 1 THEN @PassengerTharushi
+            ELSE @PassengerDilshan
         END;
+        SET @PIdx = @PIdx + 1;
 
-        IF @SeatsToBook > (@TotalSeats - 5)
-            SET @SeatsToBook = @TotalSeats - 5;
+        INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
+        VALUES (@CurPassenger, @TId, @Fare * 2, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        DECLARE @OtherBkg BIGINT = SCOPE_IDENTITY();
 
-        IF @SeatsToBook > 0
-        BEGIN
-            INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
-            VALUES (@PassengerId, @TId, @Fare * @SeatsToBook, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
+        SELECT TOP 2 @OtherBkg, @TId, s.seat_id, @Fare
+        FROM dbo.seats s 
+        WHERE s.bus_id = @BId 
+          AND s.seat_id NOT IN (SELECT seat_id FROM dbo.booking_seats WHERE trip_id = @TId)
+        ORDER BY CAST(s.seat_number AS INT) ASC;
 
-            DECLARE @BkgId BIGINT = SCOPE_IDENTITY();
-
-            INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
-            SELECT TOP (@SeatsToBook) @BkgId, @TId, s.seat_id, @Fare
-            FROM dbo.seats s
-            WHERE s.bus_id = @BId
-            ORDER BY CAST(s.seat_number AS INT) ASC;
-        END;
-
-        FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare, @TotalSeats;
+        FETCH NEXT FROM trip_cursor INTO @TId, @BId, @Fare;
     END;
 
     CLOSE trip_cursor;

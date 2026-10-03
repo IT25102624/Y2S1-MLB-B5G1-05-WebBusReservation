@@ -427,6 +427,10 @@
         const user = getCurrentUser();
         setupNav('notifications.html');
 
+        const isAdmin = Boolean(user && String(user.role).toUpperCase() === 'ADMIN');
+        const dispatchPanel = document.querySelector('.dispatch-panel');
+        const notificationsLayout = document.querySelector('.notifications-layout');
+
         const guestShowcase = document.getElementById('guestShowcase');
         const authAlertsConsole = document.getElementById('authAlertsConsole');
         const backToFeedWrap = document.getElementById('backToFeedWrap');
@@ -453,6 +457,25 @@
                     if (authAlertsConsole) authAlertsConsole.style.display = 'block';
                     if (backToFeedWrap) backToFeedWrap.style.display = 'none';
                     if (toggleGuideBtn) toggleGuideBtn.textContent = 'How Alerts Work (Guide)';
+                }
+            }
+
+            // Only Operations Admins can see and dispatch platform notifications
+            if (dispatchPanel) {
+                if (isAdmin) {
+                    dispatchPanel.style.display = 'block';
+                    if (notificationsLayout) {
+                        notificationsLayout.style.gridTemplateColumns = '';
+                        notificationsLayout.style.maxWidth = '';
+                        notificationsLayout.style.margin = '';
+                    }
+                } else {
+                    dispatchPanel.style.display = 'none';
+                    if (notificationsLayout) {
+                        notificationsLayout.style.gridTemplateColumns = '1fr';
+                        notificationsLayout.style.maxWidth = '920px';
+                        notificationsLayout.style.margin = '0 auto';
+                    }
                 }
             }
         }
@@ -560,7 +583,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadNotifications();
-            loadDispatchBookings();
+            if (isAdmin) {
+                loadDispatchBookings();
+            }
         });
 
         markAllBtn.addEventListener('click', async () => {
@@ -626,6 +651,10 @@
 
         dispatchForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!isAdmin) {
+                showMessage('Broadcasting alerts is restricted to Operations Administrators.', 'error');
+                return;
+            }
             dispatchSubmitBtn.disabled = true;
             dispatchSubmitBtn.textContent = 'Broadcasting…';
 

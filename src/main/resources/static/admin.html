@@ -254,6 +254,143 @@
         }
         .eco-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
         .eco-label { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; letter-spacing: 0.4px; }
+
+        /* My Tickets Spotlight Hero */
+        .ticket-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 18px;
+            padding: 24px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3), 0 8px 10px -6px rgba(15, 23, 42, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+        }
+        .ticket-hero::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 160px;
+            height: 160px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, rgba(16, 185, 129, 0) 70%);
+            pointer-events: none;
+        }
+        .ticket-hero-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 18px;
+        }
+        .ticket-hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseEmerald 2s infinite;
+        }
+        @keyframes pulseEmerald {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .ticket-hero-ref {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+        .ticket-hero-route {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .ticket-hero-operator {
+            font-size: 0.84rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .ticket-hero-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+        .ticket-hero-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .ticket-hero-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .ticket-hero-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+        .ticket-hero-countdown {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #34d399;
+            letter-spacing: 0.5px;
+        }
+        .ticket-hero-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .payment-card-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .payment-card-item.is-default {
+            border-color: var(--primary);
+            background: #f0fdf4;
+        }
     </style>
 </head>
 <body>
@@ -299,6 +436,7 @@
         <div class="page-tabs" id="pageTabs">
             <button class="page-tab active" id="tabSignIn" onclick="switchTab('signin')">Sign In</button>
             <button class="page-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+            <button class="page-tab" id="tabTickets" onclick="switchTab('tickets')" style="display:none;">My Tickets</button>
             <button class="page-tab" id="tabPortal" onclick="switchTab('portal')" style="display:none;">Portal</button>
             <button class="page-tab" id="tabProfile" onclick="switchTab('profile')" style="display:none;">My Account</button>
         </div>
@@ -307,8 +445,9 @@
             <div class="auth-narrow">
                 <div class="card">
                     <div class="section-header" style="display:block;">
-                        <h2 class="section-title">Welcome back</h2>
-                        <p class="section-sub">Passengers, conductors, drivers, and admins sign in here.</p>
+                        <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.2em; display:inline-block; margin-bottom:4px;">Passenger Sign-In</span>
+                        <h2 class="section-title">Welcome back.</h2>
+                        <p class="section-sub">Signing in is optional &mdash; you can always book as a guest instead.</p>
                     </div>
                     <form id="loginForm" onsubmit="handleLogin(event)">
                         <div class="form-group">
@@ -325,16 +464,19 @@
                         <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Sign In</button>
                     </form>
                     <div class="quick-login-section">
-                        <p class="quick-login-title">Demo accounts (Password: Password@123)</p>
+                        <p class="quick-login-title">Demo accounts (Password format: firstName@123)</p>
                         <div class="quick-login-grid">
-                            <button class="quick-btn quick-btn-admin" onclick="quickLogin('admin@busreservation.lk')">Admin</button>
-                            <button class="quick-btn quick-btn-conductor" onclick="quickLogin('conductor.kandy@busreservation.lk')">Conductor</button>
-                            <button class="quick-btn quick-btn-driver" onclick="quickLogin('driver.kandy@busreservation.lk')">Driver</button>
-                            <button class="quick-btn quick-btn-passenger" onclick="quickLogin('dohan@busreservation.lk')">Passenger</button>
+                            <button class="quick-btn quick-btn-admin" onclick="quickLogin('admin@busreservation.lk')">Admin (admin@123)</button>
+                            <button class="quick-btn quick-btn-conductor" onclick="quickLogin('conductor.kandy@busreservation.lk')">Conductor (kasun@123)</button>
+                            <button class="quick-btn quick-btn-driver" onclick="quickLogin('driver.kandy@busreservation.lk')">Driver (nimal@123)</button>
+                            <button class="quick-btn quick-btn-passenger" onclick="quickLogin('dohan@busreservation.lk')">Passenger (dohan@123)</button>
                         </div>
                     </div>
                     <p style="margin-top:16px; font-size:0.85rem; color:var(--text-muted); text-align:center;">
-                        Don't have an account? <a href="#" onclick="switchTab('register'); return false;" style="color:var(--primary); font-weight:600; text-decoration:none;">Create one</a>
+                        New here? <a href="#" onclick="switchTab('register'); return false;" style="color:var(--primary); font-weight:600; text-decoration:none;">Create an account</a>
+                    </p>
+                    <p style="margin-top:8px; font-size:0.82rem; color:var(--text-muted); text-align:center;">
+                        Or skip this entirely &mdash; <a href="index.html#bookTrip" style="color:var(--text-muted); text-decoration:underline;">book as a guest</a>.
                     </p>
                 </div>
             </div>
@@ -404,7 +546,10 @@
                             <h2 class="section-title" id="staffPortalTitle">Staff trip board</h2>
                             <p class="section-sub">Live schedule overview for conductors and drivers.</p>
                         </div>
-                        <button class="btn btn-outline" onclick="loadStaffTrips()">Refresh</button>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <a id="btnStaffConsoleDirect" href="conductor.html" class="btn btn-primary" style="text-decoration:none; padding:8px 16px; font-size:0.85rem;">Open Dedicated Console &rarr;</a>
+                            <button class="btn btn-outline" onclick="loadStaffTrips()">Refresh</button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table>
@@ -512,12 +657,113 @@
                     </div>
                 </div>
 
+                <!-- Crew Roster & Duty Assignment Card -->
+                <div class="card" id="adminCrewDispatchSection">
+                    <div class="section-header">
+                        <div>
+                            <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">DISPATCH OPERATIONS</span>
+                            <h2 class="section-title">Highway Crew Roster &amp; Bus Duty Assignment</h2>
+                            <p class="section-sub">Assign certified drivers and conductors to highway departures. Assigned duty manifests push instantly to crew telemetry consoles.</p>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-outline btn-sm" onclick="loadCrewRoster()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                                Refresh Roster
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Trip #</th>
+                                    <th>Corridor Route</th>
+                                    <th>Bus &amp; Operator</th>
+                                    <th>Departure Date &amp; Time</th>
+                                    <th>Trip Status</th>
+                                    <th>Assigned Driver</th>
+                                    <th>Assigned Conductor</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crewRosterTableBody">
+                                <tr><td colspan="8"><div class="empty-state"><p>Loading crew roster...</p></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="section-header">
                         <h2 class="section-title"> Recent Registrations</h2>
                     </div>
                     <div id="recentList" class="recent-list">
                         <p style="color:var(--text-muted); font-size:0.88rem;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panelTickets" class="tab-panel">
+            <div id="ticketsNotLoggedIn" class="card auth-narrow" style="text-align:center; padding: 40px 28px; display:none;">
+                <div style="font-size:1.5rem; font-weight:800; color:var(--text-muted); margin-bottom:16px;">ACCESS RESTRICTED</div>
+                <h2 style="font-size:1.1rem; font-weight:700; margin-bottom:8px;">Sign in to view your tickets</h2>
+                <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:20px;">View your upcoming yet-to-board bus tickets, live countdown timers, and digital QR boarding passes.</p>
+                <button class="btn btn-primary" onclick="switchTab('signin')">Sign In</button>
+            </div>
+
+            <div id="ticketsContent" style="display:none;">
+                <div class="section-header" style="margin-bottom:18px;">
+                    <div>
+                        <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">COMMUTER BOARDING PASSES</span>
+                        <h2 class="section-title">My Tickets &amp; Active Journeys</h2>
+                        <p class="section-sub">Real-time boarding terminal bays, departure countdowns, and verified seat reservations</p>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <button class="btn btn-outline btn-sm" onclick="loadTicketsTab()" style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            Refresh
+                        </button>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Book Another Trip
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Earliest Ticket Hero Spotlight -->
+                <div id="earliestTicketHero" style="display:none;"></div>
+
+                <!-- Other Yet-To-Board Tickets List -->
+                <div id="otherYetToBoardContainer" style="display:none; margin-bottom:24px;">
+                    <h3 style="font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:12px;">Additional Upcoming Bookings</h3>
+                    <div id="otherYetToBoardList"></div>
+                </div>
+
+                <!-- Zero Upcoming Tickets State -->
+                <div id="noUpcomingTickets" class="card" style="text-align:center; padding:48px 24px; display:none;">
+                    <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    </div>
+                    <h3 style="font-size:1.15rem; font-weight:800; color:#0f172a; margin-bottom:6px;">No Upcoming Journeys</h3>
+                    <p style="font-size:0.88rem; color:var(--text-muted); max-width:440px; margin:0 auto 18px;">You don't have any yet-to-board bus tickets scheduled. All previous trips have been boarded or archived.</p>
+                    <a href="search.html" class="btn btn-primary" style="text-decoration:none;">Find Schedules &amp; Book Seats &rarr;</a>
+                </div>
+
+                <!-- Boarded & Past Journeys Collapsible Archive -->
+                <div class="card" style="margin-top:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleArchiveTickets()">
+                        <div>
+                            <h3 style="font-size:0.98rem; font-weight:700; color:#334155; margin:0; display:flex; align-items:center; gap:8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                Past Journeys &amp; Boarded Trips Archive (<span id="archiveTicketsCount">0</span>)
+                            </h3>
+                            <p style="font-size:0.78rem; color:var(--text-muted); margin:3px 0 0 0;">View completed travels and boarded transit records</p>
+                        </div>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnToggleArchive" style="pointer-events:none;">Show History</button>
+                    </div>
+                    <div id="archiveTicketsWrap" style="display:none; margin-top:16px; border-top:1px solid var(--border); padding-top:14px;">
+                        <div id="ticketsArchiveList"></div>
                     </div>
                 </div>
             </div>
@@ -571,14 +817,14 @@
                             <div class="eco-icon">KM</div>
                             <div>
                                 <div class="eco-value" id="metricDistance">0 km</div>
-                                <div class="eco-label">Distance Traveled</div>
+                                <div class="eco-label" id="labelDistance">Distance Traveled</div>
                             </div>
                         </div>
                         <div class="eco-metric-card" id="cardTime">
                             <div class="eco-icon">HRS</div>
                             <div>
                                 <div class="eco-value" id="metricTime">0h 0m</div>
-                                <div class="eco-label">Transit Time</div>
+                                <div class="eco-label" id="labelTime">Transit Time</div>
                             </div>
                         </div>
                         <div class="eco-metric-card" id="cardEco">
@@ -598,33 +844,20 @@
                     </div>
                 </div>
 
-                <!-- Active Bus Tickets & Passes Section -->
-                <div class="card" style="margin-bottom:20px;">
-                    <div class="section-header">
+                <!-- Upcoming Journeys Quick Access Banner -->
+                <div class="card" id="profileTicketsBanner" style="margin-bottom:20px; background:linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%); border:1.5px solid var(--primary-border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                         <div>
-                            <h3 class="section-title"> Active Bus Tickets &amp; Boarding Passes</h3>
-                            <p class="section-sub">Confirmed trips with verified seat reservations</p>
+                            <div style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;" id="profileTicketsBannerEyebrow">BOARDING PASSES</div>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:#0f172a; margin-top:2px;" id="profileTicketsBannerTitle">Your Boarding Passes &amp; Active Tickets</h3>
+                            <p style="font-size:0.84rem; color:var(--text-muted); margin-top:2px;" id="profileTicketSummaryText">Loading your upcoming journeys...</p>
                         </div>
-                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Book Another Trip</a>
-                    </div>
-                    <div id="activeTicketsList">
-                        <div class="empty-state" style="padding:28px 16px;">
-                            <div class="icon"></div>
-                            <p>Loading your tickets...</p>
+                        <div id="profileTicketsBannerAction">
+                            <button type="button" class="btn btn-primary" onclick="switchTab('tickets')" style="display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                View Yet-To-Board Tickets &rarr;
+                            </button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Past Trips / Booking History Section -->
-                <div class="card" style="margin-bottom:20px;">
-                    <div class="section-header">
-                        <div>
-                            <h3 class="section-title">Travel History &amp; Past Journeys</h3>
-                            <p class="section-sub">Archived and completed journeys</p>
-                        </div>
-                    </div>
-                    <div id="pastTicketsList">
-                        <p style="color:var(--text-muted); font-size:0.85rem;">Loading travel history...</p>
                     </div>
                 </div>
 
@@ -786,6 +1019,114 @@
         </div>
     </div>
 
+    <!-- Manage Payment Methods CRUD Modal -->
+    <div class="modal-overlay" id="paymentMethodsModal">
+        <div class="modal" style="max-width:540px;">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-title" style="display:flex; align-items:center; gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Saved Payment Methods
+                    </span>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Manage credit &amp; debit cards for rapid 1-click booking</p>
+                </div>
+                <button class="modal-close" onclick="closePaymentMethodsModal()">&times;</button>
+            </div>
+
+            <!-- Saved Cards List -->
+            <div style="margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">YOUR SAVED CARDS</span>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="loadPaymentMethods()" style="font-size:0.74rem; padding:3px 8px;">Refresh</button>
+                </div>
+                <div id="savedCardsList" style="max-height:220px; overflow-y:auto;">
+                    <p style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:14px 0;">Loading payment cards...</p>
+                </div>
+            </div>
+
+            <!-- Add / Edit Card Form -->
+            <div style="border-top:1px solid var(--border); padding-top:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <strong style="font-size:0.9rem; color:#0f172a;" id="cardFormTitle">Add New Payment Card</strong>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn btn-outline btn-sm" id="btnFillDemoCard" onclick="fillDemoPaymentCard()" style="font-size:0.72rem; padding:3px 8px; border-color:var(--primary); color:var(--primary-dark);">Fill Test Visa</button>
+                        <button type="button" class="btn btn-outline btn-sm" id="btnCancelEditCard" onclick="resetCardForm()" style="display:none; font-size:0.72rem; padding:3px 8px;">Cancel Edit</button>
+                    </div>
+                </div>
+                <form id="paymentCardForm" onsubmit="handleSavePaymentCard(event)">
+                    <input type="hidden" id="cardEditId" value="">
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label for="cardholderName" style="font-size:0.78rem;">Cardholder Full Name</label>
+                        <input type="text" id="cardholderName" placeholder="KASUN PERERA" required minlength="2" maxlength="100" style="text-transform:uppercase;">
+                    </div>
+                    <div class="form-group" id="cardNumberGroup" style="margin-bottom:10px;">
+                        <label for="cardNumber" style="font-size:0.78rem;">16-Digit Card Number (Visa / Mastercard)</label>
+                        <div style="position:relative;">
+                            <input type="text" id="cardNumber" placeholder="4532 0151 1283 0366" maxlength="19" required oninput="formatCardNumberInput(this)">
+                            <span id="cardBrandBadge" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:800; color:var(--primary); pointer-events:none;">VISA / MC</span>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label for="cardExpiry" style="font-size:0.78rem;">Expiry Date (MM/YY)</label>
+                            <input type="text" id="cardExpiry" placeholder="12/28" maxlength="5" required oninput="formatExpiryInput(this)">
+                        </div>
+                        <div class="form-group" id="cardCvvGroup" style="margin-bottom:0;">
+                            <label for="cardCvv" style="font-size:0.78rem;">CVV Security Code</label>
+                            <input type="password" id="cardCvv" placeholder="123" maxlength="4" required>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                        <input type="checkbox" id="cardMakeDefault" checked style="width:16px; height:16px; cursor:pointer;">
+                        <label for="cardMakeDefault" style="font-size:0.82rem; font-weight:600; color:#334155; cursor:pointer; margin:0;">Set as default payment method</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="btnSaveCard" style="display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="btnSaveCardLabel">Save Payment Card</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Crew Duty Modal -->
+    <div class="modal-overlay" id="assignCrewModal">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-header">
+                <div>
+                    <span class="modal-title" style="display:flex; align-items:center; gap:8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
+                        Assign Corridor Duty Crew
+                    </span>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;" id="assignCrewModalSubtitle">Trip #0 &bull; Route</p>
+                </div>
+                <button class="modal-close" onclick="closeAssignCrewModal()">&times;</button>
+            </div>
+            <form id="assignCrewForm" onsubmit="handleSaveCrewAssignment(event)">
+                <input type="hidden" id="assignCrewTripId" value="">
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label for="assignDriverSelect" style="font-size:0.85rem; font-weight:700;">Assign Expressway Driver</label>
+                    <select id="assignDriverSelect" class="form-control" style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border);">
+                        <option value="0">-- Select Driver --</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:18px;">
+                    <label for="assignConductorSelect" style="font-size:0.85rem; font-weight:700;">Assign Scanner Conductor</label>
+                    <select id="assignConductorSelect" class="form-control" style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border);">
+                        <option value="0">-- Select Conductor --</option>
+                    </select>
+                </div>
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px; font-size:0.78rem; color:#166534; margin-bottom:16px;">
+                    Assigned drivers and conductors will immediately see this trip on their mobile consoles, with live QR verification and luggage manifests loaded.
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" class="btn btn-outline" onclick="closeAssignCrewModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveCrewAssignment">Save Crew Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         const API = '/api/v1/admin';
         let allUsers = [];
@@ -811,6 +1152,7 @@
             localStorage.removeItem('bus_jwt_token');
             localStorage.removeItem('user_info');
             localStorage.removeItem('bus_user');
+            localStorage.removeItem('currentUser');
         }
         function authHeaders() {
             const token = getToken();
@@ -855,14 +1197,17 @@
             const logout = document.getElementById('navLogoutBtn');
             const tabSignIn = document.getElementById('tabSignIn');
             const tabRegister = document.getElementById('tabRegister');
+            const tabTickets = document.getElementById('tabTickets');
             const tabPortal = document.getElementById('tabPortal');
             const tabProfile = document.getElementById('tabProfile');
             const navOperator = document.getElementById('navOperatorModeLink');
             const navBadge = document.getElementById('adminNavBadge');
 
+            const pageTabs = document.getElementById('pageTabs');
             if (user && token) {
                 if (tabSignIn) tabSignIn.style.display = 'none';
                 if (tabRegister) tabRegister.style.display = 'none';
+                if (tabTickets) tabTickets.style.display = 'none';
                 if (tabProfile) tabProfile.style.display = 'inline-block';
 
                 if (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
@@ -870,8 +1215,10 @@
                         tabPortal.style.display = 'inline-block';
                         tabPortal.textContent = user.role === 'ADMIN' ? 'Admin Portal' : 'Staff Portal';
                     }
+                    if (pageTabs) pageTabs.style.display = 'flex';
                 } else {
                     if (tabPortal) tabPortal.style.display = 'none';
+                    if (pageTabs) pageTabs.style.display = 'none';
                 }
 
                 if (navOperator) {
@@ -888,8 +1235,10 @@
                 }
                 if (logout) logout.style.display = 'inline-flex';
             } else {
+                if (pageTabs) pageTabs.style.display = 'flex';
                 if (tabSignIn) tabSignIn.style.display = 'inline-block';
                 if (tabRegister) tabRegister.style.display = 'inline-block';
+                if (tabTickets) tabTickets.style.display = 'none';
                 if (tabPortal) tabPortal.style.display = 'none';
                 if (tabProfile) tabProfile.style.display = 'none';
                 if (navOperator) navOperator.style.display = 'none';
@@ -902,6 +1251,11 @@
             const user = getUser();
             const token = getToken();
 
+            if (tab === 'tickets') {
+                window.location.href = 'tickets.html';
+                return;
+            }
+
             if (tab === 'portal' && (!user || !token || (user.role !== 'ADMIN' && user.role !== 'CONDUCTOR' && user.role !== 'DRIVER'))) {
                 showToast('Portal access is restricted to Administrators and Crew.', 'error');
                 switchTab('signin');
@@ -910,20 +1264,28 @@
 
             document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            const tabMap = { signin: 'tabSignIn', register: 'tabRegister', portal: 'tabPortal', profile: 'tabProfile' };
-            const panelMap = { signin: 'panelSignin', register: 'panelRegister', portal: 'panelPortal', profile: 'panelProfile' };
+            const tabMap = { signin: 'tabSignIn', register: 'tabRegister', portal: 'tabPortal', profile: 'tabProfile', tickets: 'tabTickets' };
+            const panelMap = { signin: 'panelSignin', register: 'panelRegister', portal: 'panelPortal', profile: 'panelProfile', tickets: 'panelTickets' };
             if (document.getElementById(tabMap[tab])) document.getElementById(tabMap[tab]).classList.add('active');
             if (document.getElementById(panelMap[tab])) document.getElementById(panelMap[tab]).classList.add('active');
             if (tab === 'profile') loadProfile();
             if (tab === 'portal') renderPortal();
+            if (tab === 'tickets') loadTicketsTab();
         }
         function afterAuthSuccess(user) {
             refreshSessionUi();
+            if (typeof setupNav === 'function') {
+                setupNav();
+            }
+            window.dispatchEvent(new CustomEvent('auth-change', { detail: { user } }));
             if (user.role === 'ADMIN') {
+                history.replaceState(null, '', 'admin.html?tab=portal');
                 switchTab('portal');
             } else if (user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
+                history.replaceState(null, '', 'admin.html?tab=portal');
                 switchTab('portal');
             } else {
+                history.replaceState(null, '', 'admin.html?tab=profile');
                 switchTab('profile');
             }
         }
@@ -960,7 +1322,10 @@
         }
         async function quickLogin(email) {
             document.getElementById('loginEmail').value = email;
-            document.getElementById('loginPassword').value = email.includes('admin') ? 'Admin@123' : 'Password@123';
+            let firstName = email.split('@')[0].split('.')[0].toLowerCase();
+            if (firstName === 'conductor') firstName = 'kasun';
+            if (firstName === 'driver') firstName = 'nimal';
+            document.getElementById('loginPassword').value = firstName + '@123';
             await handleLogin(new Event('submit'));
         }
         async function handleRegister(event) {
@@ -1012,19 +1377,168 @@
             if (user.role === 'ADMIN') {
                 document.getElementById('portalAdmin').style.display = 'block';
                 loadData();
+                loadCrewRoster();
             } else if (user.role === 'CONDUCTOR' || user.role === 'DRIVER') {
                 document.getElementById('portalStaff').style.display = 'block';
                 document.getElementById('staffPortalTitle').textContent =
                     user.role === 'DRIVER' ? 'Driver trip board' : 'Conductor trip board';
+                const directBtn = document.getElementById('btnStaffConsoleDirect');
+                if (directBtn) {
+                    if (user.role === 'DRIVER') {
+                        directBtn.href = 'driver.html';
+                        directBtn.textContent = 'Open Driver Console & GPS \u2192';
+                    } else {
+                        directBtn.href = 'conductor.html';
+                        directBtn.textContent = 'Open Conductor Console & Scanner \u2192';
+                    }
+                }
                 loadStaffTrips();
             } else {
                 document.getElementById('portalPassenger').style.display = 'block';
             }
         }
+
+        let cachedCrewMembers = null;
+        let cachedRosterTrips = [];
+
+        async function loadCrewMembers() {
+            try {
+                const res = await fetch('/api/v1/staff/crew-members', { headers: authHeaders() });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        cachedCrewMembers = json.data;
+                        return cachedCrewMembers;
+                    }
+                }
+            } catch (err) {
+                console.warn('Could not fetch crew members', err);
+            }
+            return [];
+        }
+
+        async function loadCrewRoster() {
+            const tbody = document.getElementById('crewRosterTableBody');
+            if (!tbody) return;
+            try {
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>Loading crew roster...</p></div></td></tr>';
+                const res = await fetch('/api/v1/staff/crew-roster', { headers: authHeaders() });
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>${json.message || 'Could not load crew roster'}</p></div></td></tr>`;
+                    return;
+                }
+                cachedRosterTrips = json.data || [];
+                if (cachedRosterTrips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>No upcoming trips scheduled for assignment.</p></div></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = cachedRosterTrips.map(t => {
+                    const driverBadge = t.driverName 
+                        ? `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${escapeHtml(t.driverName)} ${t.driverEmployeeId ? `(${t.driverEmployeeId})` : ''}</span>`
+                        : `<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-weight:600;">Unassigned</span>`;
+                    const conductorBadge = t.conductorName 
+                        ? `<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">${escapeHtml(t.conductorName)} ${t.conductorEmployeeId ? `(${t.conductorEmployeeId})` : ''}</span>`
+                        : `<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-weight:600;">Unassigned</span>`;
+                    const st = (t.tripStatus || 'SCHEDULED').toUpperCase();
+                    let stBadge = `<span class="badge" style="background:#dcfce7; color:#15803d;">SCHEDULED</span>`;
+                    if (st === 'IN_TRANSIT') stBadge = `<span class="badge" style="background:#dbeafe; color:#1d4ed8;">IN TRANSIT</span>`;
+                    else if (st === 'COMPLETED') stBadge = `<span class="badge" style="background:#f1f5f9; color:#475569;">COMPLETED</span>`;
+
+                    return `
+                        <tr>
+                            <td style="font-weight:700; color:#0f172a;">#${t.tripId}</td>
+                            <td style="font-weight:700;">${t.sourceCity} &rarr; ${t.destinationCity}</td>
+                            <td>${t.busNumber} <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${t.operatorName || ''}</span></td>
+                            <td>${formatDate(t.departureTime)}</td>
+                            <td>${stBadge}</td>
+                            <td>${driverBadge}</td>
+                            <td>${conductorBadge}</td>
+                            <td>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="openAssignCrewModal(${t.tripId})" style="border-color:var(--primary); color:var(--primary-dark); font-weight:700;">
+                                    Assign Crew
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>Connection error loading crew roster.</p></div></td></tr>';
+            }
+        }
+
+        async function openAssignCrewModal(tripId) {
+            const trip = cachedRosterTrips.find(t => t.tripId == tripId);
+            if (!trip) return;
+            document.getElementById('assignCrewTripId').value = tripId;
+            document.getElementById('assignCrewModalSubtitle').textContent = `Trip #${trip.tripId} • ${trip.sourceCity} → ${trip.destinationCity} (${trip.busNumber})`;
+
+            if (!cachedCrewMembers) {
+                await loadCrewMembers();
+            }
+            const members = cachedCrewMembers || [];
+            const drivers = members.filter(m => m.role === 'DRIVER');
+            const conductors = members.filter(m => m.role === 'CONDUCTOR');
+
+            const drvSel = document.getElementById('assignDriverSelect');
+            const conSel = document.getElementById('assignConductorSelect');
+
+            drvSel.innerHTML = '<option value="0">-- Unassigned --</option>' + drivers.map(d => `
+                <option value="${d.userId}" ${trip.driverId == d.userId ? 'selected' : ''}>
+                    ${escapeHtml(d.fullName)} ${d.employeeId ? `[${d.employeeId}]` : ''} (${d.email})
+                </option>
+            `).join('');
+
+            conSel.innerHTML = '<option value="0">-- Unassigned --</option>' + conductors.map(c => `
+                <option value="${c.userId}" ${trip.conductorId == c.userId ? 'selected' : ''}>
+                    ${escapeHtml(c.fullName)} ${c.employeeId ? `[${c.employeeId}]` : ''} (${c.email})
+                </option>
+            `).join('');
+
+            document.getElementById('assignCrewModal').classList.add('active');
+        }
+
+        function closeAssignCrewModal() {
+            document.getElementById('assignCrewModal').classList.remove('active');
+        }
+
+        async function handleSaveCrewAssignment(e) {
+            e.preventDefault();
+            const tripId = document.getElementById('assignCrewTripId').value;
+            const driverUserId = Number(document.getElementById('assignDriverSelect').value) || 0;
+            const conductorUserId = Number(document.getElementById('assignConductorSelect').value) || 0;
+            const btn = document.getElementById('btnSaveCrewAssignment');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const user = getUser();
+                const res = await fetch(`/api/v1/staff/crew-assign?adminUserId=${user ? user.userId : 1}`, {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ tripId: Number(tripId), driverUserId, conductorUserId })
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(json.message || 'Crew assigned successfully', 'success');
+                    closeAssignCrewModal();
+                    await loadCrewRoster();
+                } else {
+                    showToast(json.message || 'Could not assign crew', 'error');
+                }
+            } catch(err) {
+                showToast('Network error while assigning crew', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Crew Assignment';
+            }
+        }
+
         async function loadStaffTrips() {
             const tbody = document.getElementById('staffTripsBody');
             try {
-                const res = await fetch(`${API}/staff/trips`, { headers: authHeaders() });
+                let res = await fetch(`${API}/staff/trips`, { headers: authHeaders() });
+                if (!res.ok) res = await fetch(`${API}/auth/staff/trips`, { headers: authHeaders() });
                 const json = await res.json();
                 if (!res.ok || !json.success) {
                     tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="icon">!</div><p>${json.message || 'Could not load trips'}</p></div></td></tr>`;
@@ -1086,8 +1600,23 @@
             'colombo-nuwara eliya': 180, 'nuwara eliya-colombo': 180,
             'colombo-trincomalee': 257, 'trincomalee-colombo': 257,
             'colombo-badulla': 225, 'badulla-colombo': 225,
-            'colombo-anuradhapura': 205, 'anuradhapura-colombo': 205
+            'colombo-anuradhapura': 205, 'anuradhapura-colombo': 205,
+            'kandy-nuwara eliya': 78, 'nuwara eliya-kandy': 78,
+            'galle-matara': 45, 'matara-galle': 45,
+            'kandy-galle': 215, 'galle-kandy': 215,
+            'kandy-jaffna': 320, 'jaffna-kandy': 320,
+            'anuradhapura-jaffna': 195, 'jaffna-anuradhapura': 195,
+            'trincomalee-kandy': 180, 'kandy-trincomalee': 180
         };
+
+        function scrollToProfileSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const input = el.querySelector('input');
+                if (input) input.focus();
+            }
+        }
 
         function renderProfile(user) {
             document.getElementById('profileAvatar').textContent = initials(user.fullName);
@@ -1126,8 +1655,26 @@
                     `;
                 } else {
                     actionsEl.innerHTML = `
-                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none;"> Book Bus Seats &rarr;</a>
-                        <a href="schedule.html" class="btn btn-outline btn-sm" style="text-decoration:none;">View Corridor Timetables &rarr;</a>
+                        <a href="search.html" class="btn btn-primary btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            Book Bus Seats &rarr;
+                        </a>
+                        <a href="schedule.html" class="btn btn-outline btn-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            View Corridor Timetables &rarr;
+                        </a>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="scrollToProfileSection('updateProfileForm')" style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Update Profile
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="scrollToProfileSection('changePasswordForm')" style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Change Password
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openPaymentMethodsModal()" style="display:inline-flex; align-items:center; gap:6px; border-color:var(--primary); color:var(--primary-dark); font-weight:700;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            Manage Payment Methods
+                        </button>
                     `;
                 }
             }
@@ -1141,6 +1688,12 @@
             const cardTime = document.getElementById('cardTime');
             const cardEco = document.getElementById('cardEco');
             const cardTier = document.getElementById('cardTier');
+            const banner = document.getElementById('profileTicketsBanner');
+            const bannerEyebrow = document.getElementById('profileTicketsBannerEyebrow');
+            const bannerTitle = document.getElementById('profileTicketsBannerTitle');
+            const bannerAction = document.getElementById('profileTicketsBannerAction');
+            const distLbl = document.getElementById('labelDistance');
+            const timeLbl = document.getElementById('labelTime');
 
             if (travelEcoSec) {
                 if (user.role === 'ADMIN') {
@@ -1160,15 +1713,115 @@
                 }
             }
 
-            // Load user's bookings and compute travel & eco metrics
-            loadUserTickets(user.email);
+            if (banner) {
+                if (user.role === 'ADMIN') {
+                    banner.style.display = 'none';
+                } else if (user.role === 'CONDUCTOR') {
+                    banner.style.display = 'block';
+                    if (bannerEyebrow) bannerEyebrow.textContent = 'CREW SHIFT ROSTER';
+                    if (bannerTitle) bannerTitle.textContent = 'Active Corridor Duty & Scanner Terminal';
+                    if (bannerAction) {
+                        bannerAction.innerHTML = `
+                            <a href="conductor.html" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                                Open Conductor Console &rarr;
+                            </a>
+                        `;
+                    }
+                } else if (user.role === 'DRIVER') {
+                    banner.style.display = 'block';
+                    if (bannerEyebrow) bannerEyebrow.textContent = 'CREW SHIFT ROSTER';
+                    if (bannerTitle) bannerTitle.textContent = 'Active Corridor Duty & Live Telemetry';
+                    if (bannerAction) {
+                        bannerAction.innerHTML = `
+                            <a href="driver.html" class="btn btn-primary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
+                                Open Driver Console &rarr;
+                            </a>
+                        `;
+                    }
+                } else {
+                    banner.style.display = 'block';
+                    if (bannerEyebrow) bannerEyebrow.textContent = 'BOARDING PASSES';
+                    if (bannerTitle) bannerTitle.textContent = 'Your Boarding Passes & Active Tickets';
+                    if (bannerAction) {
+                        bannerAction.innerHTML = `
+                            <button type="button" class="btn btn-primary" onclick="switchTab('tickets')" style="display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                View Yet-To-Board Tickets &rarr;
+                            </button>
+                        `;
+                    }
+                }
+            }
+
+            if (distLbl) {
+                if (user.role === 'DRIVER') distLbl.textContent = 'Highway Km Driven';
+                else if (user.role === 'CONDUCTOR') distLbl.textContent = 'Corridor Km Operated';
+                else distLbl.textContent = 'Distance Traveled';
+            }
+            if (timeLbl) {
+                timeLbl.textContent = (user.role === 'DRIVER' || user.role === 'CONDUCTOR') ? 'Duty Shift Hours' : 'Transit Time';
+            }
+
+            // Load travel & eco metrics according to user role
+            if (user.role === 'DRIVER' || user.role === 'CONDUCTOR') {
+                loadStaffMetrics(user);
+            } else if (user.role === 'PASSENGER') {
+                loadUserTickets(user.email);
+            }
         }
 
-        async function loadUserTickets(email) {
-            const activeCont = document.getElementById('activeTicketsList');
-            const pastCont = document.getElementById('pastTicketsList');
-            if (!activeCont) return;
+        async function loadStaffMetrics(user) {
+            try {
+                let trips = [];
+                let res = await fetch(`${API}/staff/trips`, { headers: authHeaders() });
+                if (!res.ok) res = await fetch(`${API}/auth/staff/trips`, { headers: authHeaders() });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        trips = json.data;
+                    }
+                }
 
+                let totalKm = 0;
+                let totalMinutes = 0;
+                let completedTripsCount = 0;
+
+                trips.forEach(t => {
+                    const st = String(t.tripStatus || '').toUpperCase();
+                    if (st === 'COMPLETED') {
+                        completedTripsCount++;
+                        const from = (t.sourceCity || 'Colombo').toLowerCase().trim();
+                        const to = (t.destinationCity || 'Kandy').toLowerCase().trim();
+                        const key = `${from}-${to}`;
+                        const km = ROUTE_DISTANCES[key] || 115;
+                        totalKm += km;
+                        totalMinutes += Math.round(km * 1.5);
+                    }
+                });
+
+                const distEl = document.getElementById('metricDistance');
+                const timeEl = document.getElementById('metricTime');
+                if (distEl) distEl.textContent = `${totalKm} km`;
+                if (timeEl) {
+                    const hrs = Math.floor(totalMinutes / 60);
+                    const mins = totalMinutes % 60;
+                    timeEl.textContent = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+                }
+
+                const summaryText = document.getElementById('profileTicketSummaryText');
+                if (summaryText) {
+                    summaryText.innerHTML = `Highway Crew Log: <strong style="color:var(--primary);">${completedTripsCount} completed expressway assignment${completedTripsCount !== 1 ? 's' : ''}</strong> recorded on your profile roster.`;
+                }
+            } catch (err) {
+                console.warn('Could not load staff metrics', err);
+            }
+        }
+
+        let userBookingsCache = [];
+
+        async function loadUserTickets(email) {
             try {
                 let bookings = [];
                 const res = await fetch(`/api/v1/bookings?email=${encodeURIComponent(email)}`, {
@@ -1181,7 +1834,6 @@
                     }
                 }
 
-                // If in-browser last booking is present and matches this user or guest, add it
                 const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
                 if (localBooking && localBooking.reference) {
                     const alreadyHas = bookings.some(b => b.reference === localBooking.reference);
@@ -1190,20 +1842,18 @@
                     }
                 }
 
+                userBookingsCache = bookings;
                 renderUserTicketsAndMetrics(bookings);
             } catch(err) {
-                activeCont.innerHTML = '<div class="empty-state" style="padding:20px; color:var(--text-muted);"><p>No active bookings found.</p></div>';
+                console.warn('Could not load user tickets for metrics', err);
             }
         }
-
-        let userBookingsCache = [];
 
         function renderUserTicketsAndMetrics(bookings) {
             userBookingsCache = bookings || [];
             let totalKm = 0;
             let totalMinutes = 0;
-            let activeTickets = [];
-            let pastTickets = [];
+            let yetToBoardCount = 0;
 
             bookings.forEach(b => {
                 const from = (b.from || 'Colombo').toLowerCase().trim();
@@ -1211,13 +1861,18 @@
                 const key = `${from}-${to}`;
                 const km = ROUTE_DISTANCES[key] || 120;
                 
-                const isConfirmed = (b.status === 'CONFIRMED' || !b.status);
-                if (isConfirmed) {
+                // Travel & Eco metrics accumulate for completed or boarded journeys
+                const isCompletedOrBoarded = (b.status === 'COMPLETED' || b.status === 'BOARDED');
+                if (isCompletedOrBoarded) {
                     totalKm += km;
                     totalMinutes += Math.round(km * 1.5);
-                    activeTickets.push(b);
-                } else {
-                    pastTickets.push(b);
+                }
+
+                // Active yet-to-board counter: bookings that are confirmed/pending and NOT yet completed/boarded/cancelled
+                const isYetToBoard = (b.status === 'CONFIRMED' || !b.status || b.status === 'PENDING') &&
+                    b.status !== 'BOARDED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && b.status !== 'REFUNDED';
+                if (isYetToBoard) {
+                    yetToBoardCount++;
                 }
             });
 
@@ -1243,95 +1898,566 @@
                 else tierEl.textContent = 'Silver Traveler';
             }
 
-            // Render Active Tickets
-            const activeCont = document.getElementById('activeTicketsList');
-            if (activeTickets.length === 0) {
-                activeCont.innerHTML = `
-                    <div class="empty-state" style="padding:24px 16px;">
-                        <div style="font-size:2rem; margin-bottom:8px;"></div>
-                        <div style="font-weight:700; color:#1e293b; font-size:0.95rem;">No Active Bookings</div>
-                        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">You have no upcoming journeys right now.</p>
-                        <a href="search.html" class="btn btn-primary btn-sm" style="margin-top:14px; text-decoration:none;">Book a Trip Now &rarr;</a>
-                    </div>
-                `;
-            } else {
-                activeCont.innerHTML = activeTickets.map(t => {
-                    const seats = Array.isArray(t.seats) ? t.seats.join(', ') : (t.seats || 'S12');
-                    const total = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 850.00');
-                    const date = t.date || '2026-10-01';
-                    const time = t.time || '08:30';
-                    const busType = t.busType || 'Expressway AC';
-                    const operator = t.operator || 'CatchBus Express';
-                    const hasLuggage = t.luggage && t.luggage.length > 0;
-                    const lug = hasLuggage ? t.luggage[0] : null;
+            // Update profile panel quick access text
+            const summaryText = document.getElementById('profileTicketSummaryText');
+            if (summaryText) {
+                if (yetToBoardCount > 0) {
+                    summaryText.innerHTML = `You have <strong style="color:var(--primary);">${yetToBoardCount} upcoming yet-to-board journey${yetToBoardCount > 1 ? 's' : ''}</strong> ready with digital boarding passes.`;
+                } else {
+                    summaryText.textContent = 'No upcoming yet-to-board journeys right now. Ready for your next trip?';
+                }
+            }
+        }
 
-                    return `
-                        <div class="ticket-card" style="background:#ffffff; border:1.5px solid var(--primary-border); border-radius:14px; padding:18px; margin-bottom:14px; box-shadow:0 4px 14px rgba(16,185,129,0.06); display:flex; flex-direction:column; gap:12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--border); padding-bottom:10px;">
-                                <div>
-                                    <span style="font-size:0.72rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px;">E-TICKET REFERENCE</span>
-                                    <div style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:800; color:#0f172a;">${t.reference}</div>
-                                </div>
-                                <span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem; font-weight:700;">CONFIRMED</span>
-                            </div>
+        let activeCountdownInterval = null;
 
-                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; align-items:center;">
-                                <div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">ROUTE</div>
-                                    <div style="font-size:1.05rem; font-weight:800; color:#1e293b;">${t.from} &rarr; ${t.to}</div>
-                                    <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${operator} &bull; ${busType}</div>
-                                    ${lug ? `<div style="font-size:0.76rem; color:#059669; font-weight:700; margin-top:3px;">Baggage Tag: ${lug.tagNumber || lug.tagReference || 'LUG-TAG'} (${lug.bagQuantity || lug.bagCount || 1} Bag)</div>` : ''}
-                                </div>
-                                <div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">DEPARTURE</div>
-                                    <div style="font-size:0.92rem; font-weight:700; color:#0f172a;">${date}</div>
-                                    <div style="font-size:0.85rem; font-weight:800; color:var(--primary);">${time}</div>
-                                </div>
-                                <div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">SEATS &amp; FARE</div>
-                                    <div style="font-size:0.92rem; font-weight:800; color:#0f172a;">Seats: ${seats}</div>
-                                    <div style="font-size:0.88rem; font-weight:800; color:var(--primary);">${total}</div>
-                                </div>
-                            </div>
+        function getTerminalBay(sourceCity) {
+            const city = (sourceCity || '').trim().toLowerCase();
+            const map = {
+                'colombo': 'Bastian Mawatha Private Terminal — Bay 03',
+                'kandy': 'Goods Shed Intercity Bus Stand — Bay 02',
+                'galle': 'Galle Central Bus Station — Bay 04',
+                'matara': 'Matara Central Expressway Terminal — Bay 02',
+                'jaffna': 'Jaffna Central Bus Terminal — Bay 01',
+                'nuwara eliya': 'Nuwara Eliya Main Bus Stand — Bay 03',
+                'trincomalee': 'Trincomalee Central Bus Stand — Bay 02',
+                'anuradhapura': 'Anuradhapura Old Bus Stand — Bay 01',
+                'badulla': 'Badulla Central Bus Terminal — Bay 02'
+            };
+            return map[city] || `${sourceCity || 'Central'} Intercity Transit Terminal — Bay 01`;
+        }
 
-                            <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; margin-top:4px; flex-wrap:wrap; gap:8px;">
-                                <span style="font-size:0.76rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;">
-                                    Present this pass to Conductor upon boarding
-                                </span>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn btn-primary btn-sm" onclick="showBoardingPassModal('${t.reference}')">View Pass &amp; QR</button>
-                                    <button class="btn btn-danger btn-sm" onclick="cancelUserBooking('${t.reference}')">Cancel</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+        function startLiveCountdown(dateStr, timeStr) {
+            if (activeCountdownInterval) {
+                clearInterval(activeCountdownInterval);
+                activeCountdownInterval = null;
             }
 
-            // Render Past / Cancelled Tickets
-            const pastCont = document.getElementById('pastTicketsList');
-            if (pastCont) {
-                if (pastTickets.length === 0) {
-                    pastCont.innerHTML = '<p style="color:var(--text-muted); font-size:0.84rem; text-align:center; padding:12px;">No past or cancelled journeys.</p>';
+            const clockEl = document.getElementById('heroCountdownClock');
+            if (!clockEl) return;
+
+            let targetTime;
+            try {
+                if (dateStr && dateStr.includes('-')) {
+                    const timeParts = (timeStr || '08:00').split(':');
+                    const [y, m, d] = dateStr.split('-').map(Number);
+                    targetTime = new Date(y, m - 1, d, Number(timeParts[0]) || 8, Number(timeParts[1]) || 0, 0).getTime();
                 } else {
-                    pastCont.innerHTML = pastTickets.map(t => {
-                        const total = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 850.00');
-                        const date = t.date || '2026-10-01';
-                        const statusColor = t.status === 'CANCELLED' ? 'background:#fee2e2; color:#b91c1c;' : 'background:#f1f5f9; color:#475569;';
+                    const now = new Date();
+                    const timeParts = (timeStr || '08:00').split(':');
+                    targetTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Number(timeParts[0]) || 8, Number(timeParts[1]) || 0, 0).getTime();
+                    if (targetTime < now.getTime()) {
+                        targetTime += 24 * 60 * 60 * 1000;
+                    }
+                }
+            } catch(e) {
+                targetTime = Date.now() + 3600000;
+            }
+
+            const updateClock = () => {
+                const now = Date.now();
+                const diff = targetTime - now;
+                if (diff <= 0) {
+                    clockEl.innerHTML = `<span style="color:#34d399; font-weight:800; font-size:1.1rem;">BOARDING ACTIVE &bull; AT PLATFORM</span>`;
+                    return;
+                }
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const mins = Math.floor((diff / (1000 * 60)) % 60);
+                const secs = Math.floor((diff / 1000) % 60);
+                const pad = n => String(n).padStart(2, '0');
+                if (days > 0) {
+                    clockEl.textContent = `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+                } else {
+                    clockEl.textContent = `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+                }
+            };
+
+            updateClock();
+            activeCountdownInterval = setInterval(updateClock, 1000);
+        }
+
+        async function loadTicketsTab() {
+            const user = getUser();
+            const token = getToken();
+            const notLoggedIn = document.getElementById('ticketsNotLoggedIn');
+            const content = document.getElementById('ticketsContent');
+
+            if (!user || !token) {
+                if (notLoggedIn) notLoggedIn.style.display = 'block';
+                if (content) content.style.display = 'none';
+                return;
+            }
+
+            if (notLoggedIn) notLoggedIn.style.display = 'none';
+            if (content) content.style.display = 'block';
+
+            let bookings = [];
+            try {
+                const res = await fetch(`/api/v1/bookings?email=${encodeURIComponent(user.email)}`, {
+                    headers: authHeaders()
+                });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        bookings = json.data;
+                    }
+                }
+                const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+                if (localBooking && localBooking.reference && !bookings.some(b => b.reference === localBooking.reference)) {
+                    bookings.unshift(localBooking);
+                }
+            } catch(e) {
+                console.warn('Could not fetch user bookings', e);
+            }
+
+            userBookingsCache = bookings;
+            renderTicketsTabContent(bookings);
+        }
+
+        function renderTicketsTabContent(bookings) {
+            // Filter yet-to-board vs past/boarded
+            const yetToBoard = bookings.filter(b => 
+                (b.status === 'CONFIRMED' || !b.status || b.status === 'PENDING') &&
+                b.status !== 'BOARDED' && b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && b.status !== 'REFUNDED'
+            );
+
+            const pastOrBoarded = bookings.filter(b => 
+                b.status === 'BOARDED' || b.status === 'COMPLETED' || b.status === 'CANCELLED' || b.status === 'REFUNDED'
+            );
+
+            // Sort yet-to-board by departure date & time ascending
+            const getSortTime = (t) => {
+                const d = t.date || '2026-10-04';
+                const tm = t.time || '00:00';
+                return new Date(`${d}T${tm}:00`).getTime() || 0;
+            };
+            yetToBoard.sort((a, b) => getSortTime(a) - getSortTime(b));
+
+            const heroCont = document.getElementById('earliestTicketHero');
+            const otherCont = document.getElementById('otherYetToBoardContainer');
+            const otherList = document.getElementById('otherYetToBoardList');
+            const emptyCont = document.getElementById('noUpcomingTickets');
+            const archiveCount = document.getElementById('archiveTicketsCount');
+            const archiveList = document.getElementById('ticketsArchiveList');
+
+            if (archiveCount) archiveCount.textContent = pastOrBoarded.length;
+
+            if (yetToBoard.length === 0) {
+                if (heroCont) heroCont.style.display = 'none';
+                if (otherCont) otherCont.style.display = 'none';
+                if (emptyCont) emptyCont.style.display = 'block';
+                if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+            } else {
+                if (emptyCont) emptyCont.style.display = 'none';
+                
+                // Earliest ticket spotlight
+                const earliest = yetToBoard[0];
+                const fromCity = earliest.from || 'Colombo';
+                const toCity = earliest.to || 'Kandy';
+                const bay = getTerminalBay(fromCity);
+                const seats = Array.isArray(earliest.seats) ? earliest.seats.join(', ') : (earliest.seats || 'S12');
+                const fare = typeof earliest.total === 'number' ? `LKR ${earliest.total.toLocaleString()}` : (earliest.total || 'LKR 1,500.00');
+                const date = earliest.date || '2026-10-04';
+                const time = earliest.time || '08:30';
+                const operator = earliest.operator || 'CatchBus Superline';
+                const busType = earliest.busType || 'Expressway AC';
+                const busNum = earliest.busNumber ? ` &bull; ${earliest.busNumber}` : '';
+                const lug = (earliest.luggage && earliest.luggage.length > 0) ? earliest.luggage[0] : null;
+
+                heroCont.style.display = 'block';
+                heroCont.innerHTML = `
+                    <div class="ticket-hero">
+                        <div class="ticket-hero-header">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div class="ticket-hero-badge">
+                                    <span class="pulse-dot"></span>
+                                    EARLIEST BOARDING PASS &bull; YET TO BOARD
+                                </div>
+                            </div>
+                            <div class="ticket-hero-ref">REF: ${earliest.reference || 'CBL-0000'}</div>
+                        </div>
+
+                        <div>
+                            <div class="ticket-hero-route">
+                                <span>${fromCity}</span>
+                                <span style="color:#34d399;">&rarr;</span>
+                                <span>${toCity}</span>
+                            </div>
+                            <div class="ticket-hero-operator">${operator} &bull; ${busType}${busNum}</div>
+                        </div>
+
+                        <div class="ticket-hero-grid">
+                            <div class="ticket-hero-card" style="border-color:rgba(52, 211, 153, 0.4); background:rgba(16, 185, 129, 0.08);">
+                                <div class="ticket-hero-label" style="color:#34d399;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    DEPARTURE COUNTDOWN
+                                </div>
+                                <div class="ticket-hero-countdown" id="heroCountdownClock">Calculating...</div>
+                            </div>
+
+                            <div class="ticket-hero-card">
+                                <div class="ticket-hero-label">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    BOARDING TERMINAL &amp; BAY
+                                </div>
+                                <div class="ticket-hero-val" style="font-size:0.92rem; color:#f1f5f9; line-height:1.35;">${bay}</div>
+                            </div>
+
+                            <div class="ticket-hero-card">
+                                <div class="ticket-hero-label">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    DEPARTURE SCHEDULE
+                                </div>
+                                <div class="ticket-hero-val">${date} at ${time}</div>
+                            </div>
+
+                            <div class="ticket-hero-card">
+                                <div class="ticket-hero-label">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    RESERVED SEATS &amp; FARE
+                                </div>
+                                <div class="ticket-hero-val">Seat(s): ${seats} <span style="font-size:0.85rem; color:#94a3b8; font-weight:600;">(${fare})</span></div>
+                            </div>
+                        </div>
+
+                        ${lug ? `
+                            <div style="margin-top:14px; background:rgba(16,185,129,0.12); border:1px solid rgba(52,211,153,0.3); border-radius:10px; padding:10px 14px; font-size:0.82rem; color:#a7f3d0; display:flex; align-items:center; gap:8px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                                <span>Checked Baggage Attached: <strong>${lug.tagNumber || lug.tagReference || 'LUG-TAG'}</strong> (${lug.bagQuantity || 1} Bag &bull; ${lug.status || 'TAGGED'})</span>
+                            </div>
+                        ` : ''}
+
+                        <div class="ticket-hero-actions">
+                            <button type="button" class="btn btn-primary" onclick="showBoardingPassModal('${earliest.reference}')" style="display:inline-flex; align-items:center; gap:8px; font-weight:700;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+                                View Digital QR Boarding Pass
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="cancelUserBooking('${earliest.reference}')" style="opacity:0.85;">
+                                Cancel Booking
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                startLiveCountdown(earliest.date, earliest.time);
+
+                // Render additional yet-to-board tickets (if more than 1)
+                const additional = yetToBoard.slice(1);
+                if (additional.length > 0) {
+                    otherCont.style.display = 'block';
+                    otherList.innerHTML = additional.map(t => {
+                        const seats = Array.isArray(t.seats) ? t.seats.join(', ') : (t.seats || 'S12');
+                        const fare = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 1,500.00');
+                        const fromCity = t.from || 'Colombo';
+                        const toCity = t.to || 'Kandy';
+                        const bay = getTerminalBay(fromCity);
+                        const date = t.date || '2026-10-04';
+                        const time = t.time || '08:30';
+                        const operator = t.operator || 'CatchBus Express';
+
                         return `
-                            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border-radius:8px; border:1px solid var(--border); margin-bottom:8px;">
+                            <div class="card" style="margin-bottom:14px; border:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--border); padding-bottom:8px;">
+                                    <div>
+                                        <span style="font-size:0.72rem; font-weight:800; color:var(--primary); text-transform:uppercase;">E-TICKET REF</span>
+                                        <div style="font-family:'Space Grotesk',sans-serif; font-size:1.05rem; font-weight:800; color:#0f172a;">${t.reference}</div>
+                                    </div>
+                                    <span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.74rem;">YET TO BOARD</span>
+                                </div>
+                                <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; align-items:center;">
+                                    <div>
+                                        <div style="font-size:0.74rem; color:var(--text-muted); font-weight:700;">ROUTE &amp; BOARDING BAY</div>
+                                        <div style="font-size:1.05rem; font-weight:800; color:#0f172a;">${fromCity} &rarr; ${toCity}</div>
+                                        <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">${bay}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.74rem; color:var(--text-muted); font-weight:700;">DEPARTURE</div>
+                                        <div style="font-size:0.92rem; font-weight:700; color:#0f172a;">${date}</div>
+                                        <div style="font-size:0.85rem; font-weight:800; color:var(--primary);">${time}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.74rem; color:var(--text-muted); font-weight:700;">SEATS &amp; FARE</div>
+                                        <div style="font-size:0.92rem; font-weight:800; color:#0f172a;">Seats: ${seats}</div>
+                                        <div style="font-size:0.85rem; font-weight:800; color:var(--primary);">${fare}</div>
+                                    </div>
+                                </div>
+                                <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1px solid var(--border); padding-top:10px;">
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="showBoardingPassModal('${t.reference}')">View Pass &amp; QR</button>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="cancelUserBooking('${t.reference}')">Cancel</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    otherCont.style.display = 'none';
+                }
+            }
+
+            // Render past / boarded archive list
+            if (archiveList) {
+                if (pastOrBoarded.length === 0) {
+                    archiveList.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:12px 0;">No completed or archived trips yet.</p>`;
+                } else {
+                    archiveList.innerHTML = pastOrBoarded.map(t => {
+                        const total = typeof t.total === 'number' ? `LKR ${t.total.toLocaleString()}` : (t.total || 'LKR 1,500.00');
+                        const date = t.date || 'Past';
+                        const statusBadge = t.status === 'CANCELLED' 
+                            ? `<span class="badge" style="background:#fee2e2; color:#b91c1c;">CANCELLED</span>`
+                            : `<span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;">${t.status === 'BOARDED' ? 'BOARDED &bull; COMPLETED' : (t.status || 'COMPLETED')}</span>`;
+
+                        return `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; background:#f8fafc; border-radius:10px; border:1px solid var(--border); margin-bottom:8px;">
                                 <div>
-                                    <span style="font-weight:700; font-size:0.88rem; color:#1e293b;">${t.from} &rarr; ${t.to}</span>
-                                    <span style="font-size:0.78rem; color:var(--text-muted); margin-left:8px;">${date} (${t.reference})</span>
+                                    <span style="font-weight:700; font-size:0.9rem; color:#1e293b;">${t.from} &rarr; ${t.to}</span>
+                                    <span style="font-size:0.78rem; color:var(--text-muted); margin-left:8px;">${date} &middot; Ref: ${t.reference}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:12px;">
-                                    <span style="font-weight:700; font-size:0.85rem; color:#0f172a;">${total}</span>
-                                    <span class="badge" style="${statusColor} font-size:0.72rem;">${t.status || 'COMPLETED'}</span>
+                                    <span style="font-weight:700; font-size:0.86rem; color:#0f172a;">${total}</span>
+                                    ${statusBadge}
                                 </div>
                             </div>
                         `;
                     }).join('');
                 }
+            }
+        }
+
+        function toggleArchiveTickets() {
+            const wrap = document.getElementById('archiveTicketsWrap');
+            const btn = document.getElementById('btnToggleArchive');
+            if (!wrap) return;
+            if (wrap.style.display === 'none' || !wrap.style.display) {
+                wrap.style.display = 'block';
+                if (btn) btn.textContent = 'Hide History';
+            } else {
+                wrap.style.display = 'none';
+                if (btn) btn.textContent = 'Show History';
+            }
+        }
+
+        // Payment Methods Management
+        function openPaymentMethodsModal() {
+            document.getElementById('paymentMethodsModal').classList.add('open');
+            resetCardForm();
+            loadPaymentMethods();
+        }
+
+        function closePaymentMethodsModal() {
+            document.getElementById('paymentMethodsModal').classList.remove('open');
+            resetCardForm();
+        }
+
+        function resetCardForm() {
+            document.getElementById('paymentCardForm').reset();
+            document.getElementById('cardEditId').value = '';
+            document.getElementById('cardFormTitle').textContent = 'Add New Payment Card';
+            document.getElementById('btnSaveCardLabel').textContent = 'Save Payment Card';
+            document.getElementById('btnCancelEditCard').style.display = 'none';
+            document.getElementById('cardNumberGroup').style.display = 'block';
+            document.getElementById('cardCvvGroup').style.display = 'block';
+            document.getElementById('cardBrandBadge').textContent = 'VISA / MC';
+        }
+
+        function fillDemoPaymentCard() {
+            document.getElementById('cardholderName').value = (getUser()?.fullName || 'DOHAN IMANJITH').toUpperCase();
+            document.getElementById('cardNumber').value = '4532 0151 1283 0366';
+            document.getElementById('cardExpiry').value = '12/28';
+            document.getElementById('cardCvv').value = '389';
+            document.getElementById('cardBrandBadge').textContent = 'VISA';
+            document.getElementById('cardMakeDefault').checked = true;
+        }
+
+        function formatCardNumberInput(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 16);
+            let formatted = '';
+            for (let i = 0; i < val.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += val[i];
+            }
+            input.value = formatted;
+            
+            const badge = document.getElementById('cardBrandBadge');
+            if (val.startsWith('4')) {
+                badge.textContent = 'VISA';
+            } else if (val.startsWith('5') || (val.length >= 2 && Number(val.substring(0,2)) >= 51 && Number(val.substring(0,2)) <= 55)) {
+                badge.textContent = 'MASTERCARD';
+            } else {
+                badge.textContent = 'VISA / MC';
+            }
+        }
+
+        function formatExpiryInput(input) {
+            let val = input.value.replace(/\D/g, '').substring(0, 4);
+            if (val.length >= 3) {
+                input.value = val.substring(0, 2) + '/' + val.substring(2);
+            } else {
+                input.value = val;
+            }
+        }
+
+        async function loadPaymentMethods() {
+            const listEl = document.getElementById('savedCardsList');
+            if (!listEl) return;
+            listEl.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:14px 0;">Loading payment cards...</p>';
+
+            try {
+                const res = await fetch('/api/v1/payments/cards', { headers: authHeaders() });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        renderPaymentCards(json.data);
+                        return;
+                    }
+                }
+            } catch(e) {}
+
+            const localCards = JSON.parse(localStorage.getItem('catchbus_saved_cards') || '[]');
+            renderPaymentCards(localCards);
+        }
+
+        function renderPaymentCards(cards) {
+            const listEl = document.getElementById('savedCardsList');
+            if (!listEl) return;
+
+            if (!cards || cards.length === 0) {
+                listEl.innerHTML = `
+                    <div style="text-align:center; padding:18px 12px; background:#f8fafc; border-radius:10px; border:1px dashed var(--border);">
+                        <p style="font-size:0.84rem; color:var(--text-muted); margin:0;">No saved payment cards yet. Add your card below for fast checkout.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = cards.map(c => {
+                const cardId = c.cardId || c.id;
+                const brand = c.cardBrand || 'VISA';
+                const lastFour = c.lastFour || '••••';
+                const holder = c.cardholderName || 'CARDHOLDER';
+                const exp = c.expiry || 'MM/YY';
+                const isDefault = Boolean(c.isDefault);
+
+                return `
+                    <div class="payment-card-item ${isDefault ? 'is-default' : ''}">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:40px; height:28px; border-radius:6px; background:#0f172a; color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; letter-spacing:0.5px;">
+                                ${brand === 'MASTERCARD' ? 'MC' : 'VISA'}
+                            </div>
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-family:'Space Grotesk', monospace; font-size:0.92rem; font-weight:700; color:#0f172a;">•••• •••• •••• ${lastFour}</span>
+                                    ${isDefault ? '<span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.68rem; padding:1px 6px;">DEFAULT</span>' : ''}
+                                </div>
+                                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${holder} &bull; Exp: ${exp}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            ${!isDefault ? `<button type="button" class="btn btn-outline btn-sm" onclick="setDefaultPaymentCard(${cardId}, '${escStr(holder)}', '${exp}')" style="font-size:0.72rem; padding:3px 7px;" title="Set as default card">Set Default</button>` : ''}
+                            <button type="button" class="btn-icon-sm btn-icon-edit" onclick="editPaymentCard(${cardId}, '${escStr(holder)}', '${exp}', ${isDefault})" title="Edit Card" style="padding:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                            <button type="button" class="btn-icon-sm btn-icon-delete" onclick="deletePaymentCard(${cardId})" title="Delete Card" style="padding:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editPaymentCard(cardId, holder, expiry, isDefault) {
+            document.getElementById('cardEditId').value = cardId;
+            document.getElementById('cardholderName').value = holder;
+            document.getElementById('cardExpiry').value = expiry;
+            document.getElementById('cardMakeDefault').checked = isDefault;
+            document.getElementById('cardNumberGroup').style.display = 'none';
+            document.getElementById('cardCvvGroup').style.display = 'none';
+            document.getElementById('cardFormTitle').textContent = 'Edit Saved Payment Card';
+            document.getElementById('btnSaveCardLabel').textContent = 'Update Payment Card';
+            document.getElementById('btnCancelEditCard').style.display = 'inline-block';
+        }
+
+        async function handleSavePaymentCard(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSaveCard');
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+
+            const cardId = document.getElementById('cardEditId').value;
+            const holder = document.getElementById('cardholderName').value.trim();
+            const exp = document.getElementById('cardExpiry').value.trim();
+            const isDef = document.getElementById('cardMakeDefault').checked;
+
+            try {
+                if (cardId) {
+                    const res = await fetch(`/api/v1/payments/cards/${cardId}`, {
+                        method: 'PUT',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ cardholderName: holder, expiry: exp, makeDefault: isDef })
+                    });
+                    const json = await res.json();
+                    if (res.ok && json.success) {
+                        showToast('Payment card updated successfully!', 'success');
+                        resetCardForm();
+                        await loadPaymentMethods();
+                    } else {
+                        showToast(json.message || 'Failed to update card', 'error');
+                    }
+                } else {
+                    const num = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+                    const res = await fetch('/api/v1/payments/cards', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ cardholderName: holder, cardNumber: num, expiry: exp, makeDefault: isDef })
+                    });
+                    const json = await res.json();
+                    if (res.ok && json.success) {
+                        showToast('Payment card saved securely!', 'success');
+                        resetCardForm();
+                        await loadPaymentMethods();
+                    } else {
+                        showToast(json.message || 'Failed to save card. Check card number format.', 'error');
+                    }
+                }
+            } catch(e) {
+                showToast('Network error saving payment method.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }
+
+        async function deletePaymentCard(cardId) {
+            if (!confirm('Are you sure you want to remove this payment method?')) return;
+            try {
+                const res = await fetch(`/api/v1/payments/cards/${cardId}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast('Payment card removed.', 'success');
+                    await loadPaymentMethods();
+                } else {
+                    showToast(json.message || 'Failed to delete card', 'error');
+                }
+            } catch(e) {
+                showToast('Error removing payment card.', 'error');
+            }
+        }
+
+        async function setDefaultPaymentCard(cardId, holder, exp) {
+            try {
+                const res = await fetch(`/api/v1/payments/cards/${cardId}`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ cardholderName: holder, expiry: exp, makeDefault: true })
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast('Default payment method updated.', 'success');
+                    await loadPaymentMethods();
+                } else {
+                    showToast(json.message || 'Failed to set default', 'error');
+                }
+            } catch(e) {
+                showToast('Error setting default payment card.', 'error');
             }
         }
 
@@ -1346,7 +2472,10 @@
                 if (res.ok && json.success) {
                     showToast(`Booking ${ref} cancelled successfully.`, 'success');
                     const user = getUser();
-                    if (user) loadUserTickets(user.email);
+                    if (user) {
+                        loadUserTickets(user.email);
+                        loadTicketsTab();
+                    }
                 } else {
                     showToast(json.message || 'Failed to cancel booking', 'error');
                 }
@@ -1460,6 +2589,11 @@
         function handleLogout() {
             clearSession();
             refreshSessionUi();
+            if (typeof setupNav === 'function') {
+                setupNav();
+            }
+            window.dispatchEvent(new Event('auth-change'));
+            history.replaceState(null, '', 'admin.html?tab=signin');
             showToast('Signed out successfully.', 'info');
             switchTab('signin');
         }
@@ -1667,7 +2801,7 @@
                 deleteTargetId = null;
             }
         }
-        ['addModal','editModal','deleteModal','boardingPassModal'].forEach(id => {
+        ['addModal','editModal','deleteModal','boardingPassModal','paymentMethodsModal'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 el.addEventListener('click', function(e) {
@@ -1682,27 +2816,39 @@
             const tabParam = params.get('tab');
             const user = getUser();
             const token = getToken();
+            const isAuthenticated = Boolean(user && token);
 
-            if (tabParam === 'register') {
-                switchTab('register');
+            if (tabParam === 'tickets') {
+                window.location.href = 'tickets.html';
+                return;
+            } else if (tabParam === 'register') {
+                if (isAuthenticated) {
+                    switchTab(user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER' ? 'portal' : 'profile');
+                } else {
+                    switchTab('register');
+                }
             } else if (tabParam === 'signin') {
-                switchTab('signin');
+                if (isAuthenticated) {
+                    switchTab(user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER' ? 'portal' : 'profile');
+                } else {
+                    switchTab('signin');
+                }
             } else if (tabParam === 'profile') {
-                if (user && token) {
+                if (isAuthenticated) {
                     switchTab('profile');
                 } else {
                     switchTab('signin');
                 }
             } else if (tabParam === 'portal') {
-                if (user && token && (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER')) {
+                if (isAuthenticated && (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER')) {
                     switchTab('portal');
                 } else {
                     showToast('Portal access is restricted to Administrators and Crew.', 'error');
                     switchTab('signin');
                 }
             } else {
-                if (user && token) {
-                    if (user.role === 'ADMIN') switchTab('portal');
+                if (isAuthenticated) {
+                    if (user.role === 'ADMIN' || user.role === 'CONDUCTOR' || user.role === 'DRIVER') switchTab('portal');
                     else switchTab('profile');
                 } else {
                     switchTab('signin');
