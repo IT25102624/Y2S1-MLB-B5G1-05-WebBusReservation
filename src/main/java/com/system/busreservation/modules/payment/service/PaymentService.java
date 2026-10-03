@@ -17,11 +17,17 @@ import com.system.busreservation.model.enums.BookingStatus;
 import com.system.busreservation.model.enums.UserRole;
 import com.system.busreservation.modules.auth.repository.UserRepository;
 import com.system.busreservation.modules.booking.repository.BookingRepository;
+import com.system.busreservation.modules.booking.event.BookingConfirmedEvent;
 import com.system.busreservation.modules.booking.repository.BookingSeatRepository;
 import com.system.busreservation.modules.payment.dto.PaymentRequest;
+import com.system.busreservation.modules.payment.strategy.PaymentContext;
+import com.system.busreservation.modules.payment.strategy.PaymentExecutionResult;
+import com.system.busreservation.modules.payment.strategy.PaymentMethodStrategy;
+import com.system.busreservation.modules.payment.strategy.PaymentStrategyFactory;
 import com.system.busreservation.modules.search.repository.TripRepository;
 import com.system.busreservation.modules.seat.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +39,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -56,6 +63,8 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbc;
+    private final PaymentStrategyFactory paymentStrategyFactory;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Map<String, Object> process(PaymentRequest request, String authenticatedEmail) {
@@ -63,17 +72,14 @@ public class PaymentService {
             throw new IllegalArgumentException("Accept the payment and refund terms before continuing.");
         }
         Map<String, Object> selectedCard = null;
-        String cardNumber = request.cardNumber() == null ? "" : request.cardNumber().replaceAll("\\s+", "");
         if (request.savedCardId() != null) {
             if (authenticatedEmail == null) throw new IllegalArgumentException("Sign in to use a saved card.");
             selectedCard = savedCard(request.savedCardId(), authenticatedEmail);
-            validateExpiry((String) selectedCard.get("expiry"));
-            if (!List.of("VISA", "MASTERCARD").contains(String.valueOf(selectedCard.get("cardBrand")))) {
-                throw new IllegalArgumentException("Only Visa and Mastercard are accepted.");
-            }
-        } else {
-            validateCard(cardNumber, request.expiry());
         }
+
+        // 1. Strategy Pattern: Resolve appropriate payment method strategy
+        PaymentMethodStrategy paymentStrategy = paymentStrategyFactory.getStrategy(request.paymentMethod());
+
         Trip trip = tripRepository.findByIdWithDetails(request.tripId())
                 .orElseThrow(() -> new ResourceNotFoundException("Trip", "id", request.tripId()));
         List<Long> distinctSeatIds = request.seatIds().stream().distinct().toList();
@@ -106,12 +112,27 @@ public class PaymentService {
 
         String transactionReference = "PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
         String ticketToken = UUID.randomUUID().toString();
+
+        // 2. Strategy Pattern: Delegate payment processing to the resolved strategy
+        PaymentContext paymentContext = PaymentContext.builder()
+                .request(request)
+                .totalAmount(total)
+                .bookingId(booking.getBookingId())
+                .authenticatedEmail(authenticatedEmail)
+                .transactionReference(transactionReference)
+                .selectedCard(selectedCard)
+                .build();
+        PaymentExecutionResult paymentResult = paymentStrategy.processPayment(paymentContext);
+
         jdbc.update("""
                 INSERT INTO payments(booking_id,transaction_reference,card_brand,card_last_four,amount,payment_status,paid_at)
-                VALUES(?,?,?,?,?,'SUCCESS',SYSUTCDATETIME())
+                VALUES(?,?,?,?,?,?,SYSUTCDATETIME())
                 """, booking.getBookingId(), transactionReference,
-                selectedCard == null ? cardBrand(cardNumber) : selectedCard.get("cardBrand"),
-                selectedCard == null ? cardNumber.substring(cardNumber.length() - 4) : selectedCard.get("lastFour"), total);
+                paymentResult.getCardBrand(),
+                paymentResult.getCardLastFour(),
+                total,
+                paymentResult.getPaymentStatus());
+
         jdbc.update("""
                 INSERT INTO tickets(booking_id,ticket_token,qr_payload,passenger_name,passenger_email,passenger_phone,
                                     boarding_point,destination_point,verification_status,issued_at)
@@ -123,10 +144,25 @@ public class PaymentService {
                 refundProtection, booking.getBookingId());
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         bookingRepository.saveAndFlush(booking);
-        notifyUser(passenger.getUserId(), booking.getBookingId(), "PAYMENT_SUCCESS", "Payment successful",
-                "Payment received for booking #" + booking.getBookingId() + ". Your QR ticket is ready to download.");
 
-        if (Boolean.TRUE.equals(request.saveCard()) && selectedCard == null) {
+        // 3. Observer Pattern: Broadcast booking confirmed event to all subscribed listeners
+        eventPublisher.publishEvent(BookingConfirmedEvent.builder()
+                .bookingId(booking.getBookingId())
+                .userId(passenger.getUserId())
+                .passengerName(request.passengerName().trim())
+                .passengerEmail(cleanEmail(request.email()))
+                .passengerPhone(request.phoneNumber().trim())
+                .ticketToken(ticketToken)
+                .boardingPoint(request.boardingPoint().trim())
+                .destinationPoint(request.destinationPoint().trim())
+                .totalAmount(total)
+                .paymentMethod(paymentStrategy.getDisplayName())
+                .transactionReference(transactionReference)
+                .confirmedAt(Instant.now())
+                .build());
+
+        String cardNumber = request.cardNumber() == null ? "" : request.cardNumber().replaceAll("\\s+", "");
+        if (Boolean.TRUE.equals(request.saveCard()) && selectedCard == null && !cardNumber.isBlank()) {
             if (authenticatedEmail == null) throw new IllegalArgumentException("Sign in before saving a payment card.");
             saveCard(authenticatedEmail, request.cardholderName(), cardNumber, request.expiry(), true);
         }
