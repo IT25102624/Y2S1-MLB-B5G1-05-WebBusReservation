@@ -114,6 +114,23 @@ public class StaffController {
 
     public record AssignCrewRequest(Long tripId, Long driverUserId, Long conductorUserId) {}
 
+    public record AssignRecurringCrewRequest(
+            Long routeId,
+            Long busId,
+            String departureTimeStr,
+            String fromDate,
+            String toDate,
+            Boolean overwriteExisting,
+            Long driverUserId,
+            Long conductorUserId
+    ) {}
+
+    public record AssignBatchCrewRequest(
+            List<Long> tripIds,
+            Long driverUserId,
+            Long conductorUserId
+    ) {}
+
     @PostMapping({"/crew-assign", "/admin/crew-assignments"})
     public ResponseEntity<ApiResponse<Map<String, Object>>> assignCrew(
             Authentication authentication,
@@ -126,6 +143,59 @@ public class StaffController {
         staffService.assignCrew(request.tripId(), request.driverUserId(), request.conductorUserId(), resolvedAdminId);
         return ResponseEntity.ok(ApiResponse.success("Crew assigned successfully to Trip #" + request.tripId(),
                 Map.of("tripId", request.tripId(), "assigned", true)));
+    }
+
+    @PostMapping({"/crew-assign-recurring", "/admin/crew-assignments-recurring"})
+    public ResponseEntity<ApiResponse<Map<String, Object>>> assignRecurringCrew(
+            Authentication authentication,
+            @RequestParam(required = false) Long adminUserId,
+            @RequestBody AssignRecurringCrewRequest request) {
+
+        long resolvedAdminId = resolveUserId(authentication, adminUserId);
+        log.info("Administrator ID {} assigning recurring crew: route={}, bus={}, time={}, driver={}, conductor={}",
+                resolvedAdminId, request.routeId(), request.busId(), request.departureTimeStr(),
+                request.driverUserId(), request.conductorUserId());
+
+        Map<String, Object> result = staffService.assignRecurringCrew(
+                request.routeId(),
+                request.busId(),
+                request.departureTimeStr(),
+                request.fromDate(),
+                request.toDate(),
+                request.overwriteExisting(),
+                request.driverUserId(),
+                request.conductorUserId(),
+                resolvedAdminId
+        );
+
+        int count = ((Number) result.getOrDefault("assignedCount", 0)).intValue();
+        return ResponseEntity.ok(ApiResponse.success(
+                String.format("Recurring crew assignment applied successfully (%d trips updated)", count),
+                result));
+    }
+
+    @PostMapping({"/crew-assign-batch", "/admin/crew-assignments-batch"})
+    public ResponseEntity<ApiResponse<Map<String, Object>>> assignBatchCrew(
+            Authentication authentication,
+            @RequestParam(required = false) Long adminUserId,
+            @RequestBody AssignBatchCrewRequest request) {
+
+        long resolvedAdminId = resolveUserId(authentication, adminUserId);
+        log.info("Administrator ID {} batch assigning crew to {} trips: driver={}, conductor={}",
+                resolvedAdminId, request.tripIds() != null ? request.tripIds().size() : 0,
+                request.driverUserId(), request.conductorUserId());
+
+        Map<String, Object> result = staffService.assignBatchCrew(
+                request.tripIds(),
+                request.driverUserId(),
+                request.conductorUserId(),
+                resolvedAdminId
+        );
+
+        int count = ((Number) result.getOrDefault("assignedCount", 0)).intValue();
+        return ResponseEntity.ok(ApiResponse.success(
+                String.format("Batch crew assignment applied successfully (%d trips updated)", count),
+                result));
     }
 
     private long resolveUserId(Authentication authentication, Long explicitId) {

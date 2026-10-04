@@ -232,6 +232,12 @@
             color: var(--text-muted);
         }
         .modal-close:hover { color: var(--text-main); }
+        #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { padding: 12px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; max-width: 340px; animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .toast-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .toast-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .toast-info { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
     </style>
 </head>
 <body>
@@ -294,6 +300,10 @@
                     <p class="section-sub">Real-time boarding terminal bays, departure countdowns, and verified seat reservations</p>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <a href="admin.html?tab=profile" class="btn btn-outline btn-sm" style="display:inline-flex; align-items:center; gap:6px; border-color:var(--primary); color:var(--primary-dark); font-weight:700;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Manage Payment Cards
+                    </a>
                     <button class="btn btn-outline btn-sm" onclick="loadTicketsTab()" style="display:inline-flex; align-items:center; gap:6px;">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                         Refresh
@@ -366,6 +376,61 @@
                 <button class="btn btn-outline" onclick="window.print()">Print Pass</button>
                 <button class="btn btn-outline" onclick="closeBoardingPassModal()">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modify Booking Details Modal (Teammate 3 CRUD: Update Operation) -->
+    <div class="modal-overlay" id="modifyBookingModal">
+        <div class="modal" style="max-width:480px;">
+            <button class="modal-close" onclick="closeModifyBookingModal()">&times;</button>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <div style="width:42px; height:42px; border-radius:10px; background:#ecfdf5; color:#059669; display:flex; align-items:center; justify-content:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <div>
+                    <h3 class="modal-title" style="margin:0; font-size:1.15rem; font-weight:800; color:#0f172a;">Modify Booking Details</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin:0;" id="modifyModalRefSubtitle">Booking Reference: CB000000</p>
+                </div>
+            </div>
+
+            <form id="modifyBookingForm" onsubmit="handleModifyBookingSubmit(event)">
+                <input type="hidden" id="modifyBookingRef" />
+                
+                <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px; font-size:0.85rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Corridor:</span>
+                        <strong id="modifyModalRoute" style="color:#0f172a;">Colombo &rarr; Kandy</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <span style="color:var(--text-muted);">Departure:</span>
+                        <span id="modifyModalDate" style="color:#0f172a; font-weight:600;">2026-10-05 08:30</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Allocated Seats:</span>
+                        <strong id="modifyModalSeats" style="color:var(--primary);">S12</strong>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Passenger Full Name</label>
+                    <input type="text" id="modifyPassengerName" class="form-control" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Contact Mobile Number</label>
+                    <input type="text" id="modifyPassengerPhone" class="form-control" placeholder="077xxxxxxx" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label style="font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Special Travel / Boarding Note (Optional)</label>
+                    <input type="text" id="modifySpecialNotes" class="form-control" placeholder="e.g. Extra assistance, near front, window preference" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <div style="display:flex; gap:10px; justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeModifyBookingModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveBookingMod">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -665,10 +730,17 @@
                             </div>
                         </div>
 
-                        <div class="ticket-hero-actions">
+                        <div class="ticket-hero-actions" style="flex-wrap:wrap;">
                             <button type="button" class="btn btn-primary" onclick="openBoardingPassModal('${escapeHtml(earliest.reference || 'CB000000')}', '${escapeHtml(fromCity)} &rarr; ${escapeHtml(toCity)}', '${escapeHtml(seatsString)}')" style="font-size:0.9rem; padding:10px 20px; font-weight:700;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 View Digital QR Boarding Pass
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="openModifyBookingModal('${escapeHtml(earliest.reference || 'CB000000')}')" style="border-color:rgba(255,255,255,0.35); color:#ffffff; font-size:0.9rem; padding:10px 18px; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Modify Contact / Details
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="cancelUserBooking('${escapeHtml(earliest.reference || 'CB000000')}')" style="font-size:0.9rem; padding:10px 16px; background:rgba(239, 68, 68, 0.25); border:1px solid #ef4444; color:#fca5a5;">
+                                Cancel Booking
                             </button>
                             <a href="search.html" class="btn btn-outline" style="border-color:rgba(255,255,255,0.25); color:#ffffff; font-size:0.9rem; padding:10px 18px;">
                                 Find Return Schedule &rarr;
@@ -699,10 +771,16 @@
                                             <span>Seats: ${bSeatsHtml}</span>
                                         </div>
                                     </div>
-                                    <div style="display:flex; gap:8px; align-items:center;">
+                                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                                         <span class="badge badge-success">Yet to Board</span>
                                         <button type="button" class="btn btn-outline btn-sm" onclick="openBoardingPassModal('${escapeHtml(b.reference || 'CB000000')}', '${escapeHtml(b.from || 'Colombo')} &rarr; ${escapeHtml(b.to || 'Destination')}', '${escapeHtml(bSeatsString)}')">
                                              QR Pass
+                                        </button>
+                                        <button type="button" class="btn btn-outline btn-sm" onclick="openModifyBookingModal('${escapeHtml(b.reference || 'CB000000')}')">
+                                             Modify
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="cancelUserBooking('${escapeHtml(b.reference || 'CB000000')}')" style="background:transparent; border-color:#ef4444; color:#ef4444;">
+                                             Cancel
                                         </button>
                                     </div>
                                 </div>
@@ -779,6 +857,96 @@
 
         function closeBoardingPassModal() {
             document.getElementById('boardingPassModal').classList.remove('active');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function openModifyBookingModal(ref) {
+            const b = userBookingsCache.find(x => x.reference === ref || String(x.bookingId) === String(ref)) || {};
+            document.getElementById('modifyBookingRef').value = ref;
+            document.getElementById('modifyModalRefSubtitle').textContent = `Booking Reference: ${ref}`;
+            document.getElementById('modifyModalRoute').textContent = `${b.from || 'Colombo'} → ${b.to || 'Kandy'}`;
+            document.getElementById('modifyModalDate').textContent = `${b.date || 'Upcoming'} ${b.time || '08:00'}`;
+            document.getElementById('modifyModalSeats').textContent = Array.isArray(b.seats) ? b.seats.join(', ') : (b.seats || 'S12');
+
+            const pass = b.passenger || {};
+            const user = getUser() || {};
+            document.getElementById('modifyPassengerName').value = pass.name || user.fullName || '';
+            document.getElementById('modifyPassengerPhone').value = pass.phone || user.phone || '0770000000';
+            document.getElementById('modifySpecialNotes').value = b.notes || '';
+
+            document.getElementById('modifyBookingModal').classList.add('active');
+        }
+
+        function closeModifyBookingModal() {
+            document.getElementById('modifyBookingModal').classList.remove('active');
+        }
+
+        async function handleModifyBookingSubmit(e) {
+            e.preventDefault();
+            const ref = document.getElementById('modifyBookingRef').value;
+            const name = document.getElementById('modifyPassengerName').value.trim();
+            const phone = document.getElementById('modifyPassengerPhone').value.trim();
+            const notes = document.getElementById('modifySpecialNotes').value.trim();
+            const btn = document.getElementById('btnSaveBookingMod');
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const res = await fetch(`/api/v1/bookings/${encodeURIComponent(ref)}`, {
+                    method: 'PUT',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ passengerName: name, passengerPhone: phone, notes: notes })
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast('Booking details updated successfully!', 'success');
+                    closeModifyBookingModal();
+                    await loadTicketsTab();
+                } else {
+                    showToast(json.message || 'Failed to update booking.', 'error');
+                }
+            } catch (err) {
+                showToast('Error updating booking details.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        }
+
+        async function cancelUserBooking(ref) {
+            if (!confirm(`Are you sure you want to cancel booking ${ref}? Your reserved seats will be released.`)) {
+                return;
+            }
+            try {
+                const res = await fetch(`/api/v1/bookings/${encodeURIComponent(ref)}`, {
+                    method: 'DELETE',
+                    headers: authHeaders()
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(`Booking ${ref} has been cancelled.`, 'success');
+                    const localBooking = JSON.parse(localStorage.getItem('catchbuslk-last-booking') || 'null');
+                    if (localBooking && localBooking.reference === ref) {
+                        localBooking.status = 'CANCELLED';
+                        localStorage.setItem('catchbuslk-last-booking', JSON.stringify(localBooking));
+                    }
+                    await loadTicketsTab();
+                } else {
+                    showToast(json.message || 'Failed to cancel booking.', 'error');
+                }
+            } catch (err) {
+                showToast('Error cancelling booking.', 'error');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

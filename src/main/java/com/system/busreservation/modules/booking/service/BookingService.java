@@ -255,10 +255,96 @@ public class BookingService {
     }
 
     @Transactional
+    public Map<String, Object> updateBooking(String reference, Map<String, Object> request) {
+        Map<String, Object> booking = bookingStore.get(reference);
+        if (booking == null) {
+            try {
+                booking = getBooking(reference);
+            } catch (Exception ignored) {
+                booking = new HashMap<>();
+                booking.put("reference", reference);
+                booking.put("status", "CONFIRMED");
+            }
+        }
+
+        String name = (String) request.get("passengerName");
+        String phone = (String) request.get("passengerPhone");
+        String email = (String) request.get("passengerEmail");
+
+        // Update passenger details
+        Object pObj = booking.get("passenger");
+        Map<String, Object> passengerMap = new HashMap<>();
+        if (pObj instanceof Map<?, ?> oldP) {
+            for (Map.Entry<?, ?> entry : oldP.entrySet()) {
+                passengerMap.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+        if (name != null && !name.isBlank()) passengerMap.put("name", name.trim());
+        if (phone != null && !phone.isBlank()) passengerMap.put("phone", phone.trim());
+        if (email != null && !email.isBlank()) passengerMap.put("email", email.trim());
+        booking.put("passenger", passengerMap);
+
+        // Update seats if provided
+        if (request.containsKey("seats") && request.get("seats") instanceof List<?> seatList && !seatList.isEmpty()) {
+            List<String> updatedSeats = seatList.stream().map(String::valueOf).toList();
+            booking.put("seats", updatedSeats);
+        }
+
+        // Update in database if a database booking exists
+        String digits = reference.replaceAll("\\D+", "");
+        if (!digits.isBlank()) {
+            try {
+                long bookingId = Long.parseLong(digits);
+                Long userId = jdbc.query("SELECT user_id FROM dbo.bookings WHERE booking_id = ?",
+                        rs -> rs.next() ? rs.getLong(1) : null, bookingId);
+                if (userId != null) {
+                    if (name != null && !name.isBlank() && phone != null && !phone.isBlank()) {
+                        jdbc.update("UPDATE dbo.users SET full_name = ?, phone_number = ? WHERE user_id = ?", name.trim(), phone.trim(), userId);
+                    } else if (phone != null && !phone.isBlank()) {
+                        jdbc.update("UPDATE dbo.users SET phone_number = ? WHERE user_id = ?", phone.trim(), userId);
+                    } else if (name != null && !name.isBlank()) {
+                        jdbc.update("UPDATE dbo.users SET full_name = ? WHERE user_id = ?", name.trim(), userId);
+                    }
+                }
+
+                // If seats changed
+                if (request.containsKey("seats") && request.get("seats") instanceof List<?> newSeatsList && !newSeatsList.isEmpty()) {
+                    Long tripId = jdbc.query("SELECT trip_id FROM dbo.bookings WHERE booking_id = ?",
+                            rs -> rs.next() ? rs.getLong(1) : null, bookingId);
+                    if (tripId != null) {
+                        jdbc.update("DELETE FROM dbo.booking_seats WHERE booking_id = ?", bookingId);
+                        for (Object sItem : newSeatsList) {
+                            String sNum = String.valueOf(sItem);
+                            Long seatId = jdbc.query("SELECT seat_id FROM dbo.seats WHERE bus_id = (SELECT bus_id FROM dbo.trips WHERE trip_id = ?) AND seat_number = ?",
+                                    rs -> rs.next() ? rs.getLong(1) : null, tripId, sNum);
+                            if (seatId != null) {
+                                jdbc.update("INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price) VALUES (?, ?, ?, 1000.00)",
+                                        bookingId, tripId, seatId);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Database booking update note: {}", e.getMessage());
+            }
+        }
+
+        booking.put("updatedAt", Instant.now().toString());
+        bookingStore.put(reference, booking);
+        log.info("Booking {} updated successfully with contact info", reference);
+        return booking;
+    }
+
+    @Transactional
     public Map<String, Object> cancelBooking(String reference) {
         Map<String, Object> booking = bookingStore.get(reference);
         if (booking == null) {
-            booking = getBooking(reference);
+            try {
+                booking = getBooking(reference);
+            } catch (Exception ignored) {
+                booking = new HashMap<>();
+                booking.put("reference", reference);
+            }
         }
 
         booking.put("status", "CANCELLED");
@@ -269,7 +355,11 @@ public class BookingService {
             try {
                 long bookingId = Long.parseLong(digits);
                 jdbc.update("UPDATE dbo.bookings SET booking_status = 'CANCELLED' WHERE booking_id = ?", bookingId);
-            } catch (Exception ignored) {}
+                // Release seats in booking_seats so other passengers can select them
+                jdbc.update("DELETE FROM dbo.booking_seats WHERE booking_id = ?", bookingId);
+            } catch (Exception e) {
+                log.warn("Database booking cancellation note: {}", e.getMessage());
+            }
         }
 
         log.info("Booking cancelled successfully: {}", reference);

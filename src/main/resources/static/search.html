@@ -569,6 +569,157 @@
             border-color: var(--primary);
         }
 
+        /* Crew Dispatch & Duty Roster Styles */
+        .crew-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .crew-kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .crew-kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .crew-kpi-val {
+            font-size: 1.55rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 1.1;
+            color: #0f172a;
+        }
+        .crew-kpi-lbl {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+        .view-mode-toggle {
+            display: inline-flex;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            gap: 4px;
+        }
+        .view-mode-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-mode-btn.active {
+            background: #ffffff;
+            color: var(--primary-dark);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            font-weight: 700;
+        }
+        .corridor-group-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px;
+            margin-bottom: 18px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .corridor-group-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+        }
+        .corridor-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .corridor-title-group h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .corridor-sub {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .crew-roster-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+        }
+        .crew-member-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .crew-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        .crew-info-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+        }
+        .crew-info-sub {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .batch-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            padding: 10px 18px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
         @media (max-width: 768px) {
             .trip-card { grid-template-columns: 1fr; gap: 12px; }
             .time-route { justify-content: space-between; }
@@ -1313,8 +1464,12 @@
             }
         }
 
-        // --- Operator Tab Switching (Routes vs Schedules) ---
+        // --- Operator Tab Switching (Routes vs Schedules vs Buses) ---
         function switchAdminTab(tab) {
+            if (tab === 'crew') {
+                window.location.href = 'crew-dispatch.html';
+                return;
+            }
             const tabBtnRoutes = document.getElementById('tabBtnRoutes');
             const tabBtnSchedules = document.getElementById('tabBtnSchedules');
             const tabBtnBuses = document.getElementById('tabBtnBuses');
@@ -1322,24 +1477,24 @@
             const tabContentSchedules = document.getElementById('tabContentSchedules');
             const tabContentBuses = document.getElementById('tabContentBuses');
 
-            tabBtnRoutes.classList.remove('active');
-            tabBtnSchedules.classList.remove('active');
-            tabBtnBuses.classList.remove('active');
-            tabContentRoutes.style.display = 'none';
-            tabContentSchedules.style.display = 'none';
-            tabContentBuses.style.display = 'none';
+            if (tabBtnRoutes) tabBtnRoutes.classList.remove('active');
+            if (tabBtnSchedules) tabBtnSchedules.classList.remove('active');
+            if (tabBtnBuses) tabBtnBuses.classList.remove('active');
+            if (tabContentRoutes) tabContentRoutes.style.display = 'none';
+            if (tabContentSchedules) tabContentSchedules.style.display = 'none';
+            if (tabContentBuses) tabContentBuses.style.display = 'none';
 
             if (tab === 'routes') {
-                tabBtnRoutes.classList.add('active');
-                tabContentRoutes.style.display = 'block';
+                if (tabBtnRoutes) tabBtnRoutes.classList.add('active');
+                if (tabContentRoutes) tabContentRoutes.style.display = 'block';
                 loadRoutesTable();
             } else if (tab === 'schedules') {
-                tabBtnSchedules.classList.add('active');
-                tabContentSchedules.style.display = 'block';
+                if (tabBtnSchedules) tabBtnSchedules.classList.add('active');
+                if (tabContentSchedules) tabContentSchedules.style.display = 'block';
                 loadSchedulesTable();
             } else if (tab === 'buses') {
-                tabBtnBuses.classList.add('active');
-                tabContentBuses.style.display = 'block';
+                if (tabBtnBuses) tabBtnBuses.classList.add('active');
+                if (tabContentBuses) tabContentBuses.style.display = 'block';
                 loadBusesTable();
             }
         }
@@ -2306,9 +2461,19 @@
         // Initial loading on page open with role-based checks
         updateNavbarAuth();
         const urlMode = new URLSearchParams(window.location.search).get('mode');
+        const urlTab = new URLSearchParams(window.location.search).get('tab');
         if (urlMode === 'operator') {
             if (isAdminUser()) {
-                switchMode('operator');
+                if (urlTab === 'crew') {
+                    window.location.replace('crew-dispatch.html');
+                } else {
+                    switchMode('operator');
+                    if (urlTab === 'schedules') {
+                        switchAdminTab('schedules');
+                    } else if (urlTab === 'buses') {
+                        switchAdminTab('buses');
+                    }
+                }
             } else {
                 showToast('Operator Mode is restricted to Administrators only. Showing Passenger View.', 'error');
                 switchMode('passenger');

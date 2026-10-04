@@ -108,6 +108,12 @@ public class FleetServiceImpl implements FleetService {
                 );
 
         return new FleetResponse(
+                bus.getBusId(),
+                bus.getBusNumber(),
+                bus.getOperatorName(),
+                bus.getBusType(),
+                bus.getTotalSeats(),
+                upcomingTrips
         );
     }
 }

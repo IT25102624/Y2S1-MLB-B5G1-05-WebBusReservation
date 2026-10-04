@@ -149,4 +149,17 @@ public class StaffService {
     public void assignCrew(long tripId, Long driverUserId, Long conductorUserId, long adminUserId) {
         staffRepository.assignCrew(tripId, driverUserId, conductorUserId, adminUserId);
     }
+
+    @Transactional
+    public Map<String, Object> assignRecurringCrew(Long routeId, Long busId, String departureTimeStr,
+                                                  String fromDate, String toDate, Boolean overwriteExisting,
+                                                  Long driverUserId, Long conductorUserId, long adminUserId) {
+        return staffRepository.assignRecurringCrew(routeId, busId, departureTimeStr, fromDate, toDate,
+                overwriteExisting, driverUserId, conductorUserId, adminUserId);
+    }
+
+    @Transactional
+    public Map<String, Object> assignBatchCrew(List<Long> tripIds, Long driverUserId, Long conductorUserId, long adminUserId) {
+        return staffRepository.assignBatchCrew(tripIds, driverUserId, conductorUserId, adminUserId);
+    }
 }

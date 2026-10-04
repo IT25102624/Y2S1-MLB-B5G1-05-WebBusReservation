@@ -114,25 +114,32 @@ function setupNav(activePage) {
     let extraLinkHtml = '';
     const userRole = user ? String(user.role || '').toUpperCase() : '';
     if (isAdmin) {
-        extraLinkHtml = `<a href="${pfx}customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' ? 'active' : ''}">Customer Care</a>`;
-    } else if (userRole === 'CONDUCTOR') {
-        extraLinkHtml = `<a href="${pfx}conductor.html" id="navLinkConductor" class="${activePage === 'conductor.html' || currentPath.includes('conductor') ? 'active' : ''}">Conductor Console</a>`;
-    } else if (userRole === 'DRIVER') {
-        extraLinkHtml = `<a href="${pfx}driver.html" id="navLinkDriver" class="${activePage === 'driver.html' || currentPath.includes('driver') ? 'active' : ''}">Driver Console</a>`;
-    } else if (isAuthenticated && userRole === 'PASSENGER') {
-        extraLinkHtml = `<a href="${pfx}tickets.html" id="navLinkTickets" class="${activePage === 'tickets.html' || currentPath.includes('tickets') ? 'active' : ''}">My Tickets</a>`;
-    } else if (isAuthenticated) {
-        extraLinkHtml = `<a href="${pfx}admin.html?tab=profile" id="navLinkAccount" class="${activePage === 'profile' || currentPath.includes('admin') ? 'active' : ''}">My Account</a>`;
+        navLinks.innerHTML = `
+            <a href="${pfx}search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
+            <a href="${pfx}schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
+            <a href="${pfx}crew-dispatch.html" id="navLinkCrewDispatch" class="${activePage === 'crew-dispatch.html' || currentPath.includes('crew-dispatch') ? 'active' : ''}">Crew Dispatch</a>
+            <a href="${pfx}customer-care.html" id="navLinkCare" class="${activePage === 'customer-care.html' || currentPath.includes('customer-care') ? 'active' : ''}">Customer Care</a>
+        `;
     } else {
-        extraLinkHtml = `<a href="${pfx}direct-booking.html" id="navLinkDirect" class="${activePage === 'direct-booking.html' ? 'active' : ''}">Direct Booking</a>`;
-    }
+        if (userRole === 'CONDUCTOR') {
+            extraLinkHtml = `<a href="${pfx}conductor.html" id="navLinkConductor" class="${activePage === 'conductor.html' || currentPath.includes('conductor') ? 'active' : ''}">Conductor Console</a>`;
+        } else if (userRole === 'DRIVER') {
+            extraLinkHtml = `<a href="${pfx}driver.html" id="navLinkDriver" class="${activePage === 'driver.html' || currentPath.includes('driver') ? 'active' : ''}">Driver Console</a>`;
+        } else if (isAuthenticated && userRole === 'PASSENGER') {
+            extraLinkHtml = `<a href="${pfx}tickets.html" id="navLinkTickets" class="${activePage === 'tickets.html' || currentPath.includes('tickets') ? 'active' : ''}">My Tickets</a>`;
+        } else if (isAuthenticated) {
+            extraLinkHtml = `<a href="${pfx}admin.html?tab=profile" id="navLinkAccount" class="${activePage === 'profile' || currentPath.includes('admin') ? 'active' : ''}">My Account</a>`;
+        } else {
+            extraLinkHtml = `<a href="${pfx}direct-booking.html" id="navLinkDirect" class="${activePage === 'direct-booking.html' ? 'active' : ''}">Direct Booking</a>`;
+        }
 
-    navLinks.innerHTML = `
-        <a href="${pfx}search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
-        <a href="${pfx}schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
-        <a href="${pfx}feedback.html" id="navLinkFeedback" class="${activePage === 'feedback.html' ? 'active' : ''}">Feedback</a>
-        ${extraLinkHtml}
-    `;
+        navLinks.innerHTML = `
+            <a href="${pfx}search.html" id="navLinkSearch" class="${activePage === 'search.html' ? 'active' : ''}">Book a Trip</a>
+            <a href="${pfx}schedule.html" id="navLinkSchedule" class="${activePage === 'schedule.html' ? 'active' : ''}">Timetable</a>
+            <a href="${pfx}feedback.html" id="navLinkFeedback" class="${activePage === 'feedback.html' ? 'active' : ''}">Feedback</a>
+            ${extraLinkHtml}
+        `;
+    }
 
     // 5. Standardize right actions (Bell + Auth)
     let navActions = wrap.querySelector('.nav-actions');

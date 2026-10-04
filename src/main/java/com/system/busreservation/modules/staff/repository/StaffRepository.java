@@ -418,7 +418,7 @@ public class StaffRepository {
     public List<Map<String, Object>> findTripsWithCrew() {
         String sql = """
             SELECT t.trip_id, t.departure_time, t.arrival_time, t.trip_status, t.base_fare,
-                   b.bus_id, b.bus_number, b.operator_name,
+                   b.bus_id, b.bus_number, b.operator_name, b.bus_type,
                    r.route_id, r.source_city, r.destination_city,
                    driverUser.user_id AS driver_id, driverUser.full_name AS driver_name, driverSp.employee_id AS driver_emp_id,
                    conductorUser.user_id AS conductor_id, conductorUser.full_name AS conductor_name, conductorSp.employee_id AS conductor_emp_id
@@ -444,6 +444,7 @@ public class StaffRepository {
             map.put("busId", rs.getLong("bus_id"));
             map.put("busNumber", rs.getString("bus_number"));
             map.put("operatorName", rs.getString("operator_name"));
+            map.put("busType", rs.getString("bus_type"));
             map.put("routeId", rs.getLong("route_id"));
             map.put("sourceCity", rs.getString("source_city"));
             map.put("destinationCity", rs.getString("destination_city"));
@@ -498,5 +499,146 @@ public class StaffRepository {
                 rs -> rs.next() ? rs.getString(1) : "Corridor", tripId);
         saveMessage(adminUserId, "Trip #" + tripId + " Crew Assigned",
                 "Administrator assigned highway crew for Trip #" + tripId + " (" + routeInfo + "). Assigned staff consoles have been updated.", false);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public Map<String, Object> assignRecurringCrew(Long routeId, Long busId, String departureTimeStr,
+                                                  String fromDate, String toDate,
+                                                  Boolean overwriteExisting,
+                                                  Long driverUserId, Long conductorUserId,
+                                                  long adminUserId) {
+        StringBuilder sql = new StringBuilder("""
+            SELECT t.trip_id, t.departure_time, r.source_city, r.destination_city, b.bus_number
+            FROM dbo.trips t
+            JOIN dbo.routes r ON r.route_id = t.route_id
+            JOIN dbo.buses b ON b.bus_id = t.bus_id
+            WHERE t.trip_status != 'CANCELLED'
+            """);
+        List<Object> params = new ArrayList<>();
+
+        if (fromDate != null && !fromDate.isBlank()) {
+            sql.append(" AND t.departure_time >= ?");
+            params.add(java.sql.Timestamp.valueOf(java.time.LocalDate.parse(fromDate.trim()).atStartOfDay()));
+        } else {
+            sql.append(" AND t.departure_time >= DATEADD(day, -1, CAST(GETDATE() AS DATE))");
+        }
+
+        if (toDate != null && !toDate.isBlank()) {
+            sql.append(" AND t.departure_time <= ?");
+            params.add(java.sql.Timestamp.valueOf(java.time.LocalDate.parse(toDate.trim()).atTime(23, 59, 59)));
+        }
+
+        if (routeId != null && routeId > 0) {
+            sql.append(" AND t.route_id = ?");
+            params.add(routeId);
+        }
+
+        if (busId != null && busId > 0) {
+            sql.append(" AND t.bus_id = ?");
+            params.add(busId);
+        }
+
+        List<Map<String, Object>> candidateTrips = jdbc.query(sql.toString(), (rs, rowNum) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("tripId", rs.getLong("trip_id"));
+            java.sql.Timestamp ts = rs.getTimestamp("departure_time");
+            map.put("departureTime", ts != null ? ts.toLocalDateTime() : null);
+            map.put("sourceCity", rs.getString("source_city"));
+            map.put("destinationCity", rs.getString("destination_city"));
+            map.put("busNumber", rs.getString("bus_number"));
+            return map;
+        }, params.toArray());
+
+        String normTime = null;
+        if (departureTimeStr != null && !departureTimeStr.isBlank()) {
+            normTime = departureTimeStr.trim();
+            if (normTime.length() > 5) normTime = normTime.substring(0, 5);
+        }
+
+        List<Long> matchedTripIds = new ArrayList<>();
+        for (Map<String, Object> trip : candidateTrips) {
+            java.time.LocalDateTime dep = (java.time.LocalDateTime) trip.get("departureTime");
+            if (normTime != null && dep != null) {
+                String depTimeStr = String.format("%02d:%02d", dep.getHour(), dep.getMinute());
+                if (!depTimeStr.equals(normTime)) {
+                    continue;
+                }
+            }
+            matchedTripIds.add((Long) trip.get("tripId"));
+        }
+
+        boolean overwrite = (overwriteExisting == null || overwriteExisting);
+        int updatedCount = 0;
+
+        for (Long tripId : matchedTripIds) {
+            boolean assignDrv = (driverUserId != null);
+            boolean assignCon = (conductorUserId != null);
+
+            if (!overwrite) {
+                if (assignDrv && driverUserId > 0) {
+                    Integer drvAssigned = jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM dbo.staff_assignments WHERE trip_id = ? AND role = 'DRIVER' AND active = 1 AND user_id > 0",
+                        Integer.class, tripId);
+                    if (drvAssigned != null && drvAssigned > 0) assignDrv = false;
+                }
+                if (assignCon && conductorUserId > 0) {
+                    Integer conAssigned = jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM dbo.staff_assignments WHERE trip_id = ? AND role = 'CONDUCTOR' AND active = 1 AND user_id > 0",
+                        Integer.class, tripId);
+                    if (conAssigned != null && conAssigned > 0) assignCon = false;
+                }
+            }
+
+            if (assignDrv) {
+                jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'DRIVER'", tripId);
+                if (driverUserId > 0) {
+                    jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'DRIVER', SYSUTCDATETIME(), 1)", driverUserId, tripId);
+                }
+            }
+            if (assignCon) {
+                jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'CONDUCTOR'", tripId);
+                if (conductorUserId > 0) {
+                    jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'CONDUCTOR', SYSUTCDATETIME(), 1)", conductorUserId, tripId);
+                }
+            }
+            if (assignDrv || assignCon) {
+                updatedCount++;
+            }
+        }
+
+        String summary = String.format("Assigned crew to %d recurring trip(s).", updatedCount);
+        saveMessage(adminUserId, "Recurring Crew Duty Assigned", summary, false);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("assignedCount", updatedCount);
+        result.put("totalMatched", matchedTripIds.size());
+        result.put("message", summary);
+        return result;
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public Map<String, Object> assignBatchCrew(List<Long> tripIds, Long driverUserId, Long conductorUserId, long adminUserId) {
+        int updatedCount = 0;
+        if (tripIds != null) {
+            for (Long tripId : tripIds) {
+                if (tripId == null || tripId <= 0) continue;
+                if (driverUserId != null) {
+                    jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'DRIVER'", tripId);
+                    if (driverUserId > 0) {
+                        jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'DRIVER', SYSUTCDATETIME(), 1)", driverUserId, tripId);
+                    }
+                }
+                if (conductorUserId != null) {
+                    jdbc.update("UPDATE dbo.staff_assignments SET active = 0, assigned_to = SYSUTCDATETIME() WHERE trip_id = ? AND role = 'CONDUCTOR'", tripId);
+                    if (conductorUserId > 0) {
+                        jdbc.update("INSERT INTO dbo.staff_assignments(user_id, trip_id, role, assigned_from, active) VALUES (?, ?, 'CONDUCTOR', SYSUTCDATETIME(), 1)", conductorUserId, tripId);
+                    }
+                }
+                updatedCount++;
+            }
+        }
+        String summary = String.format("Batch assigned crew to %d trip(s).", updatedCount);
+        saveMessage(adminUserId, "Batch Crew Assignment", summary, false);
+        return Map.of("assignedCount", updatedCount, "message", summary);
     }
 }

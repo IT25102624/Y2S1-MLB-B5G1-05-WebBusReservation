@@ -402,7 +402,7 @@
       <nav class="nav-links">
         <a href="search.html" id="navLinkSearch">Book a Trip</a>
         <a href="schedule.html" id="navLinkSchedule">Timetable</a>
-        <a href="feedback.html" id="navLinkFeedback">Feedback</a>
+        <a href="crew-dispatch.html" id="navLinkCrewDispatch">Crew Dispatch</a>
       </nav>
       <div class="nav-actions">
         <div class="notification-area" id="navNotificationArea">
@@ -617,8 +617,9 @@
                             <p class="section-sub">Manage platform roles, dispatchers, crew, and commuter accounts.</p>
                         </div>
                         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none; font-weight:700;">Fleet &amp; Dispatch Console &rarr;</a>
-                            <a href="analytics/dashboard.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:var(--primary); color:var(--primary-dark);">Executive Analytics &rarr;</a>
+                            <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none; font-weight:700;">Fleet &amp; Buses Console &rarr;</a>
+                            <a href="crew-dispatch.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:var(--primary); color:var(--primary-dark);">Crew Dispatch Roster &rarr;</a>
+                            <a href="analytics/dashboard.html" class="btn btn-outline" style="text-decoration:none; font-weight:700;">Executive Analytics &rarr;</a>
                             <a href="customer-care.html" class="btn btn-outline" style="text-decoration:none; font-weight:700; border-color:#d97706; color:#b45309;">Customer Care &rarr;</a>
                             <button class="btn btn-outline" onclick="loadData()">Refresh</button>
                             <button class="btn btn-primary" onclick="openAddModal()">+ Add User</button>
@@ -663,31 +664,57 @@
                         <div>
                             <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">DISPATCH OPERATIONS</span>
                             <h2 class="section-title">Highway Crew Roster &amp; Bus Duty Assignment</h2>
-                            <p class="section-sub">Assign certified drivers and conductors to highway departures. Assigned duty manifests push instantly to crew telemetry consoles.</p>
+                            <p class="section-sub">Consolidated overview of expressway corridor duty rosters. Full batch and recurring duty management is managed in the dedicated Crew Dispatch Portal.</p>
                         </div>
-                        <div style="display:flex; gap:8px;">
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <a href="crew-dispatch.html" class="btn btn-primary" style="text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                                Open Crew Dispatch Portal &rarr;
+                            </a>
                             <button type="button" class="btn btn-outline btn-sm" onclick="loadCrewRoster()">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                                 Refresh Roster
                             </button>
                         </div>
                     </div>
+
+                    <!-- Dispatch KPI Summary Bar -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:20px;">
+                        <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px 16px;">
+                            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Scheduled Departures</div>
+                            <div style="font-size:1.35rem; font-weight:800; color:#0f172a; margin-top:2px;" id="adminCrewKpiTotal">0</div>
+                        </div>
+                        <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:12px 16px;">
+                            <div style="font-size:0.75rem; color:#065f46; font-weight:700; text-transform:uppercase;">Fully Crewed</div>
+                            <div style="font-size:1.35rem; font-weight:800; color:#059669; margin-top:2px;" id="adminCrewKpiAssigned">0</div>
+                        </div>
+                        <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:10px; padding:12px 16px;">
+                            <div style="font-size:0.75rem; color:#92400e; font-weight:700; text-transform:uppercase;">Pending Assignment</div>
+                            <div style="font-size:1.35rem; font-weight:800; color:#d97706; margin-top:2px;" id="adminCrewKpiPending">0</div>
+                        </div>
+                        <div style="background:#f1f5f9; border:1px solid var(--border); border-radius:10px; padding:12px 16px;">
+                            <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Corridor Services</div>
+                            <div style="font-size:1.35rem; font-weight:800; color:#334155; margin-top:2px;" id="adminCrewKpiCorridors">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Consolidated Corridor Recurring Services Table -->
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Trip #</th>
                                     <th>Corridor Route</th>
-                                    <th>Bus &amp; Operator</th>
-                                    <th>Departure Date &amp; Time</th>
-                                    <th>Trip Status</th>
+                                    <th>Bus &amp; Fleet</th>
+                                    <th>Daily Time Slot</th>
+                                    <th>Upcoming Trips</th>
                                     <th>Assigned Driver</th>
                                     <th>Assigned Conductor</th>
+                                    <th>Roster Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="crewRosterTableBody">
-                                <tr><td colspan="8"><div class="empty-state"><p>Loading crew roster...</p></div></td></tr>
+                                <tr><td colspan="8"><div class="empty-state"><p>Loading corridor duty rosters...</p></div></td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1421,11 +1448,11 @@
             const tbody = document.getElementById('crewRosterTableBody');
             if (!tbody) return;
             try {
-                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>Loading crew roster...</p></div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>Loading corridor duty rosters...</p></div></td></tr>';
                 const res = await fetch('/api/v1/staff/crew-roster', { headers: authHeaders() });
                 const json = await res.json();
                 if (!res.ok || !json.success) {
-                    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>${json.message || 'Could not load crew roster'}</p></div></td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>${escapeHtml(json.message || 'Could not load crew roster')}</p></div></td></tr>`;
                     return;
                 }
                 cachedRosterTrips = json.data || [];
@@ -1433,31 +1460,102 @@
                     tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><p>No upcoming trips scheduled for assignment.</p></div></td></tr>';
                     return;
                 }
-                tbody.innerHTML = cachedRosterTrips.map(t => {
-                    const driverBadge = t.driverName 
-                        ? `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${escapeHtml(t.driverName)} ${t.driverEmployeeId ? `(${t.driverEmployeeId})` : ''}</span>`
+
+                // Update KPIs
+                let fullyAssigned = 0;
+                let pendingAssigned = 0;
+                cachedRosterTrips.forEach(t => {
+                    const hasDriver = t.driverId && t.driverId > 0;
+                    const hasConductor = t.conductorId && t.conductorId > 0;
+                    if (hasDriver && hasConductor) fullyAssigned++;
+                    else pendingAssigned++;
+                });
+
+                // Group by Corridor Recurring Service
+                const groupsMap = new Map();
+                cachedRosterTrips.forEach(t => {
+                    let timeKey = '';
+                    if (t.departureTime) {
+                        const d = new Date(t.departureTime);
+                        timeKey = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                    }
+                    const key = `${t.routeId}__${t.busId}__${timeKey}`;
+                    if (!groupsMap.has(key)) {
+                        groupsMap.set(key, {
+                            key,
+                            routeId: t.routeId,
+                            busId: t.busId,
+                            sourceCity: t.sourceCity,
+                            destinationCity: t.destinationCity,
+                            busNumber: t.busNumber,
+                            operatorName: t.operatorName,
+                            timeSlot: timeKey,
+                            trips: []
+                        });
+                    }
+                    groupsMap.get(key).trips.push(t);
+                });
+
+                const groups = Array.from(groupsMap.values());
+                const kpiTotal = document.getElementById('adminCrewKpiTotal');
+                const kpiAssigned = document.getElementById('adminCrewKpiAssigned');
+                const kpiPending = document.getElementById('adminCrewKpiPending');
+                const kpiCorridors = document.getElementById('adminCrewKpiCorridors');
+
+                if (kpiTotal) kpiTotal.textContent = cachedRosterTrips.length;
+                if (kpiAssigned) kpiAssigned.textContent = fullyAssigned;
+                if (kpiPending) kpiPending.textContent = pendingAssigned;
+                if (kpiCorridors) kpiCorridors.textContent = groups.length;
+
+                tbody.innerHTML = groups.map(g => {
+                    const totalInGroup = g.trips.length;
+                    let fullyCrewed = 0;
+                    let mainDriverName = null;
+                    let mainDriverEmp = null;
+                    let mainConductorName = null;
+                    let mainConductorEmp = null;
+
+                    g.trips.forEach(tr => {
+                        if (tr.driverId && tr.driverId > 0 && !mainDriverName) {
+                            mainDriverName = tr.driverName;
+                            mainDriverEmp = tr.driverEmployeeId;
+                        }
+                        if (tr.conductorId && tr.conductorId > 0 && !mainConductorName) {
+                            mainConductorName = tr.conductorName;
+                            mainConductorEmp = tr.conductorEmployeeId;
+                        }
+                        if (tr.driverId && tr.conductorId) fullyCrewed++;
+                    });
+
+                    const driverBadge = mainDriverName 
+                        ? `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${escapeHtml(mainDriverName)} ${mainDriverEmp ? `(${mainDriverEmp})` : ''}</span>`
                         : `<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-weight:600;">Unassigned</span>`;
-                    const conductorBadge = t.conductorName 
-                        ? `<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">${escapeHtml(t.conductorName)} ${t.conductorEmployeeId ? `(${t.conductorEmployeeId})` : ''}</span>`
+                    const conductorBadge = mainConductorName 
+                        ? `<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">${escapeHtml(mainConductorName)} ${mainConductorEmp ? `(${mainConductorEmp})` : ''}</span>`
                         : `<span class="badge" style="background:#f1f5f9; color:#94a3b8; font-weight:600;">Unassigned</span>`;
-                    const st = (t.tripStatus || 'SCHEDULED').toUpperCase();
-                    let stBadge = `<span class="badge" style="background:#dcfce7; color:#15803d;">SCHEDULED</span>`;
-                    if (st === 'IN_TRANSIT') stBadge = `<span class="badge" style="background:#dbeafe; color:#1d4ed8;">IN TRANSIT</span>`;
-                    else if (st === 'COMPLETED') stBadge = `<span class="badge" style="background:#f1f5f9; color:#475569;">COMPLETED</span>`;
+
+                    let stBadge = '';
+                    if (fullyCrewed === totalInGroup) {
+                        stBadge = `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Fully Crewed (${fullyCrewed}/${totalInGroup})</span>`;
+                    } else if (fullyCrewed === 0) {
+                        stBadge = `<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">Needs Crew (0/${totalInGroup})</span>`;
+                    } else {
+                        stBadge = `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">Partial (${fullyCrewed}/${totalInGroup})</span>`;
+                    }
 
                     return `
                         <tr>
-                            <td style="font-weight:700; color:#0f172a;">#${t.tripId}</td>
-                            <td style="font-weight:700;">${t.sourceCity} &rarr; ${t.destinationCity}</td>
-                            <td>${t.busNumber} <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${t.operatorName || ''}</span></td>
-                            <td>${formatDate(t.departureTime)}</td>
-                            <td>${stBadge}</td>
+                            <td style="font-weight:700; color:#0f172a;">${escapeHtml(g.sourceCity)} &rarr; ${escapeHtml(g.destinationCity)}</td>
+                            <td>${escapeHtml(g.busNumber)} <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${escapeHtml(g.operatorName || '')}</span></td>
+                            <td style="font-weight:600;">${g.timeSlot ? `${escapeHtml(g.timeSlot)} Daily` : 'Regular'}</td>
+                            <td><span style="font-weight:700;">${totalInGroup}</span> scheduled departures</td>
                             <td>${driverBadge}</td>
                             <td>${conductorBadge}</td>
+                            <td>${stBadge}</td>
                             <td>
-                                <button type="button" class="btn btn-outline btn-sm" onclick="openAssignCrewModal(${t.tripId})" style="border-color:var(--primary); color:var(--primary-dark); font-weight:700;">
-                                    Assign Crew
-                                </button>
+                                <a href="crew-dispatch.html" class="btn btn-outline btn-sm" style="border-color:var(--primary); color:var(--primary-dark); font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                                    Manage Roster &rarr;
+                                </a>
                             </td>
                         </tr>
                     `;
@@ -1495,11 +1593,11 @@
                 </option>
             `).join('');
 
-            document.getElementById('assignCrewModal').classList.add('active');
+            document.getElementById('assignCrewModal').classList.add('open');
         }
 
         function closeAssignCrewModal() {
-            document.getElementById('assignCrewModal').classList.remove('active');
+            document.getElementById('assignCrewModal').classList.remove('open');
         }
 
         async function handleSaveCrewAssignment(e) {

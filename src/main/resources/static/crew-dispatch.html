@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatchBusLK — Expressway Crew Duty Roster &amp; Dispatch</title>
+    <link rel="stylesheet" href="css/srilanka-travel.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #ecfdf5;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-page);
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 20px 60px 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        /* Crew KPI Grid */
+        .crew-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .crew-kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .crew-kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+        }
+
+        .crew-kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .crew-kpi-val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .crew-kpi-lbl {
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-top: 3px;
+        }
+
+        /* Toolbar & Mode Toggle */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-input, .toolbar-select {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.88rem;
+            background: #ffffff;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .toolbar-input:focus, .toolbar-select:focus {
+            border-color: var(--primary);
+        }
+
+        .view-mode-toggle {
+            display: inline-flex;
+            background: #e2e8f0;
+            border-radius: 8px;
+            padding: 3px;
+            gap: 3px;
+        }
+
+        .view-mode-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #475569;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .view-mode-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .count-badge {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: #e2e8f0;
+            padding: 5px 12px;
+            border-radius: 9999px;
+        }
+
+        /* Corridor Duty Card */
+        .corridor-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+
+        .corridor-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .corridor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .corridor-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.18rem;
+            font-weight: 800;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .corridor-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+            background: #f8fafc;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .corridor-detail-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+
+        .corridor-detail-val {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Data Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.88rem;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 2px solid var(--border);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .badge-danger  { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .badge-info    { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+        /* Batch Action Bar */
+        .batch-bar {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: #ffffff;
+            border-color: var(--border);
+            color: #334155;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active, .modal-overlay.open { display: flex; }
+
+        .modal-box {
+            background: #ffffff;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25);
+            max-width: 580px;
+            width: 100%;
+            padding: 24px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover { color: var(--text-main); }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #ffffff;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        /* Toasts */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            max-width: 340px;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .toast-error   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .toast-info    { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+
+        @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="toastContainer"></div>
+
+    <header class="top-nav">
+        <div class="nav-wrap">
+            <a href="index.html" class="logo">Catch<span>Bus</span>LK</a>
+            <nav class="nav-links">
+                <a href="search.html" id="navLinkSearch">Book a Trip</a>
+                <a href="schedule.html" id="navLinkSchedule">Timetable</a>
+                <a href="crew-dispatch.html" id="navLinkCrewDispatch" class="active">Crew Dispatch</a>
+                <a href="customer-care.html" id="navLinkCare">Customer Care</a>
+            </nav>
+            <div class="nav-actions">
+                <div class="notification-area" id="navNotificationArea">
+                    <button id="notificationBell" class="nav-bell-btn" type="button" title="View Alerts" aria-label="Notifications">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                            <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+                        </svg>
+                        <span id="notificationBadge" class="notification-badge hidden">0</span>
+                    </button>
+                    <div id="notificationMenu" class="notification-menu hidden">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f5f9; padding-bottom:8px;">
+                            <strong style="font-size:14px; font-weight:700; color:#0f172a;">Platform Alerts</strong>
+                            <a href="notifications.html" style="font-size:12px; color:var(--primary); font-weight:700; text-decoration:none;">Alerts Hub &rarr;</a>
+                        </div>
+                        <div id="notificationItems" style="max-height:260px; overflow-y:auto; margin-bottom:12px;">
+                            <p style="font-size:12px; color:#64748b; padding:8px 0;">Loading alerts...</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="navAuthAction"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Auth Barrier for Non-Admins -->
+        <div id="crewAuthBlocked" class="card" style="text-align:center; padding:48px 24px; max-width:540px; margin:40px auto; display:none;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#fee2e2; color:#ef4444; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h2 style="font-size:1.3rem; font-weight:800; color:#0f172a; margin-bottom:8px;">Dispatcher Access Restricted</h2>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:20px;">The Crew Duty Roster &amp; Dispatch Console is restricted to System Administrators and Fleet Dispatchers.</p>
+            <a href="admin.html?tab=signin" class="btn btn-primary">Sign In as Administrator</a>
+        </div>
+
+        <!-- Main Crew Console -->
+        <div id="crewConsoleContent" style="display:none;">
+            <div class="card">
+                <div class="section-header">
+                    <div>
+                        <span style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--primary); letter-spacing:0.18em; display:inline-block; margin-bottom:4px;">DISPATCH COMMAND</span>
+                        <h1 class="section-title">Expressway Crew Duty Roster &amp; Dispatch Assignments</h1>
+                        <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+                            Assign certified expressway drivers and scanner conductors to highway corridors and recurring schedules. Rosters sync directly to mobile crew terminals.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <a href="search.html?mode=operator" class="btn btn-outline" style="text-decoration:none;">
+                            Fleet &amp; Buses Console &rarr;
+                        </a>
+                        <button class="btn btn-primary" onclick="openRecurringCrewModal()">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Assign Recurring Crew
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="loadCrewRosterData()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Metric Cards -->
+                <div class="crew-kpi-grid">
+                    <div class="crew-kpi-card">
+                        <div class="crew-kpi-icon" style="background: #ecfdf5; color: #059669;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                        </div>
+                        <div>
+                            <div class="crew-kpi-val" id="crewKpiTotalTrips">0</div>
+                            <div class="crew-kpi-lbl">Upcoming Departures</div>
+                        </div>
+                    </div>
+                    <div class="crew-kpi-card">
+                        <div class="crew-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+                        </div>
+                        <div>
+                            <div class="crew-kpi-val" id="crewKpiFullyAssigned">0</div>
+                            <div class="crew-kpi-lbl">Fully Crewed</div>
+                        </div>
+                    </div>
+                    <div class="crew-kpi-card">
+                        <div class="crew-kpi-icon" style="background: #fef3c7; color: #d97706;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                        <div>
+                            <div class="crew-kpi-val" id="crewKpiPendingAssigned" style="color: #b45309;">0</div>
+                            <div class="crew-kpi-lbl">Pending Crew Assignment</div>
+                        </div>
+                    </div>
+                    <div class="crew-kpi-card">
+                        <div class="crew-kpi-icon" style="background: #f3e8ff; color: #7e22ce;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <div class="crew-kpi-val" id="crewKpiStaffPool">0</div>
+                            <div class="crew-kpi-lbl">Active Crew Pool</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toolbar & View Mode Switcher -->
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <div class="view-mode-toggle">
+                            <button type="button" class="view-mode-btn active" id="btnViewModeConsolidated" onclick="switchCrewViewMode('consolidated')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                Corridor Recurring Services
+                            </button>
+                            <button type="button" class="view-mode-btn" id="btnViewModeDetailed" onclick="switchCrewViewMode('detailed')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                All Individual Departures
+                            </button>
+                        </div>
+
+                        <input type="text" id="crewSearchInput" class="toolbar-input" placeholder="Search route, bus plate, driver or conductor..." oninput="filterAndSortCrewRoster()" style="min-width: 260px;">
+                        <select id="crewRouteFilter" class="toolbar-select" onchange="filterAndSortCrewRoster()">
+                            <option value="">All Corridors</option>
+                        </select>
+                        <select id="crewStatusFilter" class="toolbar-select" onchange="filterAndSortCrewRoster()">
+                            <option value="">All Roster Statuses</option>
+                            <option value="unassigned">Needs Crew (Unassigned)</option>
+                            <option value="fully">Fully Assigned</option>
+                            <option value="partial">Partially Assigned</option>
+                        </select>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="resetCrewFilters()">Reset</button>
+                    </div>
+                    <div class="count-badge" id="crewCountBadge">Showing 0 corridor services</div>
+                </div>
+
+                <!-- Batch Action Bar (Detailed View) -->
+                <div id="crewBatchActionBar" class="batch-bar" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-weight: 700; color: #065f46; font-size: 0.9rem;" id="crewBatchCountLabel">0 departures selected</span>
+                        <span style="font-size: 0.8rem; color: #047857;">&bull; Assign driver &amp; conductor in one batch</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-outline" onclick="clearBatchTripSelection()">Clear</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="openBatchTripCrewModal()">Batch Assign Selected</button>
+                    </div>
+                </div>
+
+                <!-- View 1: Consolidated Corridor Recurring View (Default) -->
+                <div id="crewConsolidatedView">
+                    <div id="corridorServicesContainer">
+                        <div class="empty-state"><p>Loading corridor duty rosters...</p></div>
+                    </div>
+                </div>
+
+                <!-- View 2: Detailed Individual Departures Table View -->
+                <div id="crewDetailedView" style="display: none;">
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px; text-align: center;">
+                                        <input type="checkbox" id="selectAllTripsCheckbox" onchange="toggleSelectAllTrips(this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
+                                    </th>
+                                    <th>Trip #</th>
+                                    <th>Corridor Route</th>
+                                    <th>Bus &amp; Fleet</th>
+                                    <th>Departure Date &amp; Time</th>
+                                    <th>Status</th>
+                                    <th>Assigned Driver</th>
+                                    <th>Assigned Conductor</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crewManifestTableBody">
+                                <tr><td colspan="9" style="text-align: center;">Loading departures...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal 1: Assign Recurring Crew -->
+    <div class="modal-overlay" id="assignRecurringCrewModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin: 0;">Assign Recurring Crew Roster</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 3px 0 0 0;">Assign driver and conductor across all upcoming trips on this corridor.</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('assignRecurringCrewModal')">&times;</button>
+            </div>
+            <form id="assignRecurringCrewForm" onsubmit="handleSaveRecurringCrewAssignment(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="recurringModalRoute">Corridor Route *</label>
+                        <select id="recurringModalRoute" class="form-control" required onchange="onRecurringRouteSelectChange()">
+                            <option value="">Select Corridor Route</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label for="recurringModalBus">Bus &amp; Fleet Number *</label>
+                            <select id="recurringModalBus" class="form-control" required>
+                                <option value="0">All Buses on Corridor (Corridor-wide)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="recurringModalTime">Departure Slot (HH:mm) *</label>
+                            <input type="text" id="recurringModalTime" class="form-control" placeholder="e.g. 06:30" required pattern="([01]?[0-9]|2[0-3]):[0-5][0-9]">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assignment Horizon *</label>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                            <button type="button" class="btn btn-outline btn-sm horizon-btn active" data-days="30" onclick="selectHorizonPreset(30, this)">30 Days</button>
+                            <button type="button" class="btn btn-outline btn-sm horizon-btn" data-days="14" onclick="selectHorizonPreset(14, this)">14 Days</button>
+                            <button type="button" class="btn btn-outline btn-sm horizon-btn" data-days="7" onclick="selectHorizonPreset(7, this)">7 Days</button>
+                            <button type="button" class="btn btn-outline btn-sm horizon-btn" data-days="custom" onclick="selectHorizonPreset('custom', this)">Custom</button>
+                        </div>
+                    </div>
+
+                    <div id="customDateRangeFields" style="display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#334155;">From Date</label>
+                            <input type="date" id="recurringModalFromDate" class="form-control">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#334155;">To Date</label>
+                            <input type="date" id="recurringModalToDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label for="recurringModalDriver">Assigned Driver *</label>
+                            <select id="recurringModalDriver" class="form-control" required>
+                                <option value="">Select Driver</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="recurringModalConductor">Assigned Conductor *</label>
+                            <select id="recurringModalConductor" class="form-control" required>
+                                <option value="">Select Conductor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);">
+                        <input type="checkbox" id="recurringModalOverwrite" checked style="width: 16px; height: 16px; cursor: pointer;">
+                        <label for="recurringModalOverwrite" style="font-size: 0.82rem; font-weight: 600; color: #475569; margin: 0; cursor: pointer;">
+                            Overwrite existing driver/conductor assignments for this corridor
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('assignRecurringCrewModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveRecurringCrew">Confirm &amp; Deploy Recurring Duty</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Assign Single Trip or Batch Crew -->
+    <div class="modal-overlay" id="assignSingleCrewModal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="singleCrewModalTitle" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Assign Corridor Crew Duty</h3>
+                    <p id="singleCrewModalSubtitle" style="font-size: 0.82rem; color: var(--text-muted); margin: 3px 0 0 0;">Trip #0</p>
+                </div>
+                <button class="modal-close" onclick="closeModal('assignSingleCrewModal')">&times;</button>
+            </div>
+            <form id="assignSingleCrewForm" onsubmit="handleSaveSingleCrewAssignment(event)">
+                <input type="hidden" id="singleCrewTripId" value="">
+                <input type="hidden" id="singleCrewIsBatch" value="false">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="singleCrewDriver">Select Driver *</label>
+                        <select id="singleCrewDriver" class="form-control" required>
+                            <option value="">Choose Driver</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="singleCrewConductor">Select Conductor *</label>
+                        <select id="singleCrewConductor" class="form-control" required>
+                            <option value="">Choose Conductor</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('assignSingleCrewModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSaveSingleCrew">Save Crew Duty</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        let crewRosterCache = [];
+        let crewMembersCache = [];
+        let routesCache = [];
+        let busesCache = [];
+        let currentCrewViewMode = 'consolidated'; // 'consolidated' or 'detailed'
+        let selectedTripIdsForBatch = new Set();
+        let selectedHorizonPresetDays = 30;
+
+        function authHeaders() {
+            const token = localStorage.getItem('auth_token') || localStorage.getItem('bus_jwt_token') || '';
+            return {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            };
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function openModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.add('active');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('active');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        async function initPage() {
+            const user = getCurrentUser();
+            if (!user || String(user.role).toUpperCase() !== 'ADMIN') {
+                document.getElementById('crewAuthBlocked').style.display = 'block';
+                document.getElementById('crewConsoleContent').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('crewAuthBlocked').style.display = 'none';
+            document.getElementById('crewConsoleContent').style.display = 'block';
+
+            await Promise.all([
+                loadCrewMembers(),
+                loadRoutesAndBuses(),
+                loadCrewRosterData()
+            ]);
+        }
+
+        async function loadCrewMembers() {
+            try {
+                const res = await fetch('/api/v1/staff/crew-members', { headers: authHeaders() });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        crewMembersCache = json.data;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load crew members', e);
+            }
+        }
+
+        async function loadRoutesAndBuses() {
+            try {
+                const [routesRes, busesRes] = await Promise.all([
+                    fetch('/api/v1/search/routes', { headers: authHeaders() }),
+                    fetch('/api/v1/search/buses', { headers: authHeaders() })
+                ]);
+                if (routesRes.ok) {
+                    const json = await routesRes.json();
+                    if (json.success && Array.isArray(json.data)) routesCache = json.data;
+                }
+                if (busesRes.ok) {
+                    const json = await busesRes.json();
+                    if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+                        busesCache = json.data;
+                    }
+                }
+                if (!busesCache || busesCache.length === 0) {
+                    const altRes = await fetch('/api/v1/admin/fleet', { headers: authHeaders() });
+                    if (altRes.ok) {
+                        const json = await altRes.json();
+                        if (json.success && Array.isArray(json.data)) busesCache = json.data;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load routes/buses', e);
+            }
+        }
+
+        async function loadCrewRosterData() {
+            try {
+                const res = await fetch('/api/v1/staff/crew-roster', { headers: authHeaders() });
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success && Array.isArray(json.data)) {
+                        crewRosterCache = json.data;
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load crew roster', e);
+            }
+
+            populateRouteFilterDropdown();
+            updateCrewKpis(crewRosterCache);
+            filterAndSortCrewRoster();
+        }
+
+        function populateRouteFilterDropdown() {
+            const filterEl = document.getElementById('crewRouteFilter');
+            if (!filterEl) return;
+            const corridors = new Set();
+            crewRosterCache.forEach(t => {
+                if (t.sourceCity && t.destinationCity) {
+                    corridors.add(`${t.sourceCity} → ${t.destinationCity}`);
+                }
+            });
+            const cur = filterEl.value;
+            filterEl.innerHTML = '<option value="">All Corridors</option>' +
+                Array.from(corridors).sort().map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            filterEl.value = cur;
+        }
+
+        function updateCrewKpis(trips) {
+            const total = trips.length;
+            const fullyAssigned = trips.filter(t => t.driverId && t.conductorId).length;
+            const pending = trips.filter(t => !t.driverId || !t.conductorId).length;
+
+            document.getElementById('crewKpiTotalTrips').textContent = total;
+            document.getElementById('crewKpiFullyAssigned').textContent = fullyAssigned;
+            document.getElementById('crewKpiPendingAssigned').textContent = pending;
+            document.getElementById('crewKpiStaffPool').textContent = crewMembersCache.length;
+        }
+
+        function switchCrewViewMode(mode) {
+            currentCrewViewMode = mode;
+            const btnConsolidated = document.getElementById('btnViewModeConsolidated');
+            const btnDetailed = document.getElementById('btnViewModeDetailed');
+            const viewConsolidated = document.getElementById('crewConsolidatedView');
+            const viewDetailed = document.getElementById('crewDetailedView');
+            const batchBar = document.getElementById('crewBatchActionBar');
+
+            if (mode === 'consolidated') {
+                btnConsolidated.classList.add('active');
+                btnDetailed.classList.remove('active');
+                viewConsolidated.style.display = 'block';
+                viewDetailed.style.display = 'none';
+                if (batchBar) batchBar.style.display = 'none';
+            } else {
+                btnDetailed.classList.add('active');
+                btnConsolidated.classList.remove('active');
+                viewConsolidated.style.display = 'none';
+                viewDetailed.style.display = 'block';
+                if (batchBar) batchBar.style.display = selectedTripIdsForBatch.size > 0 ? 'flex' : 'none';
+            }
+            filterAndSortCrewRoster();
+        }
+
+        function filterAndSortCrewRoster() {
+            const q = (document.getElementById('crewSearchInput')?.value || '').toLowerCase().trim();
+            const routeFilter = (document.getElementById('crewRouteFilter')?.value || '').toLowerCase().trim();
+            const statusFilter = (document.getElementById('crewStatusFilter')?.value || '').toLowerCase().trim();
+
+            const filtered = crewRosterCache.filter(t => {
+                const corridor = `${t.sourceCity || ''} → ${t.destinationCity || ''}`.toLowerCase();
+                const busStr = `${t.busNumber || ''} ${t.operatorName || ''} ${t.busType || ''}`.toLowerCase();
+                const crewStr = `${t.driverName || ''} ${t.driverEmployeeId || ''} ${t.conductorName || ''} ${t.conductorEmployeeId || ''}`.toLowerCase();
+
+                if (q && !corridor.includes(q) && !busStr.includes(q) && !crewStr.includes(q)) return false;
+                if (routeFilter && !corridor.includes(routeFilter)) return false;
+
+                const hasDriver = Boolean(t.driverId);
+                const hasConductor = Boolean(t.conductorId);
+                if (statusFilter === 'unassigned' && (hasDriver && hasConductor)) return false;
+                if (statusFilter === 'fully' && (!hasDriver || !hasConductor)) return false;
+                if (statusFilter === 'partial' && ((hasDriver && hasConductor) || (!hasDriver && !hasConductor))) return false;
+
+                return true;
+            });
+
+            if (currentCrewViewMode === 'consolidated') {
+                renderConsolidatedCorridors(filtered);
+            } else {
+                renderDetailedManifest(filtered);
+            }
+        }
+
+        function resetCrewFilters() {
+            if (document.getElementById('crewSearchInput')) document.getElementById('crewSearchInput').value = '';
+            if (document.getElementById('crewRouteFilter')) document.getElementById('crewRouteFilter').value = '';
+            if (document.getElementById('crewStatusFilter')) document.getElementById('crewStatusFilter').value = '';
+            filterAndSortCrewRoster();
+        }
+
+        function renderConsolidatedCorridors(trips) {
+            const container = document.getElementById('corridorServicesContainer');
+            const countBadge = document.getElementById('crewCountBadge');
+
+            const groups = new Map();
+            trips.forEach(t => {
+                const depTime = (t.departureTime || '').substring(11, 16) || '08:00';
+                const key = `${t.routeId || 0}__${t.busId || 0}__${depTime}`;
+                if (!groups.has(key)) {
+                    groups.set(key, {
+                        routeId: t.routeId,
+                        busId: t.busId,
+                        sourceCity: t.sourceCity,
+                        destinationCity: t.destinationCity,
+                        busNumber: t.busNumber,
+                        operatorName: t.operatorName,
+                        busType: t.busType,
+                        departureTimeSlot: depTime,
+                        trips: []
+                    });
+                }
+                groups.get(key).trips.push(t);
+            });
+
+            const corridorList = Array.from(groups.values());
+            if (countBadge) countBadge.textContent = `Showing ${corridorList.length} corridor services (${trips.length} departures)`;
+
+            if (corridorList.length === 0) {
+                container.innerHTML = `<div class="empty-state"><p>No corridor services matching criteria.</p></div>`;
+                return;
+            }
+
+            container.innerHTML = corridorList.map(c => {
+                const totalTrips = c.trips.length;
+                const fullyAssignedCount = c.trips.filter(x => x.driverId && x.conductorId).length;
+                const needsCrewCount = totalTrips - fullyAssignedCount;
+                const isFullyAssigned = needsCrewCount === 0;
+
+                const firstAssigned = c.trips.find(x => x.driverId || x.conductorId) || c.trips[0] || {};
+                const driverName = firstAssigned.driverName || 'Pending Driver';
+                const conductorName = firstAssigned.conductorName || 'Pending Conductor';
+
+                const badge = isFullyAssigned
+                    ? `<span class="badge badge-success">Fully Roster Ready (${totalTrips}/${totalTrips})</span>`
+                    : `<span class="badge badge-warning">Needs Crew (${needsCrewCount} uncrewed)</span>`;
+
+                return `
+                    <div class="corridor-card">
+                        <div class="corridor-header">
+                            <div>
+                                <div class="corridor-title">
+                                    <span>${escapeHtml(c.sourceCity)} &rarr; ${escapeHtml(c.destinationCity)}</span>
+                                    <span style="font-size:0.82rem; font-weight:700; color:var(--text-muted); background:#f1f5f9; padding:3px 8px; border-radius:6px;">
+                                        Daily ${escapeHtml(c.departureTimeSlot)}
+                                    </span>
+                                </div>
+                                <div style="font-size:0.82rem; color:var(--text-muted); margin-top:3px;">
+                                    ${escapeHtml(c.operatorName || 'Expressway Fleet')} &bull; Coach: <strong>${escapeHtml(c.busNumber)}</strong> (${escapeHtml(c.busType || 'AC')})
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                ${badge}
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openRecurringCrewModal(${c.routeId}, ${c.busId}, '${escapeHtml(c.departureTimeSlot)}')">
+                                    Assign Recurring
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="corridor-details-grid">
+                            <div>
+                                <div class="corridor-detail-label">Active Assigned Driver</div>
+                                <div class="corridor-detail-val" style="display:flex; align-items:center; gap:6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>
+                                    <span style="color:${firstAssigned.driverId ? '#0f172a' : '#ea580c'};">${escapeHtml(driverName)}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="corridor-detail-label">Active Assigned Conductor</div>
+                                <div class="corridor-detail-val" style="display:flex; align-items:center; gap:6px;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <span style="color:${firstAssigned.conductorId ? '#0f172a' : '#ea580c'};">${escapeHtml(conductorName)}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="corridor-detail-label">Departures Horizon</div>
+                                <div class="corridor-detail-val">${totalTrips} Scheduled Departures</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDetailedManifest(trips) {
+            const tbody = document.getElementById('crewManifestTableBody');
+            const countBadge = document.getElementById('crewCountBadge');
+            if (countBadge) countBadge.textContent = `Showing ${trips.length} departures`;
+
+            if (trips.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px;">No scheduled trips found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = trips.map(t => {
+                const depStr = t.departureTime ? t.departureTime.replace('T', ' ').substring(0, 16) : '-';
+                const isSelected = selectedTripIdsForBatch.has(t.tripId);
+                const hasDriver = Boolean(t.driverId);
+                const hasConductor = Boolean(t.conductorId);
+
+                let badge = '<span class="badge badge-success">Ready</span>';
+                if (!hasDriver && !hasConductor) badge = '<span class="badge badge-danger">Unassigned</span>';
+                else if (!hasDriver || !hasConductor) badge = '<span class="badge badge-warning">Partial</span>';
+
+                return `
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleTripCheckbox(${t.tripId}, this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
+                        </td>
+                        <td><strong>#${t.tripId}</strong></td>
+                        <td><strong>${escapeHtml(t.sourceCity)} &rarr; ${escapeHtml(t.destinationCity)}</strong></td>
+                        <td>${escapeHtml(t.busNumber)} <span style="font-size:0.75rem; color:var(--text-muted);">(${escapeHtml(t.busType || 'AC')})</span></td>
+                        <td>${depStr}</td>
+                        <td>${badge}</td>
+                        <td>${t.driverName ? `<strong>${escapeHtml(t.driverName)}</strong>` : '<span style="color:#ef4444;">Not Assigned</span>'}</td>
+                        <td>${t.conductorName ? `<strong>${escapeHtml(t.conductorName)}</strong>` : '<span style="color:#ef4444;">Not Assigned</span>'}</td>
+                        <td>
+                            <button type="button" class="btn btn-outline btn-sm" onclick="openAssignCrewModal(${t.tripId}, '${escapeHtml(t.sourceCity)} &rarr; ${escapeHtml(t.destinationCity)}', '${escapeHtml(t.busNumber)}', '${depStr}', ${t.driverId || 'null'}, ${t.conductorId || 'null'})">
+                                Assign
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleTripCheckbox(tripId, checked) {
+            if (checked) selectedTripIdsForBatch.add(tripId);
+            else selectedTripIdsForBatch.delete(tripId);
+            updateBatchActionBar();
+        }
+
+        function toggleSelectAllTrips(checked) {
+            crewRosterCache.forEach(t => {
+                if (checked) selectedTripIdsForBatch.add(t.tripId);
+                else selectedTripIdsForBatch.delete(t.tripId);
+            });
+            updateBatchActionBar();
+            filterAndSortCrewRoster();
+        }
+
+        function clearBatchTripSelection() {
+            selectedTripIdsForBatch.clear();
+            const masterChk = document.getElementById('selectAllTripsCheckbox');
+            if (masterChk) masterChk.checked = false;
+            updateBatchActionBar();
+            filterAndSortCrewRoster();
+        }
+
+        function updateBatchActionBar() {
+            const bar = document.getElementById('crewBatchActionBar');
+            const lbl = document.getElementById('crewBatchCountLabel');
+            if (!bar) return;
+            const cnt = selectedTripIdsForBatch.size;
+            if (cnt > 0 && currentCrewViewMode === 'detailed') {
+                bar.style.display = 'flex';
+                if (lbl) lbl.textContent = `${cnt} departure${cnt > 1 ? 's' : ''} selected`;
+            } else {
+                bar.style.display = 'none';
+            }
+        }
+
+        function populateCrewSelects(driverSelId, conductorSelId) {
+            const driverSel = document.getElementById(driverSelId);
+            const condSel = document.getElementById(conductorSelId);
+
+            const drivers = crewMembersCache.filter(m => m.role === 'DRIVER');
+            const conductors = crewMembersCache.filter(m => m.role === 'CONDUCTOR');
+
+            if (driverSel) {
+                driverSel.innerHTML = '<option value="">Select Certified Driver</option>' +
+                    drivers.map(d => `<option value="${d.userId}">${escapeHtml(d.employeeId || 'DRV')} - ${escapeHtml(d.fullName)} (${escapeHtml(d.phoneNumber || '')})</option>`).join('');
+            }
+            if (condSel) {
+                condSel.innerHTML = '<option value="">Select Scanner Conductor</option>' +
+                    conductors.map(c => `<option value="${c.userId}">${escapeHtml(c.employeeId || 'CON')} - ${escapeHtml(c.fullName)} (${escapeHtml(c.phoneNumber || '')})</option>`).join('');
+            }
+        }
+
+        function selectHorizonPreset(days, btn) {
+            selectedHorizonPresetDays = days;
+            document.querySelectorAll('.horizon-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            const customFields = document.getElementById('customDateRangeFields');
+            if (days === 'custom') {
+                if (customFields) customFields.style.display = 'grid';
+            } else {
+                if (customFields) customFields.style.display = 'none';
+            }
+        }
+
+        async function openRecurringCrewModal(prefillRouteId = null, prefillBusId = null, prefillTime = null) {
+            if (!busesCache || busesCache.length === 0 || !routesCache || routesCache.length === 0) {
+                await loadRoutesAndBuses();
+            }
+            if (!crewMembersCache || crewMembersCache.length === 0) {
+                await loadCrewMembers();
+            }
+
+            const routeSel = document.getElementById('recurringModalRoute');
+            if (routeSel) {
+                routeSel.innerHTML = '<option value="">Select Corridor Route</option>' +
+                    routesCache.map(r => `<option value="${r.routeId}">${escapeHtml(r.sourceCity)} → ${escapeHtml(r.destinationCity)}</option>`).join('');
+                if (prefillRouteId) routeSel.value = prefillRouteId;
+            }
+
+            onRecurringRouteSelectChange(prefillBusId);
+
+            if (prefillTime && document.getElementById('recurringModalTime')) {
+                document.getElementById('recurringModalTime').value = prefillTime;
+            }
+
+            populateCrewSelects('recurringModalDriver', 'recurringModalConductor');
+            openModal('assignRecurringCrewModal');
+        }
+
+        function onRecurringRouteSelectChange(selectedBusId = null) {
+            const busSel = document.getElementById('recurringModalBus');
+            if (!busSel) return;
+
+            let html = '<option value="0">All Buses on Corridor (Corridor-wide)</option>';
+            if (busesCache && busesCache.length > 0) {
+                html += busesCache.map(b => {
+                    const plate = b.busNumber || `Bus #${b.busId}`;
+                    const operator = b.operatorName || b.operator || 'Expressway Fleet';
+                    const type = b.busType || 'AC';
+                    const seats = b.totalSeats ? `, ${b.totalSeats} seats` : '';
+                    return `<option value="${b.busId}">${escapeHtml(plate)} - ${escapeHtml(operator)} (${escapeHtml(type)}${seats})</option>`;
+                }).join('');
+            }
+            busSel.innerHTML = html;
+            if (selectedBusId !== null && selectedBusId !== undefined && selectedBusId !== '') {
+                busSel.value = String(selectedBusId);
+            } else {
+                busSel.value = '0';
+            }
+        }
+
+        async function handleSaveRecurringCrewAssignment(e) {
+            e.preventDefault();
+            const routeId = document.getElementById('recurringModalRoute').value;
+            const busIdVal = document.getElementById('recurringModalBus').value;
+            const timeSlot = document.getElementById('recurringModalTime').value.trim();
+            const driverId = document.getElementById('recurringModalDriver').value;
+            const conductorId = document.getElementById('recurringModalConductor').value;
+            const overwrite = document.getElementById('recurringModalOverwrite').checked;
+
+            if (!routeId || busIdVal === '' || !timeSlot || !driverId || !conductorId) {
+                showToast('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            let fromDate = null;
+            let toDate = null;
+            const now = new Date();
+            if (selectedHorizonPresetDays === 'custom') {
+                fromDate = document.getElementById('recurringModalFromDate')?.value || null;
+                toDate = document.getElementById('recurringModalToDate')?.value || null;
+            } else {
+                fromDate = now.toISOString().substring(0, 10);
+                const future = new Date(now.getTime() + (Number(selectedHorizonPresetDays) * 24 * 60 * 60 * 1000));
+                toDate = future.toISOString().substring(0, 10);
+            }
+
+            const payload = {
+                routeId: Number(routeId),
+                busId: Number(busIdVal) || 0,
+                departureTimeStr: timeSlot,
+                fromDate: fromDate,
+                toDate: toDate,
+                overwriteExisting: overwrite,
+                driverUserId: Number(driverId),
+                conductorUserId: Number(conductorId)
+            };
+
+            const btn = document.getElementById('btnSaveRecurringCrew');
+            btn.disabled = true;
+            btn.textContent = 'Deploying Roster...';
+
+            try {
+                const res = await fetch('/api/v1/staff/crew-assign-recurring', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (res.ok && json.success) {
+                    showToast(json.message || 'Recurring crew assigned successfully!', 'success');
+                    closeModal('assignRecurringCrewModal');
+                    await loadCrewRosterData();
+                } else {
+                    showToast(json.message || 'Failed to assign recurring crew', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Network error while saving recurring assignment', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Confirm & Deploy Recurring Duty';
+            }
+        }
+
+        function openAssignCrewModal(tripId, routeName, busNum, timeStr, currentDriverId, currentConductorId) {
+            document.getElementById('singleCrewTripId').value = tripId;
+            document.getElementById('singleCrewIsBatch').value = 'false';
+            document.getElementById('singleCrewModalTitle').textContent = `Assign Crew: Trip #${tripId}`;
+            document.getElementById('singleCrewModalSubtitle').textContent = `${routeName} • Bus ${busNum} • ${timeStr}`;
+
+            populateCrewSelects('singleCrewDriver', 'singleCrewConductor');
+            if (currentDriverId) document.getElementById('singleCrewDriver').value = currentDriverId;
+            if (currentConductorId) document.getElementById('singleCrewConductor').value = currentConductorId;
+
+            openModal('assignSingleCrewModal');
+        }
+
+        async function openBatchTripCrewModal() {
+            const tripIds = Array.from(selectedTripIdsForBatch);
+            if (tripIds.length === 0) {
+                showToast('Please select at least one departure.', 'error');
+                return;
+            }
+
+            document.getElementById('singleCrewTripId').value = tripIds.join(',');
+            document.getElementById('singleCrewIsBatch').value = 'true';
+            document.getElementById('singleCrewModalTitle').textContent = `Batch Assign Crew (${tripIds.length} Trips)`;
+            document.getElementById('singleCrewModalSubtitle').textContent = `Trips: ${tripIds.slice(0, 5).join(', ')}${tripIds.length > 5 ? '...' : ''}`;
+
+            populateCrewSelects('singleCrewDriver', 'singleCrewConductor');
+            openModal('assignSingleCrewModal');
+        }
+
+        async function handleSaveSingleCrewAssignment(e) {
+            e.preventDefault();
+            const isBatch = document.getElementById('singleCrewIsBatch').value === 'true';
+            const driverId = document.getElementById('singleCrewDriver').value;
+            const conductorId = document.getElementById('singleCrewConductor').value;
+
+            if (!driverId || !conductorId) {
+                showToast('Please select both driver and conductor.', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveSingleCrew');
+            btn.disabled = true;
+
+            try {
+                if (isBatch) {
+                    const tripIds = Array.from(selectedTripIdsForBatch);
+                    const res = await fetch('/api/v1/staff/crew-assign-batch', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({
+                            tripIds: tripIds,
+                            driverUserId: Number(driverId),
+                            conductorUserId: Number(conductorId)
+                        })
+                    });
+                    const json = await res.json();
+                    if (res.ok && json.success) {
+                        showToast(`Successfully assigned crew to ${tripIds.length} departures!`, 'success');
+                        closeModal('assignSingleCrewModal');
+                        selectedTripIdsForBatch.clear();
+                        await loadCrewRosterData();
+                    } else {
+                        showToast(json.message || 'Could not assign batch crew', 'error');
+                    }
+                } else {
+                    const tripId = document.getElementById('singleCrewTripId').value;
+                    const res = await fetch('/api/v1/staff/crew-assign', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({
+                            tripId: Number(tripId),
+                            driverUserId: Number(driverId),
+                            conductorUserId: Number(conductorId)
+                        })
+                    });
+                    const json = await res.json();
+                    if (res.ok && json.success) {
+                        showToast(`Crew assigned successfully to Trip #${tripId}!`, 'success');
+                        closeModal('assignSingleCrewModal');
+                        await loadCrewRosterData();
+                    } else {
+                        showToast(json.message || 'Could not assign crew', 'error');
+                    }
+                }
+            } catch (err) {
+                showToast('Error saving crew duty assignment', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof setupNav === 'function') {
+                setupNav('crew-dispatch.html');
+            }
+            initPage();
+        });
+    </script>
+</body>
+</html>

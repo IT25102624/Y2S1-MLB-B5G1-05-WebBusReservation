@@ -80,6 +80,15 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.success("Booking retrieved successfully", booking));
     }
 
+    @PutMapping("/{reference}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> updateBooking(
+            @PathVariable String reference,
+            @RequestBody Map<String, Object> request) {
+        log.info("REST request to update booking: {}", reference);
+        Map<String, Object> updated = bookingService.updateBooking(reference, request);
+        return ResponseEntity.ok(ApiResponse.success("Booking updated successfully", updated));
+    }
+
     @DeleteMapping("/{reference}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> cancelBooking(@PathVariable String reference) {
         log.info("REST request to cancel booking: {}", reference);
