@@ -231,13 +231,18 @@ public class BookingService {
                     WHERE b.booking_id = ?
                     """, rs -> {
                     if (rs.next()) {
+                        long bId = rs.getLong("booking_id");
                         Map<String, Object> m = new HashMap<>();
                         m.put("reference", reference);
-                        m.put("bookingId", rs.getLong("booking_id"));
+                        m.put("bookingId", bId);
                         m.put("tripId", rs.getLong("trip_id"));
                         m.put("total", rs.getBigDecimal("total_amount"));
                         m.put("status", rs.getString("booking_status"));
-                        m.put("seats", List.of("S12", "S13"));
+                        List<String> realSeats = jdbc.queryForList("""
+                                SELECT s.seat_number FROM dbo.booking_seats bs JOIN dbo.seats s ON s.seat_id=bs.seat_id
+                                WHERE bs.booking_id=? ORDER BY TRY_CAST(s.seat_number AS INT), s.seat_number
+                                """, String.class, bId);
+                        m.put("seats", realSeats.isEmpty() ? List.of("S12") : realSeats);
                         m.put("passenger", Map.of(
                                 "name", rs.getString("full_name"),
                                 "email", rs.getString("email"),
@@ -284,9 +289,24 @@ public class BookingService {
         if (email != null && !email.isBlank()) passengerMap.put("email", email.trim());
         booking.put("passenger", passengerMap);
 
-        // Update seats if provided
-        if (request.containsKey("seats") && request.get("seats") instanceof List<?> seatList && !seatList.isEmpty()) {
-            List<String> updatedSeats = seatList.stream().map(String::valueOf).toList();
+        // Identify new seats from request
+        List<?> newSeatsList = null;
+        if (request.containsKey("seats") && request.get("seats") instanceof List<?> sl && !sl.isEmpty()) {
+            newSeatsList = sl;
+        } else if (request.containsKey("seatNumbers") && request.get("seatNumbers") instanceof List<?> sl2 && !sl2.isEmpty()) {
+            newSeatsList = sl2;
+        }
+
+        // Validate seat count if memory booking already has seats
+        if (newSeatsList != null) {
+            Object oldSeatsObj = booking.get("seats");
+            if (oldSeatsObj instanceof List<?> oldSeatsList && !oldSeatsList.isEmpty()) {
+                if (oldSeatsList.size() != newSeatsList.size()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Selected seat count (" + newSeatsList.size() + ") must match reserved seat count (" + oldSeatsList.size() + ")");
+                }
+            }
+            List<String> updatedSeats = newSeatsList.stream().map(String::valueOf).toList();
             booking.put("seats", updatedSeats);
         }
 
@@ -307,23 +327,59 @@ public class BookingService {
                     }
                 }
 
-                // If seats changed
-                if (request.containsKey("seats") && request.get("seats") instanceof List<?> newSeatsList && !newSeatsList.isEmpty()) {
+                // Also update ticket passenger name and phone if ticket exists
+                try {
+                    if (name != null && !name.isBlank()) {
+                        jdbc.update("UPDATE dbo.tickets SET passenger_name = ? WHERE booking_id = ?", name.trim(), bookingId);
+                    }
+                    if (phone != null && !phone.isBlank()) {
+                        jdbc.update("UPDATE dbo.tickets SET passenger_phone = ? WHERE booking_id = ?", phone.trim(), bookingId);
+                    }
+                } catch (Exception ticketEx) {
+                    log.debug("Tickets table update note: {}", ticketEx.getMessage());
+                }
+
+                // If seats changed, validate and update booking_seats
+                if (newSeatsList != null) {
                     Long tripId = jdbc.query("SELECT trip_id FROM dbo.bookings WHERE booking_id = ?",
                             rs -> rs.next() ? rs.getLong(1) : null, bookingId);
                     if (tripId != null) {
-                        jdbc.update("DELETE FROM dbo.booking_seats WHERE booking_id = ?", bookingId);
+                        Long busId = jdbc.query("SELECT bus_id FROM dbo.trips WHERE trip_id = ?",
+                                rs -> rs.next() ? rs.getLong(1) : null, tripId);
+                        Double baseFare = jdbc.query("SELECT base_fare FROM dbo.trips WHERE trip_id = ?",
+                                rs -> rs.next() ? rs.getDouble(1) : 1000.0, tripId);
+
+                        List<Long> resolvedSeatIds = new ArrayList<>();
                         for (Object sItem : newSeatsList) {
-                            String sNum = String.valueOf(sItem);
-                            Long seatId = jdbc.query("SELECT seat_id FROM dbo.seats WHERE bus_id = (SELECT bus_id FROM dbo.trips WHERE trip_id = ?) AND seat_number = ?",
-                                    rs -> rs.next() ? rs.getLong(1) : null, tripId, sNum);
-                            if (seatId != null) {
-                                jdbc.update("INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price) VALUES (?, ?, ?, 1000.00)",
-                                        bookingId, tripId, seatId);
+                            String sNum = String.valueOf(sItem).trim();
+                            String sDigits = sNum.replaceAll("\\D+", "");
+                            Long seatId = jdbc.query(
+                                    "SELECT TOP 1 seat_id FROM dbo.seats WHERE bus_id = ? AND (seat_number = ? OR seat_number = ?)",
+                                    rs -> rs.next() ? rs.getLong(1) : null, busId, sNum, sDigits);
+                            if (seatId == null) {
+                                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid seat number for this trip bus: " + sNum);
                             }
+
+                            // Check if seat is already occupied by ANOTHER booking on this trip
+                            Integer occupied = jdbc.queryForObject(
+                                    "SELECT COUNT(*) FROM dbo.booking_seats WHERE trip_id = ? AND seat_id = ? AND booking_id <> ?",
+                                    Integer.class, tripId, seatId, bookingId);
+                            if (occupied != null && occupied > 0) {
+                                throw new ResponseStatusException(HttpStatus.CONFLICT, "Seat " + sNum + " is already occupied by another passenger.");
+                            }
+                            resolvedSeatIds.add(seatId);
+                        }
+
+                        // Atomic seat reassignment
+                        jdbc.update("DELETE FROM dbo.booking_seats WHERE booking_id = ?", bookingId);
+                        for (Long sId : resolvedSeatIds) {
+                            jdbc.update("INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price) VALUES (?, ?, ?, ?)",
+                                    bookingId, tripId, sId, baseFare != null ? baseFare : 1000.0);
                         }
                     }
                 }
+            } catch (ResponseStatusException rse) {
+                throw rse;
             } catch (Exception e) {
                 log.warn("Database booking update note: {}", e.getMessage());
             }
@@ -331,7 +387,7 @@ public class BookingService {
 
         booking.put("updatedAt", Instant.now().toString());
         bookingStore.put(reference, booking);
-        log.info("Booking {} updated successfully with contact info", reference);
+        log.info("Booking {} updated successfully (passenger: {}, seats: {})", reference, name, booking.get("seats"));
         return booking;
     }
 

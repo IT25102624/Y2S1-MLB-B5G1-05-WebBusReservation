@@ -1,4 +1,4 @@
-package com.system.busreservation.route.service;
+package com.system.busreservation.modules.route.service;
 
 import com.system.busreservation.model.Route;
 import com.system.busreservation.modules.search.repository.RouteRepository;
@@ -44,7 +44,7 @@ public class RouteService {
         existingRoute.setSourceCity(routeDetails.getSourceCity());
         existingRoute.setDestinationCity(routeDetails.getDestinationCity());
 
-        // estimatedDurationHours එකත් update කරනවා
+        // Update estimated duration
         if (routeDetails.getEstimatedDurationHours() != null) {
             existingRoute.setEstimatedDurationHours(routeDetails.getEstimatedDurationHours());
         }

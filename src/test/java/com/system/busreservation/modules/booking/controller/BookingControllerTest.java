@@ -89,6 +89,30 @@ class BookingControllerTest {
     }
 
     @Test
+    @DisplayName("Update Booking with Seats - Success")
+    void testUpdateBookingWithSeats() {
+        Map<String, Object> updateReq = Map.of(
+                "passengerName", "Supun Seat Changed",
+                "passengerPhone", "0771234567",
+                "seats", List.of("S5", "S6")
+        );
+        Map<String, Object> updated = Map.of(
+                "reference", "CB00001234",
+                "passenger", Map.of("name", "Supun Seat Changed", "phone", "0771234567"),
+                "seats", List.of("S5", "S6"),
+                "status", "CONFIRMED"
+        );
+        when(bookingService.updateBooking("CB00001234", updateReq)).thenReturn(updated);
+
+        ResponseEntity<ApiResponse<Map<String, Object>>> response = bookingController.updateBooking("CB00001234", updateReq);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isSuccess());
+        assertEquals(List.of("S5", "S6"), response.getBody().getData().get("seats"));
+    }
+
+    @Test
     @DisplayName("Cancel Booking - Success")
     void testCancelBooking() {
         Map<String, Object> cancelled = Map.of("reference", "CB00001234", "status", "CANCELLED");

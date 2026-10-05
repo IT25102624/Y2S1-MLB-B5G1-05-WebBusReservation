@@ -19,11 +19,11 @@ DELETE FROM dbo.users;
 GO
 
 -- 1. SEED USERS (Passwords follow format: firstName@123)
--- Admin: admin@123 | Dohan: dohan@123 | Kasun: kasun@123 | Nimal: nimal@123 | Kamal: kamal@123 | Tharushi: tharushi@123 | Dilshan: dilshan@123 | Anura: anura@123 | Sunil: sunil@123 | Chaminda: chaminda@123
+-- Admin: admin@123 | Kavindu: kavindu@123 | Kasun: kasun@123 | Nimal: nimal@123 | Kamal: kamal@123 | Tharushi: tharushi@123 | Dilshan: dilshan@123 | Anura: anura@123 | Sunil: sunil@123 | Chaminda: chaminda@123
 INSERT INTO dbo.users (full_name, email, phone_number, password_hash, role, created_at)
 VALUES 
     (N'System Administrator', N'admin@busreservation.lk', N'+94771234567', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'ADMIN', SYSUTCDATETIME()),
-    (N'Dohan Imanjith', N'dohan@busreservation.lk', N'+94719876543', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
+    (N'Kavindu Perera', N'kavindu@busreservation.lk', N'+94719876543', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
     (N'Kamal Gunaratne', N'kamal@busreservation.lk', N'+94771122334', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
     (N'Tharushi Bandara', N'tharushi@busreservation.lk', N'+94712233445', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
     (N'Dilshan Silva', N'dilshan@busreservation.lk', N'+94783344556', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'PASSENGER', SYSUTCDATETIME()),
@@ -34,14 +34,17 @@ VALUES
     (N'Chaminda Vaas', N'driver@catchbus.lk', N'0710000002', N'$2a$10$1awSFkKDYujEvsDYWn0GKOaTMoH32sk2oqJ8yPuj.MD6yD3YXInHy', N'DRIVER', SYSUTCDATETIME());
 GO
 
--- 2. SEED BUSES
+-- 2. SEED BUSES (All 4 Types: AC, LUXURY, SLEEPER, NON_AC)
 INSERT INTO dbo.buses (bus_number, bus_type, total_seats, operator_name)
 VALUES 
     (N'ND-1001', N'AC', 40, N'Superline Express'),
     (N'ND-2002', N'LUXURY', 44, N'Rajarata Travels'),
     (N'WP-3003', N'SLEEPER', 36, N'Northern Highway Liner'),
     (N'SP-4004', N'NON_AC', 50, N'Southern Express'),
-    (N'CP-5005', N'AC', 42, N'Hill Country Express');
+    (N'CP-5005', N'AC', 42, N'Hill Country Express'),
+    (N'NE-6006', N'LUXURY', 38, N'Highland Super Coach'),
+    (N'EP-7007', N'SLEEPER', 32, N'Eastern Night Liner'),
+    (N'NW-8008', N'NON_AC', 54, N'Wayamba Commuter Liner');
 GO
 
 -- 3. SEED SEATS (Generate normalized seats for each bus)
@@ -173,18 +176,18 @@ END;
 GO
 
 -- 6. SEED REALISTIC COMMUTER BOOKINGS (Distributed across passengers)
-DECLARE @PassengerDohan BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'dohan@busreservation.lk');
+DECLARE @PassengerKavindu BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'kavindu@busreservation.lk');
 DECLARE @PassengerKamal BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'kamal@busreservation.lk');
 DECLARE @PassengerTharushi BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'tharushi@busreservation.lk');
 DECLARE @PassengerDilshan BIGINT = (SELECT user_id FROM dbo.users WHERE email = N'dilshan@busreservation.lk');
--- Seed Dohan: 1 upcoming Colombo -> Kandy booking (2 seats) + 1 return booking (2 seats)
-IF @PassengerDohan IS NOT NULL
+-- Seed Kavindu: 1 upcoming Colombo -> Kandy booking (2 seats) + 1 return booking (2 seats)
+IF @PassengerKavindu IS NOT NULL
 BEGIN
     DECLARE @UpcomingTrip1 BIGINT = (SELECT TOP 1 trip_id FROM dbo.trips WHERE departure_time >= CAST(GETDATE() AS DATE) ORDER BY trip_id ASC);
     IF @UpcomingTrip1 IS NOT NULL
     BEGIN
         INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
-        VALUES (@PassengerDohan, @UpcomingTrip1, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        VALUES (@PassengerKavindu, @UpcomingTrip1, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
         DECLARE @B1 BIGINT = SCOPE_IDENTITY();
         INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
         SELECT TOP 2 @B1, @UpcomingTrip1, s.seat_id, 1200.00
@@ -196,7 +199,7 @@ BEGIN
     IF @UpcomingTrip2 IS NOT NULL
     BEGIN
         INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version)
-        VALUES (@PassengerDohan, @UpcomingTrip2, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
+        VALUES (@PassengerKavindu, @UpcomingTrip2, 2400.00, N'CONFIRMED', SYSUTCDATETIME(), 0);
         DECLARE @B2 BIGINT = SCOPE_IDENTITY();
         INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price)
         SELECT TOP 2 @B2, @UpcomingTrip2, s.seat_id, 1200.00

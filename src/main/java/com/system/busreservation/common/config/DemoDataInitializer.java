@@ -69,8 +69,14 @@ public class DemoDataInitializer implements CommandLineRunner {
         long driver4 = ensureUser("Priyantha Mendis", "priyantha.driver@catchbus.lk", "+94775566332", "priyantha@123", "DRIVER");
         ensureStaff(driver4, "DRV-JAFFNA-03", "DRIVER-JAFFNA-QR");
 
-        // 4. Commuter Passengers (passwords: dohan@123, kamal@123, tharushi@123, dilshan@123, anura@123)
-        long dohan = ensureUser("Dohan Imanjith", "dohan@busreservation.lk", "+94719876543", "dohan@123", "PASSENGER");
+        // Migrate legacy demo account if present
+        try {
+            jdbc.update("UPDATE dbo.users SET full_name = 'Kavindu Perera', email = 'kavindu@busreservation.lk' WHERE LOWER(email) = 'dohan@busreservation.lk'");
+            jdbc.update("UPDATE dbo.tickets SET passenger_name = 'Kavindu Perera', passenger_email = 'kavindu@busreservation.lk' WHERE LOWER(passenger_email) = 'dohan@busreservation.lk'");
+        } catch (Exception ignored) {}
+
+        // 4. Commuter Passengers (passwords: kavindu@123, kamal@123, tharushi@123, dilshan@123, anura@123)
+        long kavindu = ensureUser("Kavindu Perera", "kavindu@busreservation.lk", "+94719876543", "kavindu@123", "PASSENGER");
         long kamal = ensureUser("Kamal Gunaratne", "kamal@busreservation.lk", "+94771122334", "kamal@123", "PASSENGER");
         long tharushi = ensureUser("Tharushi Bandara", "tharushi@busreservation.lk", "+94712233445", "tharushi@123", "PASSENGER");
         long dilshan = ensureUser("Dilshan Silva", "dilshan@busreservation.lk", "+94783344556", "dilshan@123", "PASSENGER");
@@ -90,19 +96,17 @@ public class DemoDataInitializer implements CommandLineRunner {
             route = oneLong("SELECT TOP 1 route_id FROM dbo.routes ORDER BY route_id DESC");
         }
 
-        Long bus1 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'CBL-001'");
-        if (bus1 == null) {
-            jdbc.update("INSERT INTO dbo.buses(bus_number, bus_type, total_seats, operator_name) VALUES ('CBL-001', 'AC', 52, 'CatchBusLK Luxury')");
-            bus1 = oneLong("SELECT bus_id FROM dbo.buses WHERE bus_number = 'CBL-001'");
-        }
-        ensureSeatsForBus(bus1, 52);
-
-        Long bus2 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'CBL-000'");
-        if (bus2 == null) {
-            jdbc.update("INSERT INTO dbo.buses(bus_number, bus_type, total_seats, operator_name) VALUES ('CBL-000', 'AC', 52, 'CatchBusLK Express')");
-            bus2 = oneLong("SELECT bus_id FROM dbo.buses WHERE bus_number = 'CBL-000'");
-        }
-        ensureSeatsForBus(bus2, 52);
+        // Seed diverse fleet covering all bus types (AC, LUXURY, SLEEPER, NON_AC)
+        Long bus1 = ensureBus("CBL-001", "AC", 52, "CatchBusLK Luxury");
+        Long bus2 = ensureBus("CBL-000", "AC", 52, "CatchBusLK Express");
+        Long busND1001 = ensureBus("ND-1001", "AC", 40, "Superline Express");
+        Long busND2002 = ensureBus("ND-2002", "LUXURY", 44, "Rajarata Travels");
+        Long busWP3003 = ensureBus("WP-3003", "SLEEPER", 36, "Northern Highway Liner");
+        Long busSP4004 = ensureBus("SP-4004", "NON_AC", 50, "Southern Express");
+        Long busCP5005 = ensureBus("CP-5005", "AC", 42, "Hill Country Express");
+        Long busNE6006 = ensureBus("NE-6006", "LUXURY", 38, "Highland Super Coach");
+        Long busEP7007 = ensureBus("EP-7007", "SLEEPER", 32, "Eastern Night Liner");
+        Long busNW8008 = ensureBus("NW-8008", "NON_AC", 54, "Wayamba Commuter Liner");
 
         LocalDateTime now = LocalDateTime.now();
         Long previousTrip = oneLong("""
@@ -144,7 +148,7 @@ public class DemoDataInitializer implements CommandLineRunner {
             assignIfMissing(kandyDriver, secondTrip, "DRIVER");
         }
 
-        cleanAndSeedRealisticBookings(dohan, kamal, tharushi, dilshan, currentTrip, secondTrip, bus1);
+        cleanAndSeedRealisticBookings(kavindu, kamal, tharushi, dilshan, currentTrip, secondTrip, bus1);
 
         Integer locCount = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bus_location_updates WHERE trip_id = ?", Integer.class, previousTrip);
         if (locCount != null && locCount == 0) {
@@ -155,46 +159,81 @@ public class DemoDataInitializer implements CommandLineRunner {
         }
 
         seedDemoNotifications();
-        seedIntercityRoutesAndTrips(bus1, bus2);
+        seedIntercityRoutesAndTrips(bus1, bus2, busND1001, busND2002, busWP3003, busSP4004, busCP5005, busNE6006, busEP7007, busNW8008);
 
         log.info("DemoDataInitializer: Verified CatchBusLK demo staff accounts, intercity routes, and trip assignments.");
     }
 
-    private void seedIntercityRoutesAndTrips(Long bus1, Long bus2) {
+    private void seedIntercityRoutesAndTrips(Long bus1, Long bus2, Long busND1001, Long busND2002, Long busWP3003, Long busSP4004, Long busCP5005, Long busNE6006, Long busEP7007, Long busNW8008) {
         try {
-            Long busND1001 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'ND-1001'");
-            Long busND2002 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'ND-2002'");
-            Long busSP4004 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'SP-4004'");
-            Long busCP5005 = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = 'CP-5005'");
+            // Colombo <-> Kandy (3.25 hrs, varied types: NON_AC, AC, LUXURY)
+            ensureRouteWithTrips("Colombo", "Kandy", 3.25, busSP4004, 950.00, 360, null);   // 06:00 Non-AC 950
+            ensureRouteWithTrips("Colombo", "Kandy", 3.25, bus1, 1250.00, 510, null);        // 08:30 AC 1250
+            ensureRouteWithTrips("Colombo", "Kandy", 3.25, busND2002, 1650.00, 840, null);   // 14:00 Luxury 1650
 
-            Long defaultBus = bus1 != null ? bus1 : (busND1001 != null ? busND1001 : 1L);
-            Long luxuryBus = busND2002 != null ? busND2002 : defaultBus;
-            Long expressBus = bus2 != null ? bus2 : defaultBus;
-            Long southernBus = busSP4004 != null ? busSP4004 : defaultBus;
-            Long hillBus = busCP5005 != null ? busCP5005 : defaultBus;
+            ensureRouteWithTrips("Kandy", "Colombo", 3.25, busSP4004, 950.00, 390, null);   // 06:30 Non-AC 950
+            ensureRouteWithTrips("Kandy", "Colombo", 3.25, bus1, 1250.00, 540, null);        // 09:00 AC 1250
+            ensureRouteWithTrips("Kandy", "Colombo", 3.25, busND2002, 1650.00, 870, null);   // 14:30 Luxury 1650
 
-            ensureRouteWithTrips("Colombo", "Kandy", 3.25, bus1 != null ? bus1 : defaultBus, 1250.00, 390, 780);
-            ensureRouteWithTrips("Kandy", "Colombo", 3.25, bus1 != null ? bus1 : defaultBus, 1250.00, 420, 840);
-            ensureRouteWithTrips("Colombo", "Galle", 2.00, expressBus, 950.00, 450, 960);
-            ensureRouteWithTrips("Galle", "Colombo", 2.00, expressBus, 950.00, 480, 990);
-            ensureRouteWithTrips("Colombo", "Jaffna", 8.00, luxuryBus, 2600.00, 480, 1260);
-            ensureRouteWithTrips("Jaffna", "Colombo", 8.00, luxuryBus, 2600.00, 540, 1260);
-            ensureRouteWithTrips("Colombo", "Anuradhapura", 4.50, luxuryBus, 1500.00, 420, 840);
-            ensureRouteWithTrips("Anuradhapura", "Colombo", 4.50, luxuryBus, 1500.00, 390, 780);
-            ensureRouteWithTrips("Colombo", "Nuwara Eliya", 5.50, hillBus, 1850.00, 390, 780);
-            ensureRouteWithTrips("Nuwara Eliya", "Colombo", 5.50, hillBus, 1850.00, 420, 810);
-            ensureRouteWithTrips("Colombo", "Matara", 2.50, southernBus, 800.00, 420, 960);
-            ensureRouteWithTrips("Matara", "Colombo", 2.50, southernBus, 800.00, 390, 900);
-            ensureRouteWithTrips("Colombo", "Trincomalee", 6.50, defaultBus, 1750.00, 390, 1260);
-            ensureRouteWithTrips("Trincomalee", "Colombo", 6.50, expressBus, 1750.00, 420, 1290);
-            ensureRouteWithTrips("Kandy", "Nuwara Eliya", 2.50, hillBus, 850.00, 480, 840);
-            ensureRouteWithTrips("Nuwara Eliya", "Kandy", 2.50, hillBus, 850.00, 540, 900);
-            ensureRouteWithTrips("Galle", "Matara", 1.00, southernBus, 450.00, 510, 960);
-            ensureRouteWithTrips("Matara", "Galle", 1.00, southernBus, 450.00, 540, 990);
-            ensureRouteWithTrips("Kandy", "Galle", 4.50, luxuryBus, 1450.00, 420, 840);
-            ensureRouteWithTrips("Galle", "Kandy", 4.50, luxuryBus, 1450.00, 480, 900);
-            ensureRouteWithTrips("Kandy", "Jaffna", 7.00, luxuryBus, 2400.00, 420, null);
-            ensureRouteWithTrips("Jaffna", "Kandy", 7.00, luxuryBus, 2400.00, 480, null);
+            // Colombo <-> Galle (2.0 hrs, varied types: NON_AC, AC, LUXURY)
+            ensureRouteWithTrips("Colombo", "Galle", 2.00, busSP4004, 750.00, 390, null);   // 06:30 Non-AC 750
+            ensureRouteWithTrips("Colombo", "Galle", 2.00, bus2, 950.00, 480, null);         // 08:00 Express AC 950
+            ensureRouteWithTrips("Colombo", "Galle", 2.00, busND2002, 1350.00, 960, null);   // 16:00 Luxury 1350
+
+            ensureRouteWithTrips("Galle", "Colombo", 2.00, bus2, 950.00, 450, null);         // 07:30 Express AC 950
+            ensureRouteWithTrips("Galle", "Colombo", 2.00, busND2002, 1350.00, 990, null);   // 16:30 Luxury 1350
+
+            // Colombo <-> Matara (2.5 hrs)
+            ensureRouteWithTrips("Colombo", "Matara", 2.50, busNW8008, 800.00, 420, null);   // 07:00 Non-AC 800
+            ensureRouteWithTrips("Colombo", "Matara", 2.50, busND1001, 1050.00, 960, null);  // 16:00 AC 1050
+            ensureRouteWithTrips("Matara", "Colombo", 2.50, busNW8008, 800.00, 390, null);   // 06:30 Non-AC 800
+            ensureRouteWithTrips("Matara", "Colombo", 2.50, busND1001, 1050.00, 900, null);  // 15:00 AC 1050
+
+            // Colombo <-> Jaffna (8.0 hrs, varied types: AC, LUXURY, SLEEPER)
+            ensureRouteWithTrips("Colombo", "Jaffna", 8.00, busND1001, 2400.00, 360, null);  // 06:00 AC 2400
+            ensureRouteWithTrips("Colombo", "Jaffna", 8.00, busND2002, 2800.00, 480, null);  // 08:00 Luxury 2800
+            ensureRouteWithTrips("Colombo", "Jaffna", 8.00, busWP3003, 3500.00, 1260, null); // 21:00 Sleeper 3500
+
+            ensureRouteWithTrips("Jaffna", "Colombo", 8.00, busND2002, 2800.00, 540, null);  // 09:00 Luxury 2800
+            ensureRouteWithTrips("Jaffna", "Colombo", 8.00, busWP3003, 3500.00, 1260, null); // 21:00 Sleeper 3500
+
+            // Colombo <-> Nuwara Eliya (5.5 hrs, varied types: AC, LUXURY)
+            ensureRouteWithTrips("Colombo", "Nuwara Eliya", 5.50, busCP5005, 1650.00, 390, null); // 06:30 AC 1650
+            ensureRouteWithTrips("Colombo", "Nuwara Eliya", 5.50, busNE6006, 1950.00, 780, null); // 13:00 Luxury 1950
+            ensureRouteWithTrips("Nuwara Eliya", "Colombo", 5.50, busCP5005, 1650.00, 420, null); // 07:00 AC 1650
+            ensureRouteWithTrips("Nuwara Eliya", "Colombo", 5.50, busNE6006, 1950.00, 810, null); // 13:30 Luxury 1950
+
+            // Colombo <-> Badulla (6.5 hrs, varied types: AC, SLEEPER)
+            ensureRouteWithTrips("Colombo", "Badulla", 6.50, busCP5005, 2100.00, 420, null);  // 07:00 AC 2100
+            ensureRouteWithTrips("Colombo", "Badulla", 6.50, busEP7007, 3200.00, 1290, null); // 21:30 Sleeper 3200
+            ensureRouteWithTrips("Badulla", "Colombo", 6.50, busCP5005, 2100.00, 450, null);  // 07:30 AC 2100
+            ensureRouteWithTrips("Badulla", "Colombo", 6.50, busEP7007, 3200.00, 1290, null); // 21:30 Sleeper 3200
+
+            // Colombo <-> Anuradhapura (4.5 hrs, varied types: AC, LUXURY)
+            ensureRouteWithTrips("Colombo", "Anuradhapura", 4.50, busND1001, 1500.00, 420, null); // 07:00 AC 1500
+            ensureRouteWithTrips("Colombo", "Anuradhapura", 4.50, busND2002, 1850.00, 840, null); // 14:00 Luxury 1850
+            ensureRouteWithTrips("Anuradhapura", "Colombo", 4.50, busND1001, 1500.00, 390, null); // 06:30 AC 1500
+            ensureRouteWithTrips("Anuradhapura", "Colombo", 4.50, busND2002, 1850.00, 780, null); // 13:00 Luxury 1850
+
+            // Colombo <-> Trincomalee (6.5 hrs, varied types: AC, SLEEPER)
+            ensureRouteWithTrips("Colombo", "Trincomalee", 6.50, busND1001, 1850.00, 390, null);  // 06:30 AC 1850
+            ensureRouteWithTrips("Colombo", "Trincomalee", 6.50, busEP7007, 3100.00, 1260, null); // 21:00 Sleeper 3100
+            ensureRouteWithTrips("Trincomalee", "Colombo", 6.50, busND1001, 1850.00, 420, null);  // 07:00 AC 1850
+            ensureRouteWithTrips("Trincomalee", "Colombo", 6.50, busEP7007, 3100.00, 1290, null); // 21:30 Sleeper 3100
+
+            // Cross-Corridor & Regional Routes (LUXURY, NON_AC, AC)
+            ensureRouteWithTrips("Kandy", "Galle", 4.50, busND2002, 2200.00, 420, null);       // 07:00 Luxury 2200
+            ensureRouteWithTrips("Galle", "Kandy", 4.50, busND2002, 2200.00, 480, null);       // 08:00 Luxury 2200
+            ensureRouteWithTrips("Kandy", "Jaffna", 7.00, busND2002, 2400.00, 420, null);      // 07:00 Luxury 2400
+            ensureRouteWithTrips("Jaffna", "Kandy", 7.00, busND2002, 2400.00, 480, null);      // 08:00 Luxury 2400
+
+            ensureRouteWithTrips("Kandy", "Nuwara Eliya", 2.50, busSP4004, 550.00, 480, null);  // 08:00 Non-AC 550
+            ensureRouteWithTrips("Kandy", "Nuwara Eliya", 2.50, busCP5005, 850.00, 840, null);  // 14:00 AC 850
+            ensureRouteWithTrips("Nuwara Eliya", "Kandy", 2.50, busSP4004, 550.00, 540, null);  // 09:00 Non-AC 550
+            ensureRouteWithTrips("Nuwara Eliya", "Kandy", 2.50, busCP5005, 850.00, 900, null);  // 15:00 AC 850
+
+            ensureRouteWithTrips("Galle", "Matara", 1.00, busSP4004, 450.00, 510, null);       // 08:30 Non-AC 450
+            ensureRouteWithTrips("Matara", "Galle", 1.00, busSP4004, 450.00, 540, null);       // 09:00 Non-AC 450
         } catch (Exception ex) {
             log.warn("Non-fatal: Error seeding intercity routes and trips: {}", ex.getMessage());
         }
@@ -210,8 +249,8 @@ public class DemoDataInitializer implements CommandLineRunner {
         if (routeId == null || busId == null) return;
 
         Integer upcomingCount = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM dbo.trips WHERE route_id = ? AND departure_time >= CAST(GETDATE() AS DATE)",
-                Integer.class, routeId);
+                "SELECT COUNT(*) FROM dbo.trips WHERE route_id = ? AND bus_id = ? AND departure_time >= CAST(GETDATE() AS DATE)",
+                Integer.class, routeId, busId);
 
         if (upcomingCount != null && upcomingCount >= 10) return;
 
@@ -268,6 +307,20 @@ public class DemoDataInitializer implements CommandLineRunner {
                 VALUES (?, ?, ?, 1)
                 """, userId, employeeId, qrToken);
         }
+    }
+
+    private Long ensureBus(String busNumber, String busType, int totalSeats, String operatorName) {
+        Long busId = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = ?", busNumber);
+        if (busId == null) {
+            jdbc.update("INSERT INTO dbo.buses(bus_number, bus_type, total_seats, operator_name) VALUES (?, ?, ?, ?)",
+                    busNumber, busType, totalSeats, operatorName);
+            busId = oneLong("SELECT TOP 1 bus_id FROM dbo.buses WHERE bus_number = ?", busNumber);
+        } else {
+            jdbc.update("UPDATE dbo.buses SET bus_type = ?, operator_name = ?, total_seats = ? WHERE bus_id = ?",
+                    busType, operatorName, totalSeats, busId);
+        }
+        ensureSeatsForBus(busId, totalSeats);
+        return busId;
     }
 
     private void ensureSeatsForBus(Long busId, int totalSeats) {
@@ -371,14 +424,14 @@ public class DemoDataInitializer implements CommandLineRunner {
         }
     }
 
-    private void cleanAndSeedRealisticBookings(long dohanId, long kamalId, long tharushiId, long dilshanId, Long currentTrip, Long secondTrip, Long bus1) {
+    private void cleanAndSeedRealisticBookings(long kavinduId, long kamalId, long tharushiId, long dilshanId, Long currentTrip, Long secondTrip, Long bus1) {
         try {
-            // Check if Dohan has unrealistic bookings with > 3 bookings or missing seats
-            Integer bCount = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE user_id = ?", Integer.class, dohanId);
-            Integer seatCountForDohan = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.booking_seats bs JOIN dbo.bookings b ON bs.booking_id = b.booking_id WHERE b.user_id = ?", Integer.class, dohanId);
-            if (bCount != null && (bCount != 3 || seatCountForDohan == null || seatCountForDohan < 5)) {
-                log.info("Pruning and configuring realistic demo bookings for Dohan (found {} bookings, {} seats)", bCount, seatCountForDohan);
-                java.util.List<Long> oldBkgIds = jdbc.queryForList("SELECT booking_id FROM dbo.bookings WHERE user_id = ?", Long.class, dohanId);
+            // Check if Kavindu has unrealistic bookings with > 3 bookings or missing seats
+            Integer bCount = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE user_id = ?", Integer.class, kavinduId);
+            Integer seatCountForKavindu = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.booking_seats bs JOIN dbo.bookings b ON bs.booking_id = b.booking_id WHERE b.user_id = ?", Integer.class, kavinduId);
+            if (bCount != null && (bCount != 3 || seatCountForKavindu == null || seatCountForKavindu < 5)) {
+                log.info("Pruning and configuring realistic demo bookings for Kavindu (found {} bookings, {} seats)", bCount, seatCountForKavindu);
+                java.util.List<Long> oldBkgIds = jdbc.queryForList("SELECT booking_id FROM dbo.bookings WHERE user_id = ?", Long.class, kavinduId);
                 for (Long bId : oldBkgIds) {
                     try { jdbc.update("DELETE FROM dbo.user_notifications WHERE booking_id = ?", bId); } catch (Exception ignored) {}
                     try { jdbc.update("DELETE FROM dbo.notifications WHERE booking_id = ?", bId); } catch (Exception ignored) {}
@@ -391,13 +444,13 @@ public class DemoDataInitializer implements CommandLineRunner {
                 }
             }
 
-            Integer dohanRemaining = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE user_id = ?", Integer.class, dohanId);
-            if (dohanRemaining == null || dohanRemaining == 0) {
+            Integer kavinduRemaining = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE user_id = ?", Integer.class, kavinduId);
+            if (kavinduRemaining == null || kavinduRemaining == 0) {
                 // Booking 1: Upcoming Outbound Journey (Colombo -> Kandy, 2 seats)
                 if (currentTrip != null) {
                     jdbc.update("INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version) VALUES (?, ?, 2500.00, 'CONFIRMED', SYSUTCDATETIME(), 0)",
-                            dohanId, currentTrip);
-                    Long bkg1 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", dohanId, currentTrip);
+                            kavinduId, currentTrip);
+                    Long bkg1 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", kavinduId, currentTrip);
                     java.util.List<Long> seats = jdbc.queryForList("SELECT TOP 2 seat_id FROM dbo.seats WHERE bus_id = ? ORDER BY TRY_CAST(seat_number AS INT) ASC", Long.class, bus1);
                     if (seats.size() >= 2 && bkg1 != null) {
                         jdbc.update("INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price) VALUES (?, ?, ?, 1250.00)", bkg1, currentTrip, seats.get(0));
@@ -407,10 +460,10 @@ public class DemoDataInitializer implements CommandLineRunner {
                         String ref1 = "CB" + String.format("%08d", bkg1);
                         jdbc.update("DELETE FROM dbo.luggage WHERE tag_number = 'LUG-20261004-771209'");
                         jdbc.update("INSERT INTO dbo.luggage (tag_number, bag_quantity, description, status, booking_id, user_id, created_at) VALUES ('LUG-20261004-771209', 1, 'Navy blue hard-case Samsonite spinner', 'LOADED', ?, ?, SYSUTCDATETIME())",
-                                bkg1, dohanId);
+                                bkg1, kavinduId);
                         jdbc.update("""
                             INSERT INTO dbo.tickets (booking_id, ticket_token, qr_payload, passenger_name, passenger_email, passenger_phone, boarding_point, destination_point, verification_status, issued_at, approval_status)
-                            VALUES (?, ?, ?, 'Dohan Imanjith', 'dohan@busreservation.lk', '+94719876543', 'Colombo', 'Kandy', 'ISSUED', SYSUTCDATETIME(), 'APPROVED')
+                            VALUES (?, ?, ?, 'Kavindu Perera', 'kavindu@busreservation.lk', '+94719876543', 'Colombo', 'Kandy', 'ISSUED', SYSUTCDATETIME(), 'APPROVED')
                             """, bkg1, "TKT-" + ref1, "CATCHBUS:" + ref1);
                     }
                 }
@@ -418,8 +471,8 @@ public class DemoDataInitializer implements CommandLineRunner {
                 // Booking 2: Return Upcoming Journey (Kandy -> Colombo, 2 seats)
                 if (secondTrip != null) {
                     jdbc.update("INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version) VALUES (?, ?, 2500.00, 'CONFIRMED', SYSUTCDATETIME(), 0)",
-                            dohanId, secondTrip);
-                    Long bkg2 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", dohanId, secondTrip);
+                            kavinduId, secondTrip);
+                    Long bkg2 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", kavinduId, secondTrip);
                     java.util.List<Long> seats = jdbc.queryForList("SELECT TOP 2 seat_id FROM dbo.seats WHERE bus_id = ? ORDER BY TRY_CAST(seat_number AS INT) DESC", Long.class, bus1);
                     if (seats.size() >= 2 && bkg2 != null) {
                         jdbc.update("INSERT INTO dbo.booking_seats (booking_id, trip_id, seat_id, seat_price) VALUES (?, ?, ?, 1250.00)", bkg2, secondTrip, seats.get(0));
@@ -429,7 +482,7 @@ public class DemoDataInitializer implements CommandLineRunner {
                         String ref2 = "CB" + String.format("%08d", bkg2);
                         jdbc.update("""
                             INSERT INTO dbo.tickets (booking_id, ticket_token, qr_payload, passenger_name, passenger_email, passenger_phone, boarding_point, destination_point, verification_status, issued_at, approval_status)
-                            VALUES (?, ?, ?, 'Dohan Imanjith', 'dohan@busreservation.lk', '+94719876543', 'Kandy', 'Colombo', 'ISSUED', SYSUTCDATETIME(), 'APPROVED')
+                            VALUES (?, ?, ?, 'Kavindu Perera', 'kavindu@busreservation.lk', '+94719876543', 'Kandy', 'Colombo', 'ISSUED', SYSUTCDATETIME(), 'APPROVED')
                             """, bkg2, "TKT-" + ref2, "CATCHBUS:" + ref2);
                     }
                 }
@@ -438,8 +491,8 @@ public class DemoDataInitializer implements CommandLineRunner {
                 Long pastTrip = oneLong("SELECT TOP 1 trip_id FROM dbo.trips WHERE trip_status = 'COMPLETED' OR departure_time < SYSUTCDATETIME() ORDER BY departure_time DESC");
                 if (pastTrip != null) {
                     jdbc.update("INSERT INTO dbo.bookings (user_id, trip_id, total_amount, booking_status, booking_time, version) VALUES (?, ?, 950.00, 'COMPLETED', DATEADD(day, -3, SYSUTCDATETIME()), 0)",
-                            dohanId, pastTrip);
-                    Long bkg3 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", dohanId, pastTrip);
+                            kavinduId, pastTrip);
+                    Long bkg3 = oneLong("SELECT TOP 1 booking_id FROM dbo.bookings WHERE user_id = ? AND trip_id = ? ORDER BY booking_id DESC", kavinduId, pastTrip);
                     Long pastBus = oneLong("SELECT bus_id FROM dbo.trips WHERE trip_id = ?", pastTrip);
                     Long pastSeat = oneLong("SELECT TOP 1 seat_id FROM dbo.seats WHERE bus_id = ? ORDER BY TRY_CAST(seat_number AS INT) ASC", pastBus != null ? pastBus : bus1);
                     if (pastSeat == null) {
@@ -450,11 +503,11 @@ public class DemoDataInitializer implements CommandLineRunner {
                         String ref3 = "CB" + String.format("%08d", bkg3);
                         jdbc.update("""
                             INSERT INTO dbo.tickets (booking_id, ticket_token, qr_payload, passenger_name, passenger_email, passenger_phone, boarding_point, destination_point, verification_status, issued_at, approval_status, verified_at, verified_by)
-                            VALUES (?, ?, ?, 'Dohan Imanjith', 'dohan@busreservation.lk', '+94719876543', 'Colombo', 'Galle', 'VERIFIED', DATEADD(day, -3, SYSUTCDATETIME()), 'APPROVED', DATEADD(day, -3, SYSUTCDATETIME()), 'CON-001')
+                            VALUES (?, ?, ?, 'Kavindu Perera', 'kavindu@busreservation.lk', '+94719876543', 'Colombo', 'Galle', 'VERIFIED', DATEADD(day, -3, SYSUTCDATETIME()), 'APPROVED', DATEADD(day, -3, SYSUTCDATETIME()), 'CON-001')
                             """, bkg3, "TKT-" + ref3, "CATCHBUS:" + ref3);
                     }
                 }
-                log.info("DemoDataInitializer: Successfully configured realistic commuter bookings for Dohan (1 outbound + 1 return + 1 past).");
+                log.info("DemoDataInitializer: Successfully configured realistic commuter bookings for Kavindu (1 outbound + 1 return + 1 past).");
             }
 
             // Seed realistic small bookings for other passengers

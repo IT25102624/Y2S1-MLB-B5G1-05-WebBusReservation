@@ -235,9 +235,36 @@
         #toastContainer { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
         .toast { padding: 12px 18px; border-radius: 8px; font-size: 0.88rem; font-weight: 600; max-width: 340px; animation: slideIn 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .toast-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-        .toast-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
-        .toast-info { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+        .mod-seat-btn {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #1e293b;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 8px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .mod-seat-btn:hover:not(:disabled) {
+            border-color: #10b981;
+            background: #ecfdf5;
+            color: #065f46;
+        }
+        .mod-seat-btn.selected {
+            background: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+        }
+        .mod-seat-btn:disabled {
+            background: #e2e8f0 !important;
+            border-color: #e2e8f0 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
@@ -419,6 +446,29 @@
                 <div class="form-group" style="margin-bottom:14px;">
                     <label style="font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Contact Mobile Number</label>
                     <input type="text" id="modifyPassengerPhone" class="form-control" placeholder="077xxxxxxx" required style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.9rem;" />
+                </div>
+
+                <!-- Seat Modification Grid -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label style="font-size:0.82rem; font-weight:700; color:#334155; margin-bottom:0;">Change / Pick Seats</label>
+                        <span id="modifySeatCountBadge" style="font-size:0.75rem; font-weight:700; background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:12px;">Choose seats</span>
+                    </div>
+                    <div style="background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:12px;">
+                        <div style="display:flex; gap:12px; align-items:center; font-size:0.74rem; color:#64748b; margin-bottom:8px; flex-wrap:wrap;">
+                            <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:3px; background:#10b981; display:inline-block;"></span> Selected</span>
+                            <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:3px; background:#ffffff; border:1px solid #cbd5e1; display:inline-block;"></span> Available</span>
+                            <span style="display:inline-flex; align-items:center; gap:4px;"><span style="width:10px; height:10px; border-radius:3px; background:#e2e8f0; display:inline-block;"></span> Occupied</span>
+                        </div>
+                        <div id="modifySeatGridLoading" style="text-align:center; padding:12px; font-size:0.82rem; color:var(--text-muted);">
+                            Loading seat availability...
+                        </div>
+                        <div id="modifySeatGrid" style="display:none; grid-template-columns: repeat(4, 1fr); gap:6px; max-height:160px; overflow-y:auto; padding-right:4px;">
+                        </div>
+                    </div>
+                    <small style="display:block; margin-top:4px; font-size:0.74rem; color:#64748b;">
+                        Click available seats to change your seat allocation, matching your ticket count.
+                    </small>
                 </div>
 
                 <div class="form-group" style="margin-bottom:20px;">
@@ -869,13 +919,30 @@
             setTimeout(() => toast.remove(), 4000);
         }
 
-        function openModifyBookingModal(ref) {
+        let modifyBookingData = null;
+        let modifyRequiredSeatCount = 1;
+        let modifySelectedSeats = [];
+
+        async function openModifyBookingModal(ref) {
             const b = userBookingsCache.find(x => x.reference === ref || String(x.bookingId) === String(ref)) || {};
+            modifyBookingData = b;
             document.getElementById('modifyBookingRef').value = ref;
             document.getElementById('modifyModalRefSubtitle').textContent = `Booking Reference: ${ref}`;
             document.getElementById('modifyModalRoute').textContent = `${b.from || 'Colombo'} → ${b.to || 'Kandy'}`;
             document.getElementById('modifyModalDate').textContent = `${b.date || 'Upcoming'} ${b.time || '08:00'}`;
-            document.getElementById('modifyModalSeats').textContent = Array.isArray(b.seats) ? b.seats.join(', ') : (b.seats || 'S12');
+
+            // Parse existing reserved seats
+            let curSeats = [];
+            if (Array.isArray(b.seats) && b.seats.length > 0) {
+                curSeats = b.seats.map(s => String(s).trim());
+            } else if (b.seats) {
+                curSeats = [String(b.seats).trim()];
+            } else {
+                curSeats = ['S12'];
+            }
+            modifyRequiredSeatCount = curSeats.length;
+            modifySelectedSeats = [...curSeats];
+            updateModifySeatBadges();
 
             const pass = b.passenger || {};
             const user = getUser() || {};
@@ -884,6 +951,118 @@
             document.getElementById('modifySpecialNotes').value = b.notes || '';
 
             document.getElementById('modifyBookingModal').classList.add('active');
+
+            // Load and render interactive seat selection grid for this trip
+            await loadModifySeatMap(b.tripId, b.busType, curSeats);
+        }
+
+        function updateModifySeatBadges() {
+            document.getElementById('modifyModalSeats').textContent = modifySelectedSeats.join(', ') || 'None selected';
+            const badge = document.getElementById('modifySeatCountBadge');
+            if (badge) {
+                badge.textContent = `${modifySelectedSeats.length} / ${modifyRequiredSeatCount} selected`;
+                if (modifySelectedSeats.length === modifyRequiredSeatCount) {
+                    badge.style.background = '#dcfce7';
+                    badge.style.color = '#15803d';
+                } else {
+                    badge.style.background = '#fee2e2';
+                    badge.style.color = '#b91c1c';
+                }
+            }
+        }
+
+        async function loadModifySeatMap(tripId, busType, currentBookingSeats) {
+            const loading = document.getElementById('modifySeatGridLoading');
+            const grid = document.getElementById('modifySeatGrid');
+            loading.style.display = 'block';
+            grid.style.display = 'none';
+            grid.innerHTML = '';
+
+            let reservedSeats = new Set();
+            let totalSeats = 44;
+
+            try {
+                const bType = busType || 'NON_AC_NORMAL';
+                const tId = tripId || 1;
+                const res = await fetch(`/api/v1/seats/trip/${tId}?busType=${encodeURIComponent(bType)}`, { headers: authHeaders() });
+                const json = await res.json();
+                if (json.data) {
+                    totalSeats = json.data.totalSeats || 44;
+                    if (Array.isArray(json.data.reservedSeats)) {
+                        reservedSeats = new Set(json.data.reservedSeats.map(s => String(s).trim()));
+                    }
+                }
+            } catch (err) {
+                console.warn('Fallback to default seat layout:', err);
+            }
+
+            // Exclude current booking's own seats from occupied list so user can keep or re-select them
+            const ownSeatsNormalized = new Set();
+            currentBookingSeats.forEach(s => {
+                ownSeatsNormalized.add(s);
+                ownSeatsNormalized.add(s.replace(/^S/i, ''));
+                ownSeatsNormalized.add('S' + s.replace(/^S/i, ''));
+            });
+
+            // Build seat items
+            for (let i = 1; i <= totalSeats; i++) {
+                const sLabel = `S${i}`;
+                const sBare = String(i);
+                const isOwnCurrent = ownSeatsNormalized.has(sLabel) || ownSeatsNormalized.has(sBare);
+                const isOccupiedByOther = !isOwnCurrent && (reservedSeats.has(sLabel) || reservedSeats.has(sBare));
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'mod-seat-btn';
+                btn.id = `mod-seat-${sLabel}`;
+                btn.textContent = sLabel;
+
+                if (isOccupiedByOther) {
+                    btn.disabled = true;
+                    btn.title = `Seat ${sLabel} is already reserved by another passenger`;
+                } else {
+                    btn.title = `Seat ${sLabel}`;
+                    btn.onclick = () => toggleModifySeat(sLabel);
+                }
+
+                if (modifySelectedSeats.some(s => s === sLabel || s === sBare)) {
+                    btn.classList.add('selected');
+                }
+
+                grid.appendChild(btn);
+            }
+
+            loading.style.display = 'none';
+            grid.style.display = 'grid';
+        }
+
+        function toggleModifySeat(seatNum) {
+            const bare = seatNum.replace(/^S/i, '');
+            const existingIdx = modifySelectedSeats.findIndex(s => s === seatNum || s === bare);
+
+            if (existingIdx !== -1) {
+                modifySelectedSeats.splice(existingIdx, 1);
+            } else {
+                if (modifySelectedSeats.length < modifyRequiredSeatCount) {
+                    modifySelectedSeats.push(seatNum);
+                } else if (modifyRequiredSeatCount === 1) {
+                    // Quick single seat replacement
+                    modifySelectedSeats = [seatNum];
+                } else {
+                    showToast(`You can select ${modifyRequiredSeatCount} seats. Deselect one first to switch seats.`, 'info');
+                    return;
+                }
+            }
+
+            // Update UI buttons
+            document.querySelectorAll('#modifySeatGrid .mod-seat-btn').forEach(btn => {
+                const bText = btn.textContent;
+                const bBare = bText.replace(/^S/i, '');
+                const isSel = modifySelectedSeats.some(s => s === bText || s === bBare);
+                btn.classList.toggle('selected', isSel);
+            });
+
+            updateModifySeatBadges();
         }
 
         function closeModifyBookingModal() {
@@ -898,6 +1077,11 @@
             const notes = document.getElementById('modifySpecialNotes').value.trim();
             const btn = document.getElementById('btnSaveBookingMod');
 
+            if (modifySelectedSeats.length !== modifyRequiredSeatCount) {
+                showToast(`Please select exactly ${modifyRequiredSeatCount} seat(s) before saving (currently ${modifySelectedSeats.length} selected).`, 'error');
+                return;
+            }
+
             btn.disabled = true;
             btn.textContent = 'Saving...';
 
@@ -905,11 +1089,16 @@
                 const res = await fetch(`/api/v1/bookings/${encodeURIComponent(ref)}`, {
                     method: 'PUT',
                     headers: authHeaders(),
-                    body: JSON.stringify({ passengerName: name, passengerPhone: phone, notes: notes })
+                    body: JSON.stringify({
+                        passengerName: name,
+                        passengerPhone: phone,
+                        notes: notes,
+                        seats: modifySelectedSeats
+                    })
                 });
                 const json = await res.json();
                 if (res.ok && json.success) {
-                    showToast('Booking details updated successfully!', 'success');
+                    showToast('Booking details and seats updated successfully!', 'success');
                     closeModifyBookingModal();
                     await loadTicketsTab();
                 } else {

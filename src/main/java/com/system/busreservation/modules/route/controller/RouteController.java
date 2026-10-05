@@ -1,7 +1,7 @@
-package com.system.busreservation.route.controller;
+package com.system.busreservation.modules.route.controller;
 
 import com.system.busreservation.model.Route;
-import com.system.busreservation.route.service.RouteService;
+import com.system.busreservation.modules.route.service.RouteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

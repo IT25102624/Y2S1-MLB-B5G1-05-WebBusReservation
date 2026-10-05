@@ -625,7 +625,7 @@
                 // If still empty or no network, provide default demo tickets
                 if (!bookings || bookings.length === 0) {
                     bookings = [
-                        { bookingId: 58, passengerName: "Dohan Imanjith", route: "Colombo to Kandy" },
+                        { bookingId: 58, passengerName: "Kavindu Perera", route: "Colombo to Kandy" },
                         { bookingId: 52, passengerName: "Pasindu Shashmika", route: "Colombo to Galle" },
                         { bookingId: 56, passengerName: "Shehan GTR", route: "Colombo to Badulla" }
                     ];
@@ -642,7 +642,7 @@
                 console.warn('Error loading dispatch bookings, using defaults:', err);
                 dispatchBooking.innerHTML = `
                     <option value="">Platform Broadcast (General)</option>
-                    <option value="58">Ticket #58 (Dohan Imanjith — Colombo to Kandy)</option>
+                    <option value="58">Ticket #58 (Kavindu Perera — Colombo to Kandy)</option>
                     <option value="52">Ticket #52 (Pasindu Shashmika — Colombo to Galle)</option>
                     <option value="56">Ticket #56 (Shehan GTR — Colombo to Badulla)</option>
                 `;
