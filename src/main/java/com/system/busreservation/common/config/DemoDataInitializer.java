@@ -395,14 +395,36 @@ public class DemoDataInitializer implements CommandLineRunner {
             """, userId, bookingId, message, type, createdAt, isRead ? 1 : 0);
     }
 
+    private static final java.util.Set<String> SEED_DEMO_EMAILS = java.util.Set.of(
+            "admin@busreservation.lk",
+            "admin@catchbus.lk",
+            "conductor.kandy@busreservation.lk",
+            "conductor@catchbus.lk",
+            "ruwan.conductor@catchbus.lk",
+            "driver.kandy@busreservation.lk",
+            "driver@catchbus.lk",
+            "suresh.driver@catchbus.lk",
+            "priyantha.driver@catchbus.lk",
+            "kavindu@busreservation.lk",
+            "kamal@busreservation.lk",
+            "tharushi@busreservation.lk",
+            "dilshan@busreservation.lk",
+            "anura@busreservation.lk"
+    );
+
     private void synchronizeUserPasswords() {
         try {
             java.util.List<java.util.Map<String, Object>> allUsers = jdbc.queryForList("SELECT user_id, full_name, email FROM dbo.users");
             for (java.util.Map<String, Object> u : allUsers) {
-                String name = (String) u.get("full_name");
                 String email = (String) u.get("email");
+                if (email == null) continue;
+                String lowerEmail = email.trim().toLowerCase();
+                // Never overwrite passwords for newly created or custom user accounts
+                if (!SEED_DEMO_EMAILS.contains(lowerEmail)) {
+                    continue;
+                }
+                String name = (String) u.get("full_name");
                 Long uid = ((Number) u.get("user_id")).longValue();
-                String lowerEmail = email != null ? email.toLowerCase() : "";
                 String firstName = "user";
                 if (lowerEmail.contains("admin") || (name != null && name.toLowerCase().contains("admin"))) {
                     firstName = "admin";
@@ -412,13 +434,13 @@ public class DemoDataInitializer implements CommandLineRunner {
                     firstName = "chaminda";
                 } else if (name != null && !name.trim().isEmpty() && !name.toLowerCase().startsWith("demo") && !name.toLowerCase().startsWith("system")) {
                     firstName = name.trim().split("\\s+")[0].toLowerCase();
-                } else if (email != null) {
+                } else {
                     firstName = lowerEmail.split("@")[0].split("\\.")[0].toLowerCase();
                 }
                 String pwd = firstName + "@123";
                 jdbc.update("UPDATE dbo.users SET password_hash = ? WHERE user_id = ?", encoder.encode(pwd), uid);
             }
-            log.info("DemoDataInitializer: Successfully formatted and synchronized passwords for all accounts (firstName@123).");
+            log.info("DemoDataInitializer: Successfully formatted and synchronized passwords for demo seed accounts (firstName@123).");
         } catch (Exception e) {
             log.warn("DemoDataInitializer: synchronizeUserPasswords note: {}", e.getMessage());
         }

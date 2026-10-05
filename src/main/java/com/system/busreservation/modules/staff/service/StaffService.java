@@ -98,6 +98,10 @@ public class StaffService {
         }
 
         staffRepository.updateBookingStatus(bookingId, "BOARDED");
+        int updatedLug = staffRepository.updateLuggageStatusForBooking(bookingId, "LOADED");
+        if (updatedLug > 0) {
+            staffRepository.saveLuggageNotification(bookingId, "Luggage Scanned & Loaded: Baggage verified and stowed into cargo hold by conductor.");
+        }
         long tripId = ((Number) booking.get("tripId")).longValue();
         int boardedCount = staffRepository.countBoarded(tripId);
 

@@ -993,14 +993,22 @@
 
         const actionCell = isCollected
           ? `<span style="color:#34d399; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Handed Over</span>`
-          : `<button type="button" class="btn-action" onclick="handoverLuggageToPassenger(${lugId}, '${escStr(tag)}', '${escStr(name)}')" style="width:auto; padding:6px 14px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; background:var(--cyan); color:#090d16;">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Handover to Owner
-            </button>`;
+          : (isTripCompleted
+              ? `<button type="button" class="btn-action" onclick="handoverLuggageToPassenger(${lugId}, '${escStr(tag)}', '${escStr(name)}')" style="width:auto; padding:6px 14px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; background:var(--cyan); color:#090d16;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Handover to Owner
+                </button>`
+              : `<button type="button" class="btn-action" disabled title="Locked: Baggage handover unlocks after driver completes trip arrival" style="width:auto; padding:6px 14px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.06); color:var(--ink-muted); border:1px solid rgba(255,255,255,0.12); cursor:not-allowed; opacity:0.65;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Awaiting Driver Arrival
+                </button>`
+            );
 
         return `
           <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
-            <td style="padding:12px; font-family:'Space Grotesk',monospace; font-weight:700; color:#38bdf8;">${tag}</td>
+            <td style="padding:12px; font-family:'Space Grotesk',monospace; font-weight:700;">
+              <a href="luggage.html?tag=${encodeURIComponent(tag)}" target="_blank" style="color:#38bdf8; text-decoration:none;" title="Inspect in live luggage tracker">${tag} &nearr;</a>
+            </td>
             <td style="padding:12px;">
               <div style="font-weight:700; color:#f8fafc;">${name}</div>
               <div style="font-size:11px; color:var(--ink-muted);">${phone}</div>

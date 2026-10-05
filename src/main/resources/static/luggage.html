@@ -349,7 +349,60 @@
         if (user) {
             if (user.fullName) passengerNameInput.value = user.fullName;
             loadBookings();
-            loadLuggage();
+            loadLuggage().then(() => {
+                handleUrlParams();
+            });
+        } else {
+            handleUrlParams();
+        }
+
+        async function handleUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const tagParam = params.get('tag');
+            const bookingParam = params.get('booking');
+
+            if (tagParam) {
+                switchLuggageTab('track');
+                const trackInput = document.getElementById('trackTagInput');
+                if (trackInput) {
+                    trackInput.value = tagParam.trim();
+                    await queryTagTrack(tagParam.trim());
+                }
+            } else if (bookingParam) {
+                const cleanDigits = bookingParam.replace(/\D+/g, '');
+                try {
+                    const lookupId = cleanDigits || bookingParam;
+                    const res = await fetch(`/api/v1/luggage/booking/${encodeURIComponent(lookupId)}`);
+                    if (res.ok) {
+                        const items = await res.json();
+                        if (items && items.length > 0 && items[0].tagNumber) {
+                            switchLuggageTab('track');
+                            const trackInput = document.getElementById('trackTagInput');
+                            if (trackInput) {
+                                trackInput.value = items[0].tagNumber;
+                                await queryTagTrack(items[0].tagNumber);
+                            }
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Booking luggage lookup note:', e);
+                }
+
+                switchLuggageTab('tag');
+                setTimeout(() => {
+                    const sel = document.getElementById('bookingId');
+                    if (sel) {
+                        for (let i = 0; i < sel.options.length; i++) {
+                            if (sel.options[i].value === cleanDigits || sel.options[i].text.includes(bookingParam)) {
+                                sel.selectedIndex = i;
+                                sel.dispatchEvent(new Event('change'));
+                                break;
+                            }
+                        }
+                    }
+                }, 400);
+            }
         }
 
         function switchLuggageTab(tab) {
@@ -663,8 +716,13 @@
         }
 
         async function handleTagSearch(event) {
-            event.preventDefault();
+            if (event) event.preventDefault();
             const tagNumber = document.getElementById('trackTagInput').value.trim();
+            await queryTagTrack(tagNumber);
+        }
+
+        async function queryTagTrack(tagNumber) {
+            if (!tagNumber) return;
             const resultBox = document.getElementById('trackResult');
 
             resultBox.classList.remove('hidden');

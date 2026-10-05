@@ -318,6 +318,23 @@ public class StaffRepository {
         jdbc.update("UPDATE dbo.bookings SET booking_status = ? WHERE booking_id = ?", status, bookingId);
     }
 
+    public int updateLuggageStatusForBooking(long bookingId, String status) {
+        return jdbc.update("UPDATE dbo.luggage SET status = ? WHERE booking_id = ? AND status IN ('TAGGED', 'CHECKED_IN')", status, bookingId);
+    }
+
+    public void saveLuggageNotification(long bookingId, String message) {
+        try {
+            Long uid = jdbc.query("SELECT TOP 1 user_id FROM dbo.bookings WHERE booking_id = ?",
+                    rs -> rs.next() ? rs.getLong(1) : null, bookingId);
+            if (uid != null) {
+                jdbc.update("""
+                    INSERT INTO dbo.notifications (user_id, booking_id, message, type, created_at, is_read)
+                    VALUES (?, ?, ?, 'LUGGAGE_STATUS', SYSUTCDATETIME(), 0)
+                    """, uid, bookingId, message);
+            }
+        } catch (Exception ignored) {}
+    }
+
     public int countBoarded(long tripId) {
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM dbo.bookings WHERE trip_id = ? AND booking_status = 'BOARDED'", Integer.class, tripId);
         return count != null ? count : 0;

@@ -201,6 +201,39 @@ public class PaymentService {
                 int idx = payload.indexOf("catchbus://ticket/");
                 token = payload.substring(idx + "catchbus://ticket/".length()).trim();
                 token = token.split("[^a-zA-Z0-9-]")[0];
+            } else if (payload.startsWith("CATCHBUS:")) {
+                String sub = payload.substring("CATCHBUS:".length()).trim();
+                String resolvedToken = jdbc.query("SELECT TOP 1 ticket_token FROM dbo.tickets WHERE ticket_token = ?",
+                        rs -> rs.next() ? rs.getString(1) : null, sub);
+                if (resolvedToken == null) {
+                    String digits = sub.replaceAll("\\D+", "");
+                    if (!digits.isBlank()) {
+                        try {
+                            long bId = Long.parseLong(digits);
+                            resolvedToken = jdbc.query("SELECT TOP 1 ticket_token FROM dbo.tickets WHERE booking_id = ?",
+                                    rs -> rs.next() ? rs.getString(1) : null, bId);
+                        } catch (Exception ignored) {}
+                    }
+                }
+                token = resolvedToken != null ? resolvedToken : sub;
+            } else if (payload.contains("Tag ID:") || payload.startsWith("LUG-") || payload.contains("BAGGAGE TAG")) {
+                String tag = null;
+                for (String line : payload.split("\n")) {
+                    if (line.contains("Tag ID:")) {
+                        tag = line.substring(line.indexOf("Tag ID:") + "Tag ID:".length()).trim();
+                        break;
+                    }
+                }
+                if (tag == null && payload.startsWith("LUG-")) {
+                    tag = payload.trim().split("\\s+")[0];
+                }
+                if (tag != null) {
+                    token = jdbc.query("""
+                        SELECT TOP 1 t.ticket_token FROM dbo.tickets t
+                        JOIN dbo.luggage l ON l.booking_id = t.booking_id
+                        WHERE l.tag_number = ?
+                        """, rs -> rs.next() ? rs.getString(1) : null, tag);
+                }
             } else if (payload.trim().matches("^[0-9a-fA-F-]{32,36}$")) {
                 token = payload.trim();
             } else {
@@ -210,6 +243,34 @@ public class PaymentService {
             if (!admin && !"APPROVED".equals(details.get("approvalStatus")) && !"PENDING".equals(details.get("approvalStatus"))) {
                 throw new IllegalStateException("This ticket is not authorized for passenger boarding.");
             }
+
+            // Conductor scanned QR: update associated luggage to LOADED
+            Long bId = (Long) details.get("bookingId");
+            if (bId != null) {
+                int updatedCount = jdbc.update("""
+                        UPDATE dbo.luggage SET status = 'LOADED'
+                        WHERE booking_id = ? AND status IN ('TAGGED', 'CHECKED_IN')
+                        """, bId);
+                if (updatedCount > 0) {
+                    try {
+                        Long uid = jdbc.query("SELECT TOP 1 user_id FROM dbo.bookings WHERE booking_id = ?",
+                                rs -> rs.next() ? rs.getLong(1) : null, bId);
+                        if (uid != null) {
+                            jdbc.update("""
+                                INSERT INTO dbo.notifications (user_id, booking_id, message, type, created_at, is_read)
+                                VALUES (?, ?, 'Luggage Scanned & Loaded: Baggage verified and stowed into cargo hold by conductor.', 'LUGGAGE_STATUS', SYSUTCDATETIME(), 0)
+                                """, uid, bId);
+                        }
+                    } catch (Exception ignored) {}
+                }
+                List<Map<String, Object>> refreshedLuggage = jdbc.queryForList("""
+                        SELECT luggage_id luggageId, tag_number tagNumber, tag_number tagReference,
+                               bag_quantity bagQuantity, status, description
+                        FROM dbo.luggage WHERE booking_id=?
+                        """, bId);
+                details.put("luggage", refreshedLuggage);
+            }
+
             return details;
         } catch (IllegalArgumentException | IllegalStateException ex) {
             throw ex;
@@ -236,6 +297,28 @@ public class PaymentService {
                 UPDATE bookings SET booking_status='BOARDED'
                 WHERE booking_id=(SELECT booking_id FROM tickets WHERE ticket_token=?)
                 """, token);
+
+        // Update associated luggage to LOADED
+        Long bId = (Long) current.get("bookingId");
+        if (bId != null) {
+            int updatedCount = jdbc.update("""
+                    UPDATE dbo.luggage SET status = 'LOADED'
+                    WHERE booking_id = ? AND status IN ('TAGGED', 'CHECKED_IN')
+                    """, bId);
+            if (updatedCount > 0) {
+                try {
+                    Long uid = jdbc.query("SELECT TOP 1 user_id FROM dbo.bookings WHERE booking_id = ?",
+                            rs -> rs.next() ? rs.getLong(1) : null, bId);
+                    if (uid != null) {
+                        jdbc.update("""
+                            INSERT INTO dbo.notifications (user_id, booking_id, message, type, created_at, is_read)
+                            VALUES (?, ?, 'Luggage Scanned & Loaded: Baggage verified and stowed into cargo hold by conductor.', 'LUGGAGE_STATUS', SYSUTCDATETIME(), 0)
+                            """, uid, bId);
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+
         return ticketDetails(token);
     }
 
